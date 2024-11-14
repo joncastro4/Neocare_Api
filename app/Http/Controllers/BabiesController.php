@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Baby;
 use Illuminate\Http\Request;
-use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 
-class NotificationController extends Controller
+class BabiesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,18 +16,17 @@ class NotificationController extends Controller
      */
     public function index()
     {
-        $notifications = Notification::all();
+        $babies = Baby::all();
 
-        if (!$notifications)
-        {
+        if (!$babies) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "There are no babies registered"
             ], 204);
         }
 
         return response()->json([
-            'data' => $notifications
-        ]);
+            'babies' => $babies
+        ], 200);
     }
 
     /**
@@ -39,28 +38,28 @@ class NotificationController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'nurse_id' => 'required|integer|exists:nurses,id',
-            'message' => 'required|string',
+            'person_id' => 'required|integer|exists:people,id',
+            'date_of_birth' => 'required|date',
+            'ingress_date' => 'required|date|after_or_equal:date_of_birth',
+            'egress_date' => 'required|date|after_or_equal:ingress_date|nullable',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $notification = Notification::create($request->all());
+        $baby = Baby::create($request->all());
 
-        if (!$notification)
-        {
+        if (!$baby) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'data' => $notification
+            'baby' => $baby
         ], 201);
     }
 
@@ -72,17 +71,16 @@ class NotificationController extends Controller
      */
     public function show($id)
     {
-        $notification = Notification::find($id);
+        $baby = Baby::find($id);
 
-        if (!$notification)
-        {
+        if (!$baby) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "Baby not found"
             ], 404);
         }
 
         return response()->json([
-            'data' => $notification
+            'baby' => $baby
         ], 200);
     }
 
@@ -96,30 +94,32 @@ class NotificationController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'message' => 'nullable|string',
+            'date_of_birth' => 'nullable|date',
+            'ingress_date' => 'nullable|date|after_or_equal:date_of_birth',
+            'egress_date' => 'nullable|date|after_or_equal:ingress_date|nullable',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $notification = Notification::find($id);
+        $baby = Baby::find($id);
 
-        if (!$notification)
-        {
+        if (!$baby) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "Baby not found"
             ], 404);
         }
 
-        $notification->message = $request->message;
-        $notification->save();
+        $baby->date_of_birth = $request->date_of_birth ?? $baby->date_of_birth;
+        $baby->ingress_date = $request->ingress_date ?? $baby->ingress_date;
+        $baby->egress_date = $request->egress_date ?? $baby->egress_date;
+        $baby->save();
 
         return response()->json([
-            'data' => $notification
+            'baby' => $baby
         ], 200);
     }
 
@@ -131,19 +131,18 @@ class NotificationController extends Controller
      */
     public function destroy($id)
     {
-        $notification = Notification::find($id);
+        $baby = Baby::find($id);
 
-        if (!$notification)
-        {
+        if (!$baby) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "Baby not found"
             ], 404);
         }
 
-        $notification->delete();
+        $baby->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => "Baby deleted"
         ], 200);
     }
 }

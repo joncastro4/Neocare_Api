@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Baby_Incubator;
 use Illuminate\Http\Request;
-use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
 
-class IncubatorController extends Controller
+class BabyIncubatorsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,17 +16,16 @@ class IncubatorController extends Controller
      */
     public function index()
     {
-        $incubators = Incubator::all();
-        
-        if (!$incubators)
-        {
+        $baby_incubators = Baby_Incubator::all();
+
+        if (!$baby_incubators) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'data' => $incubators
+            'baby_incubators' => $baby_incubators
         ], 200);
     }
 
@@ -39,28 +38,27 @@ class IncubatorController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'state' => 'required|string|in:inactive,active',
+            'baby_id' => 'required|integer|exists:babies,id',
+            'incubator_id' => 'required|integer|exists:incubators,id',
         ]);
-        
-        if ($validate->fails())
-        {
+
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $incubator = Incubator::create($request->all());
+        $baby_incubator = Baby_Incubator::create($request->all());
 
-        if (!$incubator)
-        {
+        if (!$baby_incubator) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'data' => $incubator
-        ], 201);
+            'baby_incubator' => $baby_incubator
+        ], 200);
     }
 
     /**
@@ -71,17 +69,16 @@ class IncubatorController extends Controller
      */
     public function show($id)
     {
-        $incubator = Incubator::find($id);
+        $baby_incubator = Baby_Incubator::find($id);
 
-        if (!$incubator)
-        {
+        if (!$baby_incubator) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'data' => $incubator
+            'baby_incubator' => $baby_incubator
         ], 200);
     }
 
@@ -95,30 +92,30 @@ class IncubatorController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'state' => 'nullable|string|in:inactive,active',
+            'baby_id' => 'nullable|integer|exists:babies,id',
+            'incubator_id' => 'nullable|integer|exists:incubators,id',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $incubator = Incubator::find($id);
+        $baby_incubator = Baby_Incubator::find($id);
 
-        if (!$incubator)
-        {
+        if (!$baby_incubator) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $incubator->state = $request->state;
-        $incubator->save();
+        $baby_incubator->baby_id = $request->baby_id ?? $baby_incubator->baby_id;
+        $baby_incubator->incubator_id = $request->incubator_id ?? $baby_incubator->incubator_id;
+        $baby_incubator->save();
 
         return response()->json([
-            'data' => $incubator
+            'baby_incubator' => $baby_incubator
         ], 200);
     }
 
@@ -130,16 +127,15 @@ class IncubatorController extends Controller
      */
     public function destroy($id)
     {
-        $incubator = Incubator::find($id);
+        $baby_incubator = Baby_Incubator::find($id);
 
-        if (!$incubator)
-        {
+        if (!$baby_incubator) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $incubator->delete();
+        $baby_incubator->delete();
 
         return response()->json([
             'msg' => 'Data Deleted'

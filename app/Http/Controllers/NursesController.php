@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Relative;
+use App\Models\Nurse;
 use Illuminate\Support\Facades\Validator;
 
-class RelativeController extends Controller
+class NursesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,18 +16,17 @@ class RelativeController extends Controller
      */
     public function index()
     {
-        $relatives = Relative::all();
+        $nurses = Nurse::all();
 
-        if (!$relatives)
-        {
+        if (!$nurses) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'relatives' => $relatives
-        ]);
+            'data' => $nurses
+        ], 200);
     }
 
     /**
@@ -39,31 +38,27 @@ class RelativeController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'required|integer|exists:people,id',
-            'baby_id' => 'required|integer|exists:babies,id',
-            'phone_number' => 'required|string|min:10|max:10',
-            'contact' => 'nullable|string',
+            'person_id' => 'required|integer|exists:people,id|unique:nurses,person_id',
+            'rfc' => 'required|string|unique:nurses,rfc',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
-        }   
+        }
 
-        $relative = Relative::create($request->all());
+        $nurse = Nurse::create($request->all());
 
-        if (!$relative)
-        {
+        if (!$nurse) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'relative' => $relative
-        ], 201);
+            'data' => $nurse
+        ], 200);
     }
 
     /**
@@ -74,18 +69,17 @@ class RelativeController extends Controller
      */
     public function show($id)
     {
-        $relative = Relative::find($id);
+        $nurse = Nurse::find($id);
 
-        if (!$relative)
-        {
+        if (!$nurse) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'relative' => $relative
-        ], 200);
+            'data' => $nurse
+        ]);
     }
 
     /**
@@ -98,36 +92,30 @@ class RelativeController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'integer|exists:people,id|nullable',
-            'baby_id' => 'integer|exists:babies,id|nullable',
-            'phone_number' => 'string|min:10|max:10|nullable',
-            'contact' => 'string|nullable',
+            'person_id' => 'nullable|integer|exists:people,id|unique:nurses,person_id',
+            'rfc' => 'nullable|string|unique:nurses,rfc',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $relative = Relative::find($id);
+        $nurse = Nurse::find($id);
 
-        if (!$relative)
-        {
+        if (!$nurse) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $relative->person_id = $request->person_id ?? $relative->person_id;
-        $relative->baby_id = $request->baby_id ?? $relative->baby_id;
-        $relative->phone_number = $request->phone_number ?? $relative->phone_number;
-        $relative->contact = $request->contact ?? $relative->contact;
-        $relative->save();
+        $nurse->person_id = $request->person_id ?? $nurse->person_id;
+        $nurse->rfc = $request->rfc ?? $nurse->rfc;
+        $nurse->save();
 
         return response()->json([
-            'relative' => $relative
+            'data' => $nurse
         ], 200);
     }
 
@@ -139,16 +127,15 @@ class RelativeController extends Controller
      */
     public function destroy($id)
     {
-        $relative = Relative::find($id);
+        $nurse = Nurse::find($id);
 
-        if (!$relative)
-        {
+        if (!$nurse) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $relative->delete();
+        $nurse->delete();
 
         return response()->json([
             'msg' => 'Data Deleted'

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Baby_Data;
 use Illuminate\Http\Request;
+use App\Models\Schedule;
 use Illuminate\Support\Facades\Validator;
 
-class BabyDataController extends Controller
+class SchedulesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,17 +16,16 @@ class BabyDataController extends Controller
      */
     public function index()
     {
-        $data = Baby_Data::all();
+        $schedules = Schedule::all();
 
-        if (!$data)
-        {
+        if (!$schedules) {
             return response()->json([
-                'msg' => "There is no data registered"
+                'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'data' => $data
+            'data' => $schedules
         ], 200);
     }
 
@@ -39,30 +38,22 @@ class BabyDataController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'baby_incubator_id' => 'required|integer|exists:baby_incubators,id',
-            'oxygen' => 'required|integer|between:0,100',
-            'heart_rate' => 'required|integer|between:0,255',
-            'temperature' => 'required|decimal|between:0,100',
+            'nurse_id' => 'required|integer|exists:nurses,id',
+            'day' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
+            'start_time' => 'required|date_format:H:i:s',
+            'end_time' => 'required|date_format:H:i:s',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $data = Baby_Data::create($request->all());
-
-        if (!$data)
-        {
-            return response()->json([
-                'msg' => "Data not registered"
-            ], 400);
-        }
+        $schedule = Schedule::create($request->all());
 
         return response()->json([
-            'data' => $data
+            'data' => $schedule
         ], 201);
     }
 
@@ -74,17 +65,16 @@ class BabyDataController extends Controller
      */
     public function show($id)
     {
-        $data = Baby_Data::find($id);
+        $schedule = Schedule::find($id);
 
-        if (!$data)
-        {
+        if (!$schedule) {
             return response()->json([
-                'msg' => "Data not found"
+                'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'data' => $data
+            'data' => $schedule
         ], 200);
     }
 
@@ -98,34 +88,34 @@ class BabyDataController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'oxygen' => 'nullable|integer|between:0,100',
-            'heart_rate' => 'nullable|integer|between:0,255',
-            'temperature' => 'nullable|decimal|between:0,100',
+            'nurse_id' => 'integer|exists:nurses,id|nullable',
+            'day' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday|nullable',
+            'start_time' => 'date_format:H:i:s|nullable',
+            'end_time' => 'date_format:H:i:s|nullable',
         ]);
-        
-        if ($validate->fails())
-        {
+
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $data = Baby_Data::find($id);
+        $schedule = Schedule::find($id);
 
-        if (!$data)
-        {
+        if (!$schedule) {
             return response()->json([
-                'msg' => "Data not found"
+                'msg' => 'No Data Found'
             ], 404);
         }
 
-        $data->oxygen = $request->oxygen ?? $data->oxygen;
-        $data->heart_rate = $request->heart_rate ?? $data->heart_rate;
-        $data->temperature = $request->temperature ?? $data->temperature;
-        $data->save();
+        $schedule->nurse_id = $request->nurse_id ?? $schedule->nurse_id;
+        $schedule->day = $request->day ?? $schedule->day;
+        $schedule->start_time = $request->start_time ?? $schedule->start_time;
+        $schedule->end_time = $request->end_time ?? $schedule->end_time;
+        $schedule->save();
 
         return response()->json([
-            'data' => $data
+            'data' => $schedule
         ], 200);
     }
 
@@ -137,19 +127,18 @@ class BabyDataController extends Controller
      */
     public function destroy($id)
     {
-        $data = Baby_Data::find($id);
+        $schedule = Schedule::find($id);
 
-        if (!$data)
-        {
+        if (!$schedule) {
             return response()->json([
-                'msg' => "Data not found"
+                'msg' => 'No Data Found'
             ], 404);
         }
 
-        $data->delete();
+        $schedule->delete();
 
         return response()->json([
-            'msg' => "Data deleted"
+            'msg' => 'Data Deleted'
         ], 200);
     }
 }

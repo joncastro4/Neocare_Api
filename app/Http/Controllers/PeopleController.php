@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Baby_Incubator;
+use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class BabyIncubatorController extends Controller
+class PeopleController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,17 +16,16 @@ class BabyIncubatorController extends Controller
      */
     public function index()
     {
-        $baby_incubators = Baby_Incubator::all();
+        $people = Person::all();
 
-        if (!$baby_incubators)
-        {
+        if (!$people) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "There are no people registered"
             ], 204);
         }
 
         return response()->json([
-            'baby_incubators' => $baby_incubators
+            'people' => $people
         ], 200);
     }
 
@@ -39,29 +38,28 @@ class BabyIncubatorController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'baby_id' => 'required|integer|exists:babies,id',
-            'incubator_id' => 'required|integer|exists:incubators,id',
+            'name' => 'required|string',
+            'last_name_1' => 'required|string',
+            'last_name_2' => 'nullable|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $baby_incubator = Baby_Incubator::create($request->all());
+        $person = Person::create($request->all());
 
-        if (!$baby_incubator)
-        {
+        if (!$person) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'baby_incubator' => $baby_incubator
-        ], 200);
+            'person' => $person
+        ], 201);
     }
 
     /**
@@ -72,17 +70,16 @@ class BabyIncubatorController extends Controller
      */
     public function show($id)
     {
-        $baby_incubator = Baby_Incubator::find($id);    
+        $person = Person::find($id);
 
-        if (!$baby_incubator)
-        {
+        if (!$person) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "Person not found"
             ], 404);
         }
 
         return response()->json([
-            'baby_incubator' => $baby_incubator
+            'person' => $person
         ], 200);
     }
 
@@ -96,32 +93,32 @@ class BabyIncubatorController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'baby_id' => 'nullable|integer|exists:babies,id',
-            'incubator_id' => 'nullable|integer|exists:incubators,id',
+            'name' => 'nullable|string',
+            'last_name_1' => 'nullable|string',
+            'last_name_2' => 'nullable|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $baby_incubator = Baby_Incubator::find($id);
+        $person = Person::find($id);
 
-        if (!$baby_incubator)
-        {
+        if (!$person) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "Person not found"
             ], 404);
         }
 
-        $baby_incubator->baby_id = $request->baby_id ?? $baby_incubator->baby_id;
-        $baby_incubator->incubator_id = $request->incubator_id ?? $baby_incubator->incubator_id;
-        $baby_incubator->save();
+        $person->name = $request->name ?? $person->name;
+        $person->last_name_1 = $request->last_name_1 ?? $person->last_name_1;
+        $person->last_name_2 = $request->last_name_2 ?? $person->last_name_2;
+        $person->save();
 
         return response()->json([
-            'baby_incubator' => $baby_incubator
+            'person' => $person
         ], 200);
     }
 
@@ -133,19 +130,18 @@ class BabyIncubatorController extends Controller
      */
     public function destroy($id)
     {
-        $baby_incubator = Baby_Incubator::find($id);
+        $person = Person::find($id);
 
-        if (!$baby_incubator)
-        {
+        if (!$person) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => "Person not found"
             ], 404);
         }
 
-        $baby_incubator->delete();
+        $person->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => "Person deleted"
         ], 200);
     }
 }

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Baby;
+use App\Models\Baby_Data;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class BabyController extends Controller
+class BabiesDataController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,17 +16,16 @@ class BabyController extends Controller
      */
     public function index()
     {
-        $babies = Baby::all();
+        $data = Baby_Data::all();
 
-        if (!$babies)
-        {
+        if (!$data) {
             return response()->json([
-                'msg' => "There are no babies registered"
+                'msg' => "There is no data registered"
             ], 204);
         }
 
         return response()->json([
-            'babies' => $babies
+            'data' => $data
         ], 200);
     }
 
@@ -39,30 +38,28 @@ class BabyController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'required|integer|exists:people,id',
-            'date_of_birth' => 'required|date',
-            'ingress_date' => 'required|date|after_or_equal:date_of_birth',
-            'egress_date' => 'required|date|after_or_equal:ingress_date|nullable',
+            'baby_incubator_id' => 'required|integer|exists:baby_incubators,id',
+            'oxygen' => 'required|integer|between:0,100',
+            'heart_rate' => 'required|integer|between:0,255',
+            'temperature' => 'required|decimal|between:0,100',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $baby = Baby::create($request->all());
+        $data = Baby_Data::create($request->all());
 
-        if (!$baby)
-        {
+        if (!$data) {
             return response()->json([
-                'msg' => 'Data not registered'
+                'msg' => "Data not registered"
             ], 400);
         }
 
         return response()->json([
-            'baby' => $baby
+            'data' => $data
         ], 201);
     }
 
@@ -74,17 +71,16 @@ class BabyController extends Controller
      */
     public function show($id)
     {
-        $baby = Baby::find($id);
+        $data = Baby_Data::find($id);
 
-        if (!$baby)
-        {
+        if (!$data) {
             return response()->json([
-                'msg' => "Baby not found"
+                'msg' => "Data not found"
             ], 404);
         }
 
         return response()->json([
-            'baby' => $baby
+            'data' => $data
         ], 200);
     }
 
@@ -98,34 +94,32 @@ class BabyController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'date_of_birth' => 'nullable|date',
-            'ingress_date' => 'nullable|date|after_or_equal:date_of_birth',
-            'egress_date' => 'nullable|date|after_or_equal:ingress_date|nullable',
+            'oxygen' => 'nullable|integer|between:0,100',
+            'heart_rate' => 'nullable|integer|between:0,255',
+            'temperature' => 'nullable|decimal|between:0,100',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $baby = Baby::find($id);
+        $data = Baby_Data::find($id);
 
-        if (!$baby)
-        {
+        if (!$data) {
             return response()->json([
-                'msg' => "Baby not found"
+                'msg' => "Data not found"
             ], 404);
         }
 
-        $baby->date_of_birth = $request->date_of_birth ?? $baby->date_of_birth;
-        $baby->ingress_date = $request->ingress_date ?? $baby->ingress_date;
-        $baby->egress_date = $request->egress_date ?? $baby->egress_date;
-        $baby->save();
+        $data->oxygen = $request->oxygen ?? $data->oxygen;
+        $data->heart_rate = $request->heart_rate ?? $data->heart_rate;
+        $data->temperature = $request->temperature ?? $data->temperature;
+        $data->save();
 
         return response()->json([
-            'baby' => $baby
+            'data' => $data
         ], 200);
     }
 
@@ -137,19 +131,18 @@ class BabyController extends Controller
      */
     public function destroy($id)
     {
-        $baby = Baby::find($id);
+        $data = Baby_Data::find($id);
 
-        if (!$baby)
-        {
+        if (!$data) {
             return response()->json([
-                'msg' => "Baby not found"
+                'msg' => "Data not found"
             ], 404);
         }
 
-        $baby->delete();
+        $data->delete();
 
         return response()->json([
-            'msg' => "Baby deleted"
+            'msg' => "Data deleted"
         ], 200);
     }
 }

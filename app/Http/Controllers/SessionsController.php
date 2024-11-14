@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 
-class SessionController extends Controller
+class SessionsController extends Controller
 {
-    public function register(Request $request) 
+    public function register(Request $request)
     {
         $validate = Validator::make($request->all(), [
             'name' => 'required',
@@ -58,12 +58,11 @@ class SessionController extends Controller
         ], 201);
     }
 
-    public function verifyEmail(Request $request) 
+    public function verifyEmail(Request $request)
     {
         $user = User::where('id', $request->user)->first();
 
-        if (!$user) 
-        {
+        if (!$user) {
             return response()->json([
                 'message' => 'User not found'
             ], 404);
@@ -84,8 +83,7 @@ class SessionController extends Controller
             'password' => 'required',
         ]);
 
-        if ($validate->fails()) 
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
@@ -93,15 +91,13 @@ class SessionController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) 
-        {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
         }
 
-        if (!$user->email_verified_at)
-        {
+        if (!$user->email_verified_at) {
             return response()->json([
                 'message' => 'Email not verified'
             ], 401);
@@ -122,8 +118,7 @@ class SessionController extends Controller
             'password' => 'required',
         ]);
 
-        if ($validate->fails()) 
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
@@ -131,15 +126,13 @@ class SessionController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) 
-        {
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid credentials'
             ], 401);
         }
-        
-        if ($user->email_verified_at)
-        {
+
+        if ($user->email_verified_at) {
             return response()->json([
                 'message' => 'Email already verified'
             ], 400);

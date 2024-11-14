@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Nurse_Baby;
 use Illuminate\Http\Request;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Validator;
 
-class BabyNurseController extends Controller
+class NotificationsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,18 +16,17 @@ class BabyNurseController extends Controller
      */
     public function index()
     {
-        $data = Nurse_Baby::all();
+        $notifications = Notification::all();
 
-        if (!$data)
-        {
+        if (!$notifications) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'data' => $data
-        ], 200);
+            'data' => $notifications
+        ]);
     }
 
     /**
@@ -40,28 +39,26 @@ class BabyNurseController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'nurse_id' => 'required|integer|exists:nurses,id',
-            'baby_id' => 'required|integer|exists:babies,id',
+            'message' => 'required|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $data = Nurse_Baby::create($request->all());
+        $notification = Notification::create($request->all());
 
-        if (!$data)
-        {
+        if (!$notification) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'data' => $data
-        ], 200);
+            'data' => $notification
+        ], 201);
     }
 
     /**
@@ -72,17 +69,16 @@ class BabyNurseController extends Controller
      */
     public function show($id)
     {
-        $data = Nurse_Baby::find($id);
+        $notification = Notification::find($id);
 
-        if (!$data)
-        {
+        if (!$notification) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'data' => $data
+            'data' => $notification
         ], 200);
     }
 
@@ -96,32 +92,28 @@ class BabyNurseController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'nurse_id' => 'nullable|integer|exists:nurses,id',
-            'baby_id' => 'nullable|integer|exists:babies,id',
+            'message' => 'nullable|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $data = Nurse_Baby::find($id);
+        $notification = Notification::find($id);
 
-        if (!$data)
-        {
+        if (!$notification) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $data->nurse_id = $request->nurse_id ?? $data->nurse_id;
-        $data->baby_id = $request->baby_id ?? $data->baby_id;
-        $data->save();
+        $notification->message = $request->message;
+        $notification->save();
 
         return response()->json([
-            'data' => $data
+            'data' => $notification
         ], 200);
     }
 
@@ -133,16 +125,15 @@ class BabyNurseController extends Controller
      */
     public function destroy($id)
     {
-        $data = Nurse_Baby::find($id);
+        $notification = Notification::find($id);
 
-        if (!$data)
-        {
+        if (!$notification) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $data->delete();
+        $notification->delete();
 
         return response()->json([
             'msg' => 'Data Deleted'

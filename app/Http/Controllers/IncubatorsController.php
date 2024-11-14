@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Check;
+use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
 
-class CheckController extends Controller
+class IncubatorsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,17 +16,16 @@ class CheckController extends Controller
      */
     public function index()
     {
-        $checks = Check::all();
+        $incubators = Incubator::all();
 
-        if (!$checks)
-        {
+        if (!$incubators) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'data' => $checks
+            'data' => $incubators
         ], 200);
     }
 
@@ -39,30 +38,26 @@ class CheckController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'nurse_id' => 'required|integer|exists:nurses,id',
-            'baby_id' => 'required|integer|exists:babies,id',
-            'description' => 'required|string',
+            'state' => 'required|string|in:inactive,active',
         ]);
-        
-        if ($validate->fails())
-        {
+
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $check = Check::create($request->all());
+        $incubator = Incubator::create($request->all());
 
-        if (!$check)
-        {
+        if (!$incubator) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'data' => $check
-        ], 200);
+            'data' => $incubator
+        ], 201);
     }
 
     /**
@@ -73,18 +68,17 @@ class CheckController extends Controller
      */
     public function show($id)
     {
-        $check = Check::find($id);
+        $incubator = Incubator::find($id);
 
-        if (!$check)
-        {
+        if (!$incubator) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'data' => $check
-        ]);
+            'data' => $incubator
+        ], 200);
     }
 
     /**
@@ -97,30 +91,28 @@ class CheckController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'description' => 'nullable|string',
+            'state' => 'nullable|string|in:inactive,active',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $check = Check::find($id);
+        $incubator = Incubator::find($id);
 
-        if (!$check)
-        {
+        if (!$incubator) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $check->description = $request->description;
-        $check->save();
+        $incubator->state = $request->state;
+        $incubator->save();
 
         return response()->json([
-            'data' => $check
+            'data' => $incubator
         ], 200);
     }
 
@@ -132,16 +124,15 @@ class CheckController extends Controller
      */
     public function destroy($id)
     {
-        $check = Check::find($id);
+        $incubator = Incubator::find($id);
 
-        if (!$check)
-        {
+        if (!$incubator) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $check->delete();
+        $incubator->delete();
 
         return response()->json([
             'msg' => 'Data Deleted'

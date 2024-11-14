@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Person;
 use Illuminate\Http\Request;
+use App\Models\Relative;
 use Illuminate\Support\Facades\Validator;
 
-class PersonController extends Controller
+class RelativesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,18 +16,17 @@ class PersonController extends Controller
      */
     public function index()
     {
-        $people = Person::all();
+        $relatives = Relative::all();
 
-        if (!$people) 
-        {
+        if (!$relatives) {
             return response()->json([
-                'msg' => "There are no people registered"
+                'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'people' => $people
-        ], 200);
+            'relatives' => $relatives
+        ]);
     }
 
     /**
@@ -39,29 +38,28 @@ class PersonController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'name' => 'required|string',
-            'last_name_1' => 'required|string',
-            'last_name_2' => 'nullable|string',
+            'person_id' => 'required|integer|exists:people,id',
+            'baby_id' => 'required|integer|exists:babies,id',
+            'phone_number' => 'required|string|min:10|max:10',
+            'contact' => 'nullable|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $person = Person::create($request->all());
+        $relative = Relative::create($request->all());
 
-        if (!$person)
-        {
+        if (!$relative) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'person' => $person
+            'relative' => $relative
         ], 201);
     }
 
@@ -73,17 +71,16 @@ class PersonController extends Controller
      */
     public function show($id)
     {
-        $person = Person::find($id);
+        $relative = Relative::find($id);
 
-        if (!$person)
-        {
+        if (!$relative) {
             return response()->json([
-                'msg' => "Person not found"
+                'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'person' => $person
+            'relative' => $relative
         ], 200);
     }
 
@@ -97,34 +94,34 @@ class PersonController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'name' => 'nullable|string',
-            'last_name_1' => 'nullable|string',
-            'last_name_2' => 'nullable|string',
+            'person_id' => 'integer|exists:people,id|nullable',
+            'baby_id' => 'integer|exists:babies,id|nullable',
+            'phone_number' => 'string|min:10|max:10|nullable',
+            'contact' => 'string|nullable',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $person = Person::find($id);
+        $relative = Relative::find($id);
 
-        if (!$person)
-        {
+        if (!$relative) {
             return response()->json([
-                'msg' => "Person not found"
+                'msg' => 'No Data Found'
             ], 404);
         }
 
-        $person->name = $request->name ?? $person->name;
-        $person->last_name_1 = $request->last_name_1 ?? $person->last_name_1;
-        $person->last_name_2 = $request->last_name_2 ?? $person->last_name_2;
-        $person->save();
+        $relative->person_id = $request->person_id ?? $relative->person_id;
+        $relative->baby_id = $request->baby_id ?? $relative->baby_id;
+        $relative->phone_number = $request->phone_number ?? $relative->phone_number;
+        $relative->contact = $request->contact ?? $relative->contact;
+        $relative->save();
 
         return response()->json([
-            'person' => $person
+            'relative' => $relative
         ], 200);
     }
 
@@ -136,19 +133,18 @@ class PersonController extends Controller
      */
     public function destroy($id)
     {
-        $person = Person::find($id);
+        $relative = Relative::find($id);
 
-        if (!$person)
-        {
+        if (!$relative) {
             return response()->json([
-                'msg' => "Person not found"
+                'msg' => 'No Data Found'
             ], 404);
         }
 
-        $person->delete();
+        $relative->delete();
 
         return response()->json([
-            'msg' => "Person deleted"
+            'msg' => 'Data Deleted'
         ], 200);
     }
 }

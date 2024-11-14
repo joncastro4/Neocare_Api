@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Nurse;
+use App\Models\Check;
 use Illuminate\Support\Facades\Validator;
 
-class NurseController extends Controller
+class ChecksController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,17 +16,16 @@ class NurseController extends Controller
      */
     public function index()
     {
-        $nurses = Nurse::all();
+        $checks = Check::all();
 
-        if (!$nurses)
-        {
+        if (!$checks) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
         }
 
         return response()->json([
-            'data' => $nurses
+            'data' => $checks
         ], 200);
     }
 
@@ -39,28 +38,27 @@ class NurseController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'required|integer|exists:people,id|unique:nurses,person_id',
-            'rfc' => 'required|string|unique:nurses,rfc',
+            'nurse_id' => 'required|integer|exists:nurses,id',
+            'baby_id' => 'required|integer|exists:babies,id',
+            'description' => 'required|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $nurse = Nurse::create($request->all());
+        $check = Check::create($request->all());
 
-        if (!$nurse)
-        {
+        if (!$check) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
 
         return response()->json([
-            'data' => $nurse
+            'data' => $check
         ], 200);
     }
 
@@ -72,17 +70,16 @@ class NurseController extends Controller
      */
     public function show($id)
     {
-        $nurse = Nurse::find($id);
+        $check = Check::find($id);
 
-        if (!$nurse)
-        {
+        if (!$check) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
         return response()->json([
-            'data' => $nurse
+            'data' => $check
         ]);
     }
 
@@ -96,32 +93,28 @@ class NurseController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'nullable|integer|exists:people,id|unique:nurses,person_id',
-            'rfc' => 'nullable|string|unique:nurses,rfc',
+            'description' => 'nullable|string',
         ]);
 
-        if ($validate->fails())
-        {
+        if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 400);
         }
 
-        $nurse = Nurse::find($id);
+        $check = Check::find($id);
 
-        if (!$nurse)
-        {
+        if (!$check) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $nurse->person_id = $request->person_id ?? $nurse->person_id;
-        $nurse->rfc = $request->rfc ?? $nurse->rfc;
-        $nurse->save();
+        $check->description = $request->description;
+        $check->save();
 
         return response()->json([
-            'data' => $nurse
+            'data' => $check
         ], 200);
     }
 
@@ -133,16 +126,15 @@ class NurseController extends Controller
      */
     public function destroy($id)
     {
-        $nurse = Nurse::find($id);
+        $check = Check::find($id);
 
-        if (!$nurse)
-        {
+        if (!$check) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 404);
         }
 
-        $nurse->delete();
+        $check->delete();
 
         return response()->json([
             'msg' => 'Data Deleted'
