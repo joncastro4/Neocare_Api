@@ -48,7 +48,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('baby-nurses', BabyNursesController::class);
 });
 
-
+// Ruta de prueba
 Route::get('/prueba', function () {
     return view('welcome');
 });
