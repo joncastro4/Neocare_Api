@@ -49,6 +49,6 @@ Route::prefix('v1')->group(function () {
 });
 
 // Ruta de prueba
-Route::get('/pruebaapi', function () {
+Route::get('/prueba', function () {
     return view('welcome');
 });
