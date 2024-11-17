@@ -48,3 +48,7 @@ Route::prefix('v1')->group(function () {
     Route::apiResource('baby-nurses', BabyNursesController::class);
 });
 
+
+Route::get('/prueba', function () {
+    return view('welcome');
+});

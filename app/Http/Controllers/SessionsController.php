@@ -9,15 +9,16 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
+use App\Mail\RegisterMail;
 
 class SessionsController extends Controller
 {
     public function register(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email',
-            'password' => 'required',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8|max:32|confirmed',
         ]);
 
         if ($validate->fails()) {
@@ -50,7 +51,7 @@ class SessionsController extends Controller
             ['user' => $user->id]
         );
 
-        Mail::to($request->email)->send(new \App\Mail\RegisterMail($request->name, $request->email, $signedUrl));
+        Mail::to($request->email)->send(new RegisterMail($request->name, $request->email, $signedUrl));
 
         return response()->json([
             'message' => 'User created successfully',
@@ -144,7 +145,7 @@ class SessionsController extends Controller
             ['user' => $user->id]
         );
 
-        Mail::to($request->email)->send(new \App\Mail\RegisterMail($user->name, $user->email, $signedUrl));
+        Mail::to($request->email)->send(new RegisterMail($user->name, $user->email, $signedUrl));
 
         return response()->json([
             'message' => 'Email sent'
