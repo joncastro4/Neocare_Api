@@ -30,28 +30,31 @@ Route::prefix('v1')->group(function () {
 
     Route::prefix('sessions')->group(function () {
         Route::post('register', [SessionsController::class, 'register']);
-        Route::get('verify-email', [SessionsController::class, 'verifyEmail'])->middleware('signed')->name('verify-email');
         Route::post('login', [SessionsController::class, 'login']);
+        Route::get('verify-email', [SessionsController::class, 'verifyEmail'])->middleware('signed')->name('verify-email');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
 
-    Route::apiResource('babies', BabiesController::class);
-    Route::apiResource('babies-data', BabiesDataController::class);
-    Route::apiResource('baby-incubators', BabyIncubatorsController::class);
-    Route::apiResource('incubators', IncubatorsController::class);
-    Route::apiResource('nurses', NursesController::class);
-    Route::apiResource('people', PeopleController::class);
-    Route::apiResource('relatives', RelativesController::class);
-    Route::apiResource('notifications', NotificationsController::class);
-    Route::apiResource('checks', ChecksController::class);
-    Route::apiResource('schedules', SchedulesController::class);
-    Route::apiResource('baby-nurses', BabyNursesController::class);
+    Route::middleware('auth')->group(function () {
+        Route::apiResource('babies', BabiesController::class);
+        Route::apiResource('babies-data', BabiesDataController::class);
+        Route::apiResource('baby-incubators', BabyIncubatorsController::class);
+        Route::apiResource('incubators', IncubatorsController::class);
+        Route::apiResource('nurses', NursesController::class);
+        Route::apiResource('people', PeopleController::class);
+        Route::apiResource('relatives', RelativesController::class);
+        Route::apiResource('notifications', NotificationsController::class);
+        Route::apiResource('checks', ChecksController::class);
+        Route::apiResource('schedules', SchedulesController::class);
+        Route::apiResource('baby-nurses', BabyNursesController::class);
+    });
+
 });
 
 // Ruta de prueba
 Route::get('/test', function () {
     return response()->json([
-        'message' => 'Prueba exitosa',
-        'API Funcionando correctamente'
+        'message' => 'Hello World'
     ]);
 });
+
