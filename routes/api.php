@@ -49,6 +49,9 @@ Route::prefix('v1')->group(function () {
 });
 
 // Ruta de prueba
-Route::get('/prueba', function () {
-    return view('welcome');
+Route::get('/test', function () {
+    return response()->json([
+        'message' => 'Prueba exitosa',
+        'API Funcionando correctamente'
+    ]);
 });
