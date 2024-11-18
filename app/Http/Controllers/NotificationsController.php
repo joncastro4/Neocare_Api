@@ -9,18 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class NotificationsController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $notifications = Notification::all();
 
         if (!$notifications) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Notifications Found'
             ], 204);
         }
 
@@ -28,13 +23,6 @@ class NotificationsController extends Controller
             'data' => $notifications
         ]);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -52,7 +40,7 @@ class NotificationsController extends Controller
 
         if (!$notification) {
             return response()->json([
-                'msg' => 'Data not registered'
+                'msg' => 'Notification not registered'
             ], 400);
         }
 
@@ -60,20 +48,16 @@ class NotificationsController extends Controller
             'data' => $notification
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $notification = Notification::find($id);
 
         if (!$notification) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Notification Found'
             ], 404);
         }
 
@@ -81,16 +65,11 @@ class NotificationsController extends Controller
             'data' => $notification
         ], 200);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'message' => 'nullable|string',
         ]);
@@ -105,7 +84,7 @@ class NotificationsController extends Controller
 
         if (!$notification) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Notification Found'
             ], 404);
         }
 
@@ -116,27 +95,23 @@ class NotificationsController extends Controller
             'data' => $notification
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $notification = Notification::find($id);
 
         if (!$notification) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Notification Found'
             ], 404);
         }
 
         $notification->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => 'Notification Deleted'
         ], 200);
     }
 }

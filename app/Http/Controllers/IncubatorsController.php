@@ -36,6 +36,9 @@ class IncubatorsController extends Controller
     }
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $incubator = Incubator::find($id);
 
         if (!$incubator) {

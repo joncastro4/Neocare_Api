@@ -28,13 +28,6 @@ class PeopleController extends Controller
             'people' => $people
         ], 200);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -61,15 +54,11 @@ class PeopleController extends Controller
             'person' => $person
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $person = Person::find($id);
 
         if (!$person) {
@@ -82,16 +71,11 @@ class PeopleController extends Controller
             'person' => $person
         ], 200);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'name' => 'nullable|string',
             'last_name_1' => 'nullable|string',
@@ -121,15 +105,11 @@ class PeopleController extends Controller
             'person' => $person
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $person = Person::find($id);
 
         if (!$person) {

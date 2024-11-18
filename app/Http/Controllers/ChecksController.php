@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class ChecksController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $checks = Check::all();
@@ -28,13 +23,6 @@ class ChecksController extends Controller
             'data' => $checks
         ], 200);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -61,15 +49,11 @@ class ChecksController extends Controller
             'data' => $check
         ], 200);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $check = Check::find($id);
 
         if (!$check) {
@@ -82,16 +66,11 @@ class ChecksController extends Controller
             'data' => $check
         ]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'description' => 'nullable|string',
         ]);
@@ -117,15 +96,11 @@ class ChecksController extends Controller
             'data' => $check
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $check = Check::find($id);
 
         if (!$check) {

@@ -9,18 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class SchedulesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $schedules = Schedule::all();
 
         if (!$schedules) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Schedules Found'
             ], 204);
         }
 
@@ -28,13 +23,6 @@ class SchedulesController extends Controller
             'data' => $schedules
         ], 200);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -56,20 +44,16 @@ class SchedulesController extends Controller
             'data' => $schedule
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $schedule = Schedule::find($id);
 
         if (!$schedule) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Schedule Found'
             ], 404);
         }
 
@@ -77,16 +61,11 @@ class SchedulesController extends Controller
             'data' => $schedule
         ], 200);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'nurse_id' => 'integer|exists:nurses,id|nullable',
             'day' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday|nullable',
@@ -104,7 +83,7 @@ class SchedulesController extends Controller
 
         if (!$schedule) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Schedule Found'
             ], 404);
         }
 
@@ -118,27 +97,23 @@ class SchedulesController extends Controller
             'data' => $schedule
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $schedule = Schedule::find($id);
 
         if (!$schedule) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Schedule Found'
             ], 404);
         }
 
         $schedule->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => 'Schedule Deleted'
         ], 200);
     }
 }

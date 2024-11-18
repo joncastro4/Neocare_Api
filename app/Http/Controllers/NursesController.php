@@ -49,15 +49,11 @@ class NursesController extends Controller
             'data' => $nurse
         ], 200);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $nurse = Nurse::find($id);
 
         if (!$nurse) {
@@ -70,16 +66,11 @@ class NursesController extends Controller
             'data' => $nurse
         ]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'person_id' => 'nullable|integer|exists:people,id|unique:nurses,person_id',
             'rfc' => 'nullable|string|unique:nurses,rfc',
@@ -107,15 +98,11 @@ class NursesController extends Controller
             'data' => $nurse
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $nurse = Nurse::find($id);
 
         if (!$nurse) {

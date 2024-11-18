@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class BabiesDataController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $data = Baby_Data::all();
@@ -28,13 +23,6 @@ class BabiesDataController extends Controller
             'data' => $data
         ], 200);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -62,15 +50,11 @@ class BabiesDataController extends Controller
             'data' => $data
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $data = Baby_Data::find($id);
 
         if (!$data) {
@@ -83,16 +67,11 @@ class BabiesDataController extends Controller
             'data' => $data
         ], 200);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'oxygen' => 'nullable|integer|between:0,100',
             'heart_rate' => 'nullable|integer|between:0,255',
@@ -122,15 +101,11 @@ class BabiesDataController extends Controller
             'data' => $data
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $data = Baby_Data::find($id);
 
         if (!$data) {

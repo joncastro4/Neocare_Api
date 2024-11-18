@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class RelativesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $relatives = Relative::all();
@@ -28,13 +23,6 @@ class RelativesController extends Controller
             'relatives' => $relatives
         ]);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -62,15 +50,11 @@ class RelativesController extends Controller
             'relative' => $relative
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $relative = Relative::find($id);
 
         if (!$relative) {
@@ -83,16 +67,11 @@ class RelativesController extends Controller
             'relative' => $relative
         ], 200);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'person_id' => 'integer|exists:people,id|nullable',
             'baby_id' => 'integer|exists:babies,id|nullable',
@@ -124,15 +103,11 @@ class RelativesController extends Controller
             'relative' => $relative
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $relative = Relative::find($id);
 
         if (!$relative) {
