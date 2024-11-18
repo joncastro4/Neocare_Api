@@ -9,11 +9,6 @@ use Illuminate\Support\Facades\Validator;
 
 class BabiesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $babies = Baby::all();
@@ -28,13 +23,6 @@ class BabiesController extends Controller
             'babies' => $babies
         ], 200);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -62,15 +50,11 @@ class BabiesController extends Controller
             'baby' => $baby
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $baby = Baby::find($id);
 
         if (!$baby) {
@@ -83,16 +67,11 @@ class BabiesController extends Controller
             'baby' => $baby
         ], 200);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $validate = Validator::make($request->all(), [
             'date_of_birth' => 'nullable|date',
             'ingress_date' => 'nullable|date|after_or_equal:date_of_birth',
@@ -122,15 +101,11 @@ class BabiesController extends Controller
             'baby' => $baby
         ], 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
         $baby = Baby::find($id);
 
         if (!$baby) {
