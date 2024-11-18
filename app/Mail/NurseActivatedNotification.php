@@ -8,22 +8,26 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use App\Models\Person;
+use App\Models\User;
 
-class RegisterMail extends Mailable
+
+class NurseActivatedNotification extends Mailable
 {
     use Queueable, SerializesModels;
 
-    protected $name, $email, $signedUrl;
-
+    protected $user;
+    protected $person;
+    protected $signedUrl;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($name, $email, $signedUrl)
+    public function __construct(User $user, Person $person, $signedUrl)
     {
-        $this->name = $name;
-        $this->email = $email;
+        $this->user = $user;
+        $this->person = $person;
         $this->signedUrl = $signedUrl;
     }
 
@@ -35,7 +39,7 @@ class RegisterMail extends Mailable
     public function envelope()
     {
         return new Envelope(
-            subject: 'Register Mail',
+            subject: 'Nurse Activated Notification',
         );
     }
 
@@ -47,12 +51,12 @@ class RegisterMail extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.register',
+            view: 'emails.nurse_activated',
             with: [
-                'name' => $this->name,
-                'email' => $this->email,
+                'user' => $this->user,
+                'person' => $this->person,
                 'signedUrl' => $this->signedUrl
-            ],
+            ]
         );
     }
 

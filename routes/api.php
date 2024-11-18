@@ -49,6 +49,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('baby-nurses', BabyNursesController::class);
     });
 
+    Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
 });
 
 // Ruta de prueba

@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use App\Mail\RegisterMail;
+use App\Mail\NurseActivatedNotification;
 
 class SessionsController extends Controller
 {
@@ -89,6 +90,34 @@ class SessionsController extends Controller
 
         $user->email_verified_at = now();
         $user->save();
+
+        $nurse = Nurse::where('user_id', $user->id)->first();
+
+        if (!$nurse) {
+            return response()->json([
+                'message' => 'Nurse not found'
+            ], 404);
+        }
+
+        $person = Person::where('id', $nurse->person_id)->first();
+
+        if (!$person) {
+            return response()->json([
+                'message' => 'Person not found'
+            ]);
+        }
+
+        $admin = User::where('role', 'admin')->first();
+
+        if (!$admin) {
+            return response()->json([
+                'message' => 'Admin not found'
+            ]);
+        }
+
+        $signedUrl = URL::signedRoute('nurse-activate', ['id' => $user->id]);
+
+        Mail::to($admin->email)->send(new NurseActivatedNotification($user, $person, $signedUrl));
 
         return response()->json([
             'message' => 'Email verified successfully'
@@ -170,6 +199,41 @@ class SessionsController extends Controller
         return response()->json([
             'message' => 'User data',
             'user' => $request->user()
+        ], 200);
+    }
+    public function activateNurse($id)
+    {
+        $user = User::where('id', $id)->first();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'message' => 'Email not verified'
+            ], 400);
+        }
+
+        if ($user->role == 'nurse') {
+            return response()->json([
+                'message' => 'User already activated'
+            ], 400);
+        }
+
+        if ($user->role == 'admin') {
+            return response()->json([
+                'message' => 'Admin cannot be activated'
+            ], 400);
+        }
+
+        $user->role = 'nurse';
+        $user->save();
+
+        return response()->json([
+            'message' => 'Nurse activated successfully'
         ], 200);
     }
 

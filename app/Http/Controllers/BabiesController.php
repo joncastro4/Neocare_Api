@@ -72,6 +72,7 @@ class BabiesController extends Controller
 
         return response()->json([
             'msg' => 'Baby registered Successfully',
+            'person' => $person,
             'baby' => $baby
         ], 201);
     }
@@ -88,7 +89,17 @@ class BabiesController extends Controller
             ], 404);
         }
 
+        $person = Person::find($baby->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => "Person not found"
+            ], 404);
+        }
+
         return response()->json([
+            'msg' => "Baby found",
+            'person' => $person,
             'baby' => $baby
         ], 200);
     }
@@ -98,9 +109,22 @@ class BabiesController extends Controller
             abort(404);
         }
         $validate = Validator::make($request->all(), [
-            'date_of_birth' => 'nullable|date',
-            'ingress_date' => 'nullable|date|after_or_equal:date_of_birth',
-            'egress_date' => 'nullable|date|after_or_equal:ingress_date|nullable',
+            'name' => 'required|string|max:255',
+            'last_name_1' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
+            'date_of_birth' => 'required|date|before_or_equal:today',
+            'ingress_date' => 'sometimes|date|after_or_equal:date_of_birth|before_or_equal:today',
+            'egress_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:date_of_birth',
+                function ($value, $fail) use ($request) {
+                    $ingressDate = $request->ingress_date ?? now()->toDateString();
+                    if ($value < $ingressDate) {
+                        $fail('The egress date cannot be earlier than the ingress date.');
+                    }
+                },
+            ],
         ]);
 
         if ($validate->fails()) {
@@ -117,12 +141,26 @@ class BabiesController extends Controller
             ], 404);
         }
 
+        $person = Person::find($baby->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => "Person not found"
+            ], 404);
+        }
+        $person->name = $request->name ?? $person->name;
+        $person->last_name_1 = $request->last_name_1 ?? $person->last_name_1;
+        $person->last_name_2 = $request->last_name_2 ?? $person->last_name_2;
+        $person->save();
+
         $baby->date_of_birth = $request->date_of_birth ?? $baby->date_of_birth;
         $baby->ingress_date = $request->ingress_date ?? $baby->ingress_date;
         $baby->egress_date = $request->egress_date ?? $baby->egress_date;
         $baby->save();
 
         return response()->json([
+            'msg' => "Baby updated successfully",
+            'person' => $person,
             'baby' => $baby
         ], 200);
     }
@@ -139,6 +177,15 @@ class BabiesController extends Controller
             ], 404);
         }
 
+        $person = Person::find($baby->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => "Person not found"
+            ], 404);
+        }
+
+        $person->delete();
         $baby->delete();
 
         return response()->json([
