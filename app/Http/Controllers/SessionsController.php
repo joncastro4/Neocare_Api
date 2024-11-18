@@ -21,7 +21,7 @@ class SessionsController extends Controller
             'name' => 'required|string|max:255',
             'last_name_1' => 'required|string|max:255',
             'last_name_2' => 'nullable|string|max:255',
-            'username' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|max:32|confirmed',
         ]);

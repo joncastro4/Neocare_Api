@@ -35,7 +35,7 @@ Route::prefix('v1')->group(function () {
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
 
-    Route::middleware('auth')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('babies', BabiesController::class);
         Route::apiResource('babies-data', BabiesDataController::class);
         Route::apiResource('baby-incubators', BabyIncubatorsController::class);
