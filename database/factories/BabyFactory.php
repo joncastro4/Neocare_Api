@@ -17,7 +17,7 @@ class BabyFactory extends Factory
     public function definition()
     {
         return [
-            //
+
         ];
     }
 }

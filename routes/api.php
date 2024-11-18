@@ -36,17 +36,19 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('babies', BabiesController::class);
-        Route::apiResource('babies-data', BabiesDataController::class);
-        Route::apiResource('baby-incubators', BabyIncubatorsController::class);
-        Route::apiResource('incubators', IncubatorsController::class);
-        Route::apiResource('nurses', NursesController::class);
-        Route::apiResource('people', PeopleController::class);
-        Route::apiResource('relatives', RelativesController::class);
-        Route::apiResource('notifications', NotificationsController::class);
-        Route::apiResource('checks', ChecksController::class);
-        Route::apiResource('schedules', SchedulesController::class);
-        Route::apiResource('baby-nurses', BabyNursesController::class);
+        Route::middleware('role')->group(function () {
+            Route::apiResource('babies', BabiesController::class);
+            Route::apiResource('babies-data', BabiesDataController::class);
+            Route::apiResource('baby-incubators', BabyIncubatorsController::class);
+            Route::apiResource('incubators', IncubatorsController::class);
+            Route::apiResource('nurses', NursesController::class);
+            Route::apiResource('people', PeopleController::class);
+            Route::apiResource('relatives', RelativesController::class);
+            Route::apiResource('notifications', NotificationsController::class);
+            Route::apiResource('checks', ChecksController::class);
+            Route::apiResource('schedules', SchedulesController::class);
+            Route::apiResource('baby-nurses', BabyNursesController::class);
+        });
     });
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
