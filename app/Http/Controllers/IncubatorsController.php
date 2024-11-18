@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
+use function PHPUnit\Framework\isEmpty;
 
 class IncubatorsController extends Controller
 {
@@ -13,7 +14,7 @@ class IncubatorsController extends Controller
     {
         $incubators = Incubator::all();
 
-        if (!$incubators) {
+        if (isEmpty($incubators)) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
@@ -23,7 +24,6 @@ class IncubatorsController extends Controller
             'data' => $incubators
         ], 200);
     }
-
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -48,7 +48,6 @@ class IncubatorsController extends Controller
             'data' => $incubator
         ], 201);
     }
-
     public function show($id)
     {
         $incubator = Incubator::find($id);
@@ -63,7 +62,6 @@ class IncubatorsController extends Controller
             'data' => $incubator
         ], 200);
     }
-
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
@@ -91,7 +89,6 @@ class IncubatorsController extends Controller
             'data' => $incubator
         ], 200);
     }
-
     public function destroy($id)
     {
         $incubator = Incubator::find($id);
