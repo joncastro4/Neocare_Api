@@ -19,8 +19,11 @@
         <!-- Content -->
         <div style="padding: 20px;">
             <p>Hello Admin,</p>
-            <p>The user <strong>{{ $person->name }} {{ $person->last_name_1 }}</strong> is ready to be activated as a
-                Nurse in the system.</p>
+            <p>The user <strong>{{ $person->name }} {{ $person->last_name_1 }}</strong> (username:
+                <strong>{{ $user->name }}</strong>) has registered with the email <a href="mailto:{{ $user->email }}"
+                    style="color: #7469B6;">{{ $user->email }}</a> and is ready to be
+                activated as a Nurse in the system.
+            </p>
             <p>Please click the button below to confirm their role activation:</p>
             <a href="{{ $signedUrl }}"
                 style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #AD88C6; color: white; text-decoration: none; border-radius: 5px;">Activate
