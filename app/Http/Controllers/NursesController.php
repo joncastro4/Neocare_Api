@@ -9,18 +9,13 @@ use Illuminate\Support\Facades\Validator;
 
 class NursesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $nurses = Nurse::all();
 
         if (!$nurses) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Nurses Found'
             ], 204);
         }
 
@@ -29,12 +24,6 @@ class NursesController extends Controller
         ], 200);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [

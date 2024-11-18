@@ -50,6 +50,10 @@ class IncubatorsController extends Controller
     }
     public function update(Request $request, $id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
+
         $validate = Validator::make($request->all(), [
             'state' => 'required|string|in:active,available,inactive',
         ]);
@@ -77,18 +81,22 @@ class IncubatorsController extends Controller
     }
     public function destroy($id)
     {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
+
         $incubator = Incubator::find($id);
 
         if (!$incubator) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Incubator Found'
             ], 404);
         }
 
         $incubator->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => 'Incubator Deleted'
         ], 200);
     }
 }
