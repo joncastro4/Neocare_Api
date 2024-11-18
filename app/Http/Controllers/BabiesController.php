@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Baby;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Person;
 
 class BabiesController extends Controller
 {
@@ -26,10 +27,22 @@ class BabiesController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'required|integer|exists:people,id',
-            'date_of_birth' => 'required|date',
-            'ingress_date' => 'required|date|after_or_equal:date_of_birth',
-            'egress_date' => 'required|date|after_or_equal:ingress_date|nullable',
+            'name' => 'required|string|max:255',
+            'last_name_1' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
+            'date_of_birth' => 'required|date|before_or_equal:today',
+            'ingress_date' => 'sometimes|date|after_or_equal:date_of_birth|before_or_equal:today',
+            'egress_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:date_of_birth',
+                function ($value, $fail) use ($request) {
+                    $ingressDate = $request->ingress_date ?? now()->toDateString();
+                    if ($value < $ingressDate) {
+                        $fail('The egress date cannot be earlier than the ingress date.');
+                    }
+                },
+            ],
         ]);
 
         if ($validate->fails()) {
@@ -38,7 +51,18 @@ class BabiesController extends Controller
             ], 400);
         }
 
-        $baby = Baby::create($request->all());
+        $person = new Person();
+        $person->name = $request->name;
+        $person->last_name_1 = $request->last_name_1;
+        $person->last_name_2 = $request->last_name_2;
+        $person->save();
+
+        $baby = new Baby();
+        $baby->person_id = $person->id;
+        $baby->date_of_birth = $request->date_of_birth;
+        $baby->ingress_date = $request->ingress_date ?? now()->toDateString();
+        $baby->egress_date = $request->egress_date;
+        $baby->save();
 
         if (!$baby) {
             return response()->json([
@@ -47,6 +71,7 @@ class BabiesController extends Controller
         }
 
         return response()->json([
+            'msg' => 'Baby registered Successfully',
             'baby' => $baby
         ], 201);
     }
