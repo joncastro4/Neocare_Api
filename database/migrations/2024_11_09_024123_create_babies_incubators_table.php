@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -15,10 +14,8 @@ return new class extends Migration
     {
         Schema::create('babies_incubators', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('baby_id');
-            $table->foreign('baby_id')->references('id')->on('babies');
-            $table->unsignedBigInteger('incubator_id');
-            $table->foreign('incubator_id')->references('id')->on('incubators');
+            $table->foreignId('baby_id')->constrained('babies')->onDelete('cascade');
+            $table->foreignId('incubator_id')->constrained('incubators')->onDelete('cascade');
             $table->softDeletes();
             $table->timestamps();
         });

@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -15,10 +14,8 @@ return new class extends Migration
     {
         Schema::create('relatives', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('person_id');
-            $table->foreign('person_id')->references('id')->on('people')->onDelete('cascade');
-            $table->unsignedBigInteger('baby_id');
-            $table->foreign('baby_id')->references('id')->on('babies')->onDelete('cascade');
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
+            $table->foreignId('baby_id')->constrained('babies')->onDelete('cascade');
             $table->string('phone_number');
             $table->string('contact')->nullable();
             $table->softDeletes();

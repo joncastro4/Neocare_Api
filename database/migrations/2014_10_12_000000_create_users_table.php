@@ -19,7 +19,6 @@ return new class extends Migration {
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('role')->default('guest');
-            $table->string('profile_image_path')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

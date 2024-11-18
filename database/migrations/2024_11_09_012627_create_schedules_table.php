@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -15,8 +14,7 @@ return new class extends Migration
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('nurse_id');
-            $table->foreign('nurse_id')->references('id')->on('nurses');
+            $table->foreignId('nurse_id')->constrained('nurses')->onDelete('cascade');
             $table->string('day');
             $table->time('start_time');
             $table->time('end_time');

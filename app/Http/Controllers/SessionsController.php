@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\Person;
+use App\Models\Nurse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
@@ -17,6 +19,9 @@ class SessionsController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
+            'last_name_1' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
+            'username' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|max:32|confirmed',
         ]);
@@ -33,17 +38,30 @@ class SessionsController extends Controller
             ], 400);
         }
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+        // Registrar usuario
+        $user = new User();
 
-        if (!$user) {
-            return response()->json([
-                'message' => 'Error creating user'
-            ], 400);
-        }
+        $user->name = $request->username;
+        $user->email = $request->email;
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Registrar persona
+        $person = new Person();
+
+        $person->name = $request->name;
+        $person->last_name_1 = $request->last_name_1;
+        $person->last_name_2 = $request->last_name_2;
+
+        $person->save();
+
+        // Registrar enfermera
+        $nurse = new Nurse();
+
+        $nurse->user_id = $user->id;
+        $nurse->person_id = $person->id;
+
+        $nurse->save();
 
         $signedUrl = URL::temporarySignedRoute(
             'verify-email',
@@ -143,6 +161,22 @@ class SessionsController extends Controller
 
         return response()->json([
             'message' => 'Email sent'
+        ], 200);
+    }
+
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json([
+            'message' => 'Logout successful'
+        ], 200);
+    }
+
+    public function me(Request $request)
+    {
+        return response()->json([
+            'message' => 'User data',
+            'user' => $request->user()
         ], 200);
     }
 }

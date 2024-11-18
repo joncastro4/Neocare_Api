@@ -19,4 +19,8 @@ class Notification extends Model
     {
         return $this->belongsTo(Nurse::class);
     }
+    public function baby()
+    {
+        return $this->belongsTo(Baby::class);
+    }
 }

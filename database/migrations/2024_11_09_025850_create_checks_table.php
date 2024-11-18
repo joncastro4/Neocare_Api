@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -15,10 +14,8 @@ return new class extends Migration
     {
         Schema::create('checks', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('nurse_id');
-            $table->foreign('nurse_id')->references('id')->on('nurses');
-            $table->unsignedBigInteger('baby_incubator_id');
-            $table->foreign('baby_incubator_id')->references('id')->on('babies_incubators');
+            $table->foreignId('nurse_id')->constrained('nurses')->onDelete('cascade');
+            $table->foreignId('baby_incubator_id')->constrained('babies_incubators')->onDelete('cascade');
             $table->string('description');
             $table->softDeletes();
             $table->timestamps();

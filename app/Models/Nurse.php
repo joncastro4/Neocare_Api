@@ -11,9 +11,14 @@ class Nurse extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'person_id', 
-        'rfc'
+        'rfc',
+        'image_path',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function person()
     {
