@@ -153,7 +153,7 @@ class SessionsController extends Controller
 
         $signedUrl = URL::temporarySignedRoute(
             'verify-email',
-            now()->addMinutes(1),
+            now()->addMinutes(15),
             ['user' => $user->id]
         );
 
@@ -179,4 +179,5 @@ class SessionsController extends Controller
             'user' => $request->user()
         ], 200);
     }
+
 }
