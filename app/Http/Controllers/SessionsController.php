@@ -21,7 +21,7 @@ class SessionsController extends Controller
             'name' => 'required|string|max:255',
             'last_name_1' => 'required|string|max:255',
             'last_name_2' => 'nullable|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
+            'username' => 'required|string|max:255|unique:users,name',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|max:32|confirmed',
         ]);
@@ -128,7 +128,6 @@ class SessionsController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'email' => 'required|email',
-            'password' => 'required',
         ]);
 
         if ($validate->fails()) {
@@ -138,12 +137,6 @@ class SessionsController extends Controller
         }
 
         $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Invalid credentials'
-            ], 401);
-        }
 
         if ($user->email_verified_at) {
             return response()->json([

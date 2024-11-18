@@ -24,27 +24,13 @@ class IncubatorsController extends Controller
             'data' => $incubators
         ], 200);
     }
-    public function store(Request $request)
+    public function store()
     {
-        $validate = Validator::make($request->all(), [
-            'state' => 'required|string|in:inactive,active',
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 400);
-        }
-
-        $incubator = Incubator::create($request->all());
-
-        if (!$incubator) {
-            return response()->json([
-                'msg' => 'Data not registered'
-            ], 400);
-        }
+        $incubator = new Incubator();
+        $incubator->save();
 
         return response()->json([
+            'msg' => 'Incubator Created Successfully',
             'data' => $incubator
         ], 201);
     }
@@ -54,7 +40,7 @@ class IncubatorsController extends Controller
 
         if (!$incubator) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Incubator Found'
             ], 404);
         }
 
@@ -65,7 +51,7 @@ class IncubatorsController extends Controller
     public function update(Request $request, $id)
     {
         $validate = Validator::make($request->all(), [
-            'state' => 'nullable|string|in:inactive,active',
+            'state' => 'required|string|in:active,available,inactive',
         ]);
 
         if ($validate->fails()) {
@@ -78,7 +64,7 @@ class IncubatorsController extends Controller
 
         if (!$incubator) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Incubator Found'
             ], 404);
         }
 

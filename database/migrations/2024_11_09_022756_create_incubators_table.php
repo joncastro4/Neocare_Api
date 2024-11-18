@@ -14,7 +14,7 @@ return new class extends Migration {
     {
         Schema::create('incubators', function (Blueprint $table) {
             $table->id();
-            $table->enum('state', ['in_use', 'available', 'disabled'])->default('available');
+            $table->enum('state', ['active', 'available', 'inactive'])->default('available');
             $table->softDeletes();
             $table->timestamps();
         });
