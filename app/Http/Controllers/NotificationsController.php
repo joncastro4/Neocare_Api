@@ -33,7 +33,7 @@ class NotificationsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $notification = Notification::create($request->all());
@@ -77,7 +77,7 @@ class NotificationsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $notification = Notification::find($id);

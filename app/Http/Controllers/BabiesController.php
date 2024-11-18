@@ -12,11 +12,11 @@ class BabiesController extends Controller
 {
     public function index()
     {
-        $babies = Baby::all();
+        $babies = Baby::with('person')->get();
 
-        if (!$babies) {
+        if ($babies->isEmpty()) {
             return response()->json([
-                'msg' => "There are no babies registered"
+                'msg' => "No Babiess Found"
             ], 204);
         }
 
@@ -48,7 +48,7 @@ class BabiesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $person = new Person();
@@ -81,7 +81,7 @@ class BabiesController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby = Baby::find($id);
+        $baby = Baby::with('person')->find($id);
 
         if (!$baby) {
             return response()->json([
@@ -89,17 +89,8 @@ class BabiesController extends Controller
             ], 404);
         }
 
-        $person = Person::find($baby->person_id);
-
-        if (!$person) {
-            return response()->json([
-                'msg' => "Person not found"
-            ], 404);
-        }
-
         return response()->json([
             'msg' => "Baby found",
-            'person' => $person,
             'baby' => $baby
         ], 200);
     }
@@ -130,7 +121,7 @@ class BabiesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $baby = Baby::find($id);

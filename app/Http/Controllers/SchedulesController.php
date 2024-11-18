@@ -35,7 +35,7 @@ class SchedulesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $schedule = Schedule::create($request->all());
@@ -76,7 +76,7 @@ class SchedulesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $schedule = Schedule::find($id);

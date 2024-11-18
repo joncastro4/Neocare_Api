@@ -34,7 +34,7 @@ class PeopleController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $person = Person::create($request->all());
@@ -80,7 +80,7 @@ class PeopleController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $person = Person::find($id);

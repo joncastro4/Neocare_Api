@@ -64,7 +64,7 @@ class IncubatorsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $incubator = Incubator::find($id);

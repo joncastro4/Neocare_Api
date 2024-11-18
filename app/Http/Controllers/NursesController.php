@@ -6,14 +6,16 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Nurse;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Person;
 
 class NursesController extends Controller
 {
+    // Posiblemente no se utilize para la aplicación
     public function index()
     {
-        $nurses = Nurse::all();
+        $nurses = Nurse::with('person')->get();
 
-        if (!$nurses) {
+        if ($nurses->isEmpty()) {
             return response()->json([
                 'msg' => 'No Nurses Found'
             ], 204);
@@ -23,18 +25,17 @@ class NursesController extends Controller
             'data' => $nurses
         ], 200);
     }
-
+    //Posiblemente no se utilize para la aplicación
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'person_id' => 'required|integer|exists:people,id|unique:nurses,person_id',
             'rfc' => 'required|string|unique:nurses,rfc',
         ]);
 
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $nurse = Nurse::create($request->all());
@@ -54,15 +55,16 @@ class NursesController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $nurse = Nurse::find($id);
+        $nurse = Nurse::with('person')->find($id);
 
         if (!$nurse) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Nurse Found'
             ], 404);
         }
 
         return response()->json([
+            'msg' => 'Nurse Found Successfully',
             'data' => $nurse
         ]);
     }
@@ -72,14 +74,22 @@ class NursesController extends Controller
             abort(404);
         }
         $validate = Validator::make($request->all(), [
-            'person_id' => 'nullable|integer|exists:people,id|unique:nurses,person_id',
-            'rfc' => 'nullable|string|unique:nurses,rfc',
+            'name' => 'required|string|max:255',
+            'last_name_1' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
+            'rfc' => [
+                'required',
+                'string',
+                'max:13',
+                'unique:nurses,rfc,' . $id,
+                'regex:/^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$/'
+            ]
         ]);
 
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $nurse = Nurse::find($id);
@@ -90,14 +100,29 @@ class NursesController extends Controller
             ], 404);
         }
 
-        $nurse->person_id = $request->person_id ?? $nurse->person_id;
-        $nurse->rfc = $request->rfc ?? $nurse->rfc;
+        $person = Person::find($nurse->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => 'No Person Found'
+            ], 404);
+        }
+
+        $person->name = $request->name;
+        $person->last_name_1 = $request->last_name_1;
+        $person->last_name_2 = $request->last_name_2;
+        $person->save();
+
+        $nurse->rfc = $request->rfc;
         $nurse->save();
 
         return response()->json([
-            'data' => $nurse
+            'msg' => 'Nurse Updated Successfully',
+            'data' => $nurse,
+            'person' => $person
         ], 200);
     }
+    // Posiblemente no se utilize para la aplicación
     public function destroy($id)
     {
         if (!is_numeric($id)) {
@@ -107,14 +132,37 @@ class NursesController extends Controller
 
         if (!$nurse) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Nurse Found'
             ], 404);
         }
 
+        $person = Person::find($nurse->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => 'No Person Found'
+            ], 404);
+        }
+        $person->delete();
         $nurse->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => 'Nurse Deleted Successfully'
         ], 200);
     }
+
+    public function uploadImage(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
+    }
+
 }

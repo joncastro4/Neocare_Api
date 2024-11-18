@@ -33,7 +33,7 @@ class BabyNursesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $data = Nurse_Baby::create($request->all());
@@ -78,7 +78,7 @@ class BabyNursesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $data = Nurse_Baby::find($id);

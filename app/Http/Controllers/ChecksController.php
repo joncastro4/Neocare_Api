@@ -34,7 +34,7 @@ class ChecksController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $check = Check::create($request->all());
@@ -78,7 +78,7 @@ class ChecksController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $check = Check::find($id);

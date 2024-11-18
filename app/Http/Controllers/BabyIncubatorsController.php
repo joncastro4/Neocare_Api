@@ -33,7 +33,7 @@ class BabyIncubatorsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $baby_incubator = Baby_Incubator::create($request->all());
@@ -78,7 +78,7 @@ class BabyIncubatorsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $baby_incubator = Baby_Incubator::find($id);

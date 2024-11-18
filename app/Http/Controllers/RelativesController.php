@@ -12,15 +12,16 @@ class RelativesController extends Controller
 {
     public function index()
     {
-        $relatives = Relative::all();
+        $relatives = Relative::with('person')->get();
 
-        if (!$relatives) {
+        if ($relatives->isEmpty()) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Relatives Found'
             ], 204);
         }
 
         return response()->json([
+            'msg' => 'Relatives Found Successfully',
             'relatives' => $relatives
         ]);
     }
@@ -38,7 +39,7 @@ class RelativesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $person = new Person();
@@ -86,7 +87,17 @@ class RelativesController extends Controller
             ], 404);
         }
 
+        $person = Person::find($relative->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => 'No Person Found'
+            ], 404);
+        }
+
         return response()->json([
+            'msg' => 'Relative Found Successfully',
+            'person' => $person,
             'relative' => $relative
         ], 200);
     }
@@ -96,7 +107,9 @@ class RelativesController extends Controller
             abort(404);
         }
         $validate = Validator::make($request->all(), [
-            'person_id' => 'integer|exists:people,id|nullable',
+            'name' => 'string|max:255|nullable',
+            'last_name_1' => 'string|max:255|nullable',
+            'last_name_2' => 'string|max:255|nullable',
             'baby_id' => 'integer|exists:babies,id|nullable',
             'phone_number' => 'string|min:10|max:10|nullable',
             'contact' => 'string|nullable',
@@ -105,7 +118,7 @@ class RelativesController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $relative = Relative::find($id);
@@ -116,13 +129,27 @@ class RelativesController extends Controller
             ], 404);
         }
 
-        $relative->person_id = $request->person_id ?? $relative->person_id;
+        $person = Person::find($relative->person_id);
+
+        if (!$person) {
+            return response()->json([
+                'msg' => 'No Person Found'
+            ], 404);
+        }
+
+        $person->name = $request->name ?? $person->name;
+        $person->last_name_1 = $request->last_name_1 ?? $person->last_name_1;
+        $person->last_name_2 = $request->last_name_2 ?? $person->last_name_2;
+        $person->save();
+
         $relative->baby_id = $request->baby_id ?? $relative->baby_id;
         $relative->phone_number = $request->phone_number ?? $relative->phone_number;
         $relative->contact = $request->contact ?? $relative->contact;
         $relative->save();
 
         return response()->json([
+            'msg' => 'Relative Updated Successfully',
+            'person' => $person,
             'relative' => $relative
         ], 200);
     }
