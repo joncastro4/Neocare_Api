@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Nurse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
+use Storage;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class NursesController extends Controller
 {
@@ -154,7 +156,7 @@ class NursesController extends Controller
     public function uploadImage(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
         ]);
 
         if ($validate->fails()) {
@@ -163,6 +165,100 @@ class NursesController extends Controller
             ], 422);
         }
 
+        $user = auth()->user();
+
+        $image = $request->file('image');
+
+        if (!$user) {
+            return response()->json([
+                'msg' => 'No User Found'
+            ], 404);
+        }
+
+        $nurse = Nurse::find($user->id);
+
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'No Nurse Found'
+            ], 404);
+        }
+
+        if ($nurse->image_path) {
+            Storage::disk('s3')->delete($nurse->image_path);
+        }
+
+        $imagePath = Storage::disk('s3')->put('neocare/nurses_images', $image);
+
+        $nurse->image_path = $imagePath;
+        $nurse->save();
+
+        return response()->json([
+            'msg' => 'Image Uploaded Successfully',
+            'data' => $nurse
+        ], 200);
+
+    }
+
+    public function destroyImage()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'msg' => 'No User Found'
+            ], 404);
+        }
+
+        $nurse = Nurse::find($user->id);
+
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'No Nurse Found'
+            ], 404);
+        }
+
+        $nurse->image_path = null;
+        $nurse->save();
+
+        Storage::disk('s3')->delete($nurse->image_path);
+
+        return response()->json([
+            'msg' => 'Image Deleted Successfully',
+            'data' => $nurse
+        ], 200);
+    }
+    public function viewImage()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'msg' => 'No User Found'
+            ], 404);
+        }
+
+        $nurse = Nurse::find($user->id);
+
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'No Nurse Found'
+            ], 404);
+        }
+
+        if (!$nurse->image_path) {
+            return response()->json([
+                'msg' => 'No Image Found'
+            ], 404);
+        }
+
+        try {
+            $content = Storage::disk('s3')->get($nurse->image_path);
+        } catch (FileNotFoundException $e) {
+            return response()->json([
+                'msg' => 'No Image Found in S3'
+            ]);
+        }
+        return response($content, 200)->header('Content-Type', 'image/jpeg');
     }
 
 }

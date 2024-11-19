@@ -48,7 +48,11 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('checks', ChecksController::class);
             Route::apiResource('schedules', SchedulesController::class);
             Route::apiResource('baby-nurses', BabyNursesController::class);
+            Route::post('profile-image-nurses', [NursesController::class, 'uploadImage']);
+            Route::get('profile-image-nurses', [NursesController::class, 'viewImage']);
+            Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
         });
+
     });
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
