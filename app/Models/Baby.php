@@ -10,10 +10,12 @@ class Baby extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'babies';
+
     protected $fillable = [
-        'person_id', 
-        'date_of_birth', 
-        'ingress_date', 
+        'person_id',
+        'date_of_birth',
+        'ingress_date',
         'egress_date'
     ];
 
@@ -24,12 +26,12 @@ class Baby extends Model
 
     public function baby_incubator()
     {
-        return $this->hasMany(Baby_Incubator::class);
+        return $this->hasMany(BabyIncubator::class);
     }
 
     public function nurse_baby()
     {
-        return $this->hasMany(Nurse_Baby::class);
+        return $this->hasMany(NurseBaby::class);
     }
 
     public function relative()

@@ -10,12 +10,14 @@ class Incubator extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'incubators';
+
     protected $fillable = [
         'state'
     ];
 
     public function baby_incubator()
     {
-        return $this->hasMany(Baby_Incubator::class);
+        return $this->hasMany(BabyIncubator::class);
     }
 }

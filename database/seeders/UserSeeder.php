@@ -3,11 +3,11 @@
 namespace Database\Seeders;
 
 use Hash;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
 use App\Models\User;
-use App\Models\Nurse;
 use App\Models\Person;
+use App\Models\Nurse;
 
 class UserSeeder extends Seeder
 {
@@ -36,5 +36,7 @@ class UserSeeder extends Seeder
             'user_id' => $user->id,
             'person_id' => $person->id,
         ]);
+
+        User::factory(10)->create();
     }
 }

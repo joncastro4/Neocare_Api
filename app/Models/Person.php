@@ -10,9 +10,11 @@ class Person extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'people';
+
     protected $fillable = [
-        'name', 
-        'last_name_1', 
+        'name',
+        'last_name_1',
         'last_name_2'
     ];
 

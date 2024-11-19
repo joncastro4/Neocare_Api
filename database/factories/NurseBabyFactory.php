@@ -1,18 +1,15 @@
 <?php
 
 namespace Database\Factories;
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ScheduleFactory extends Factory
+class NurseBabyFactory extends Factory
 {
     public function definition()
     {
         return [
             'nurse_id' => $this->faker->numberBetween(1, 10),
-            'day' => $this->faker->dayOfWeek,
-            'start_time' => $this->faker->time(),
-            'end_time' => $this->faker->time(),
+            'baby_id' => $this->faker->numberBetween(1, 10),
         ];
     }
 }

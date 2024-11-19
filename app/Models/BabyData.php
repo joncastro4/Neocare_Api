@@ -6,22 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Nurse_Baby extends Model
+class BabyData extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'baby_datas';
+    
     protected $fillable = [
-        'nurse_id', 
-        'baby_id'
+        'baby_incubator_id',
+        'oxygen',
+        'heart_rate',
+        'temperature',
     ];
 
-    public function nurse()
+    public function baby_incubator()
     {
-        return $this->belongsTo(Nurse::class);
-    }
-
-    public function baby()
-    {
-        return $this->belongsTo(Baby::class);
+        return $this->belongsTo(BabyIncubator::class);
     }
 }

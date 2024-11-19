@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
-use Database\Factories\BabyFactory;
+use App\Models\Check;
 
-class BabySeeder extends Seeder
+class CheckSeeder extends Seeder
 {
     public function run()
     {
-        BabyFactory::times(10)->create();
+        Check::factory()->count(10)->create();
     }
 }

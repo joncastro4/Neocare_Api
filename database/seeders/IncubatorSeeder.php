@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
-use Database\Factories\BabyFactory;
+use App\Models\Incubator;
 
-class BabySeeder extends Seeder
+class IncubatorSeeder extends Seeder
 {
     public function run()
     {
-        BabyFactory::times(10)->create();
+        Incubator::factory(10)->create();
     }
 }

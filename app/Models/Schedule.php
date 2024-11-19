@@ -10,10 +10,12 @@ class Schedule extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'schedules';
+
     protected $fillable = [
-        'nurse_id', 
-        'day', 
-        'start_time', 
+        'nurse_id',
+        'day',
+        'start_time',
         'end_time'
     ];
 

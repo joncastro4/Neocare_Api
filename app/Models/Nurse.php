@@ -10,6 +10,8 @@ class Nurse extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'nurses';
+
     protected $fillable = [
         'rfc',
         'image_path',
@@ -32,7 +34,7 @@ class Nurse extends Model
 
     public function nurses_babies()
     {
-        return $this->hasMany(Nurse_Baby::class);
+        return $this->hasMany(NurseBaby::class);
     }
 
     public function notifications()

@@ -10,8 +10,10 @@ class Relative extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'relatives';
+
     protected $fillable = [
-        'phone_number', 
+        'phone_number',
         'contact'
     ];
 
