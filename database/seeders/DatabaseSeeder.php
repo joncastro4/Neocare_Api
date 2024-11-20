@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 use Illuminate\Database\Seeder;
-
+use Database\Seeders\SensoresTableSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\PersonSeeder;
 use Database\Seeders\BabySeeder;
@@ -32,7 +32,8 @@ class DatabaseSeeder extends Seeder
             IncubatorSeeder::class,
             BabyIncubatorSeeder::class,
             CheckSeeder::class,
-            BabyDataSeeder::class
+            BabyDataSeeder::class,
+            SensoresTableSeeder::class
         ]);
     }
 }
