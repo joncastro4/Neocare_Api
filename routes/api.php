@@ -14,6 +14,8 @@ use App\Http\Controllers\ChecksController;
 use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\BabyNursesController;
 use App\Http\Controllers\SessionsController;
+use App\Http\Controllers\AdafruitController;
+
 
 Route::prefix('v1')->group(function () {
 
@@ -46,6 +48,20 @@ Route::prefix('v1')->group(function () {
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
 });
+
+// Ruta para obtener todos los sensores
+Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
+
+// Rutas individuales
+Route::get('/sensores/bpm', [AdafruitController::class, 'bpm']);
+Route::get('/sensores/fotoresistencia', [AdafruitController::class, 'fotoresistencia']);
+Route::get('/sensores/humedad', [AdafruitController::class, 'humedad']);
+Route::get('/sensores/oxigeno', [AdafruitController::class, 'oxigeno']);
+Route::get('/sensores/rgb', [AdafruitController::class, 'rgb']);
+Route::get('/sensores/temperaturacorporal', [AdafruitController::class, 'temperaturacorporal']);
+Route::get('/sensores/temperaturambiental', [AdafruitController::class, 'temperaturambiental']);
+Route::get('/sensores/vibraciones', [AdafruitController::class, 'vibraciones']);
+
 
 // Ruta de prueba
 Route::get('/test', function () {
