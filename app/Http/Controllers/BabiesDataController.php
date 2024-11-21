@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Baby_Data;
+use App\Models\BabyData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -11,7 +11,7 @@ class BabiesDataController extends Controller
 {
     public function index()
     {
-        $data = Baby_Data::all();
+        $data = BabyData::all();
 
         if (!$data) {
             return response()->json([
@@ -38,7 +38,7 @@ class BabiesDataController extends Controller
             ], 422);
         }
 
-        $data = Baby_Data::create($request->all());
+        $data = BabyData::create($request->all());
 
         if (!$data) {
             return response()->json([
@@ -55,7 +55,7 @@ class BabiesDataController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $data = Baby_Data::find($id);
+        $data = BabyData::find($id);
 
         if (!$data) {
             return response()->json([
@@ -84,7 +84,7 @@ class BabiesDataController extends Controller
             ], 422);
         }
 
-        $data = Baby_Data::find($id);
+        $data = BabyData::find($id);
 
         if (!$data) {
             return response()->json([
@@ -106,7 +106,7 @@ class BabiesDataController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $data = Baby_Data::find($id);
+        $data = BabyData::find($id);
 
         if (!$data) {
             return response()->json([

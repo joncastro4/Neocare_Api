@@ -62,16 +62,16 @@
         },
         {
             "name": "aws/aws-sdk-php",
-            "version": "3.328.1",
+            "version": "3.328.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aws/aws-sdk-php.git",
-                "reference": "52d8219935146c3261181de2da4d36bf04c76298"
+                "reference": "bceb5a6443ecd51e988ef28af70210f7168ad0e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/52d8219935146c3261181de2da4d36bf04c76298",
-                "reference": "52d8219935146c3261181de2da4d36bf04c76298",
+                "url": "https://api.github.com/repos/aws/aws-sdk-php/zipball/bceb5a6443ecd51e988ef28af70210f7168ad0e5",
+                "reference": "bceb5a6443ecd51e988ef28af70210f7168ad0e5",
                 "shasum": ""
             },
             "require": {
@@ -101,7 +101,7 @@
                 "paragonie/random_compat": ">= 2",
                 "phpunit/phpunit": "^5.6.3 || ^8.5 || ^9.5",
                 "psr/cache": "^1.0",
-                "psr/simple-cache": "^1.0",
+                "psr/simple-cache": "^1.0 || ^2.0 || ^3.0",
                 "sebastian/comparator": "^1.2.3 || ^4.0",
                 "yoast/phpunit-polyfills": "^1.0"
             },
@@ -154,9 +154,9 @@
             "support": {
                 "forum": "https://forums.aws.amazon.com/forum.jspa?forumID=80",
                 "issues": "https://github.com/aws/aws-sdk-php/issues",
-                "source": "https://github.com/aws/aws-sdk-php/tree/3.328.1"
+                "source": "https://github.com/aws/aws-sdk-php/tree/3.328.3"
             },
-            "time": "2024-11-18T19:13:28+00:00"
+            "time": "2024-11-20T19:04:23+00:00"
         },
         {
             "name": "brick/math",
@@ -1283,16 +1283,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v9.52.17",
+            "version": "v9.52.18",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "a069cf17e4943fb88d2a91c92690004fb3236dab"
+                "reference": "41c812bf83e00d0d3f4b6963b0d475b26cb6fbf7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/a069cf17e4943fb88d2a91c92690004fb3236dab",
-                "reference": "a069cf17e4943fb88d2a91c92690004fb3236dab",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/41c812bf83e00d0d3f4b6963b0d475b26cb6fbf7",
+                "reference": "41c812bf83e00d0d3f4b6963b0d475b26cb6fbf7",
                 "shasum": ""
             },
             "require": {
@@ -1477,7 +1477,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-11-12T15:39:14+00:00"
+            "time": "2024-11-20T15:56:00+00:00"
         },
         {
             "name": "laravel/sanctum",
@@ -1546,16 +1546,16 @@
         },
         {
             "name": "laravel/serializable-closure",
-            "version": "v1.3.6",
+            "version": "v1.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/serializable-closure.git",
-                "reference": "f865a58ea3a0107c336b7045104c75243fa59d96"
+                "reference": "4f48ade902b94323ca3be7646db16209ec76be3d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/f865a58ea3a0107c336b7045104c75243fa59d96",
-                "reference": "f865a58ea3a0107c336b7045104c75243fa59d96",
+                "url": "https://api.github.com/repos/laravel/serializable-closure/zipball/4f48ade902b94323ca3be7646db16209ec76be3d",
+                "reference": "4f48ade902b94323ca3be7646db16209ec76be3d",
                 "shasum": ""
             },
             "require": {
@@ -1603,7 +1603,7 @@
                 "issues": "https://github.com/laravel/serializable-closure/issues",
                 "source": "https://github.com/laravel/serializable-closure"
             },
-            "time": "2024-11-11T17:06:04+00:00"
+            "time": "2024-11-14T18:34:49+00:00"
         },
         {
             "name": "laravel/tinker",
@@ -5757,16 +5757,16 @@
         },
         {
             "name": "voku/portable-ascii",
-            "version": "2.0.1",
+            "version": "2.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/voku/portable-ascii.git",
-                "reference": "b56450eed252f6801410d810c8e1727224ae0743"
+                "reference": "b1d923f88091c6bf09699efcd7c8a1b1bfd7351d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/voku/portable-ascii/zipball/b56450eed252f6801410d810c8e1727224ae0743",
-                "reference": "b56450eed252f6801410d810c8e1727224ae0743",
+                "url": "https://api.github.com/repos/voku/portable-ascii/zipball/b1d923f88091c6bf09699efcd7c8a1b1bfd7351d",
+                "reference": "b1d923f88091c6bf09699efcd7c8a1b1bfd7351d",
                 "shasum": ""
             },
             "require": {
@@ -5791,7 +5791,7 @@
             "authors": [
                 {
                     "name": "Lars Moelleken",
-                    "homepage": "http://www.moelleken.org/"
+                    "homepage": "https://www.moelleken.org/"
                 }
             ],
             "description": "Portable ASCII library - performance optimized (ascii) string functions for php.",
@@ -5803,7 +5803,7 @@
             ],
             "support": {
                 "issues": "https://github.com/voku/portable-ascii/issues",
-                "source": "https://github.com/voku/portable-ascii/tree/2.0.1"
+                "source": "https://github.com/voku/portable-ascii/tree/2.0.3"
             },
             "funding": [
                 {
@@ -5827,7 +5827,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-03-08T17:03:00+00:00"
+            "time": "2024-11-21T01:49:47+00:00"
         },
         {
             "name": "webmozart/assert",

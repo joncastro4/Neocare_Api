@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Baby_Incubator;
+use App\Models\BabyIncubator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -11,7 +11,7 @@ class BabyIncubatorsController extends Controller
 {
     public function index()
     {
-        $baby_incubators = Baby_Incubator::all();
+        $baby_incubators = BabyIncubator::all();
 
         if (!$baby_incubators) {
             return response()->json([
@@ -36,7 +36,7 @@ class BabyIncubatorsController extends Controller
             ], 422);
         }
 
-        $baby_incubator = Baby_Incubator::create($request->all());
+        $baby_incubator = BabyIncubator::create($request->all());
 
         if (!$baby_incubator) {
             return response()->json([
@@ -53,7 +53,7 @@ class BabyIncubatorsController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby_incubator = Baby_Incubator::find($id);
+        $baby_incubator = BabyIncubator::find($id);
 
         if (!$baby_incubator) {
             return response()->json([
@@ -81,7 +81,7 @@ class BabyIncubatorsController extends Controller
             ], 422);
         }
 
-        $baby_incubator = Baby_Incubator::find($id);
+        $baby_incubator = BabyIncubator::find($id);
 
         if (!$baby_incubator) {
             return response()->json([
@@ -102,7 +102,7 @@ class BabyIncubatorsController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby_incubator = Baby_Incubator::find($id);
+        $baby_incubator = BabyIncubator::find($id);
 
         if (!$baby_incubator) {
             return response()->json([

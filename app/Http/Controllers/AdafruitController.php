@@ -11,31 +11,32 @@ class AdafruitController extends Controller
     private $AIOkey;
     private $AIOuser;
 
-    public function __construct(){
-        $this->AIOkey = env('AIOKEY');
-        $this->AIOuser = env('AIOUSER');
+    public function __construct()
+    {
+        $this->AIOkey = env('AIOKEY', 'aio_CdSd32sWXEBivEDROv09jU4cfXBQ');
+        $this->AIOuser = env('AIOUSER', 'Shuy03');
     }
 
     public function obtenerTodosLosSensores()
     {
-        $sensores = Sensor::all(); 
-    
-        $datalist = []; 
-    
+        $sensores = Sensor::all();
+
+        $datalist = [];
+
         foreach ($sensores as $sensor) {
             try {
                 $response = Http::withHeaders([
                     'X-AIO-Key' => $this->AIOkey,
                 ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/incubadora.{$sensor->tipo_sensor}/data/last");
-    
+
                 if ($response->successful()) {
                     $data = $response->json();
-    
+
                     $datalist[] = [
                         'feed_key' => $sensor->tipo_sensor,
                         'nombre_amigable' => $sensor->nombre_amigable,
                         'unidad' => $sensor->unidad,
-                        'value' => $data['value'],
+                        'value' => $data['value'] ?? 'Sin datos disponibles',
                     ];
                 } else {
                     $datalist[] = [
@@ -50,11 +51,11 @@ class AdafruitController extends Controller
                     'feed_key' => $sensor->tipo_sensor,
                     'nombre_amigable' => $sensor->nombre_amigable,
                     'unidad' => $sensor->unidad,
-                    'error' => 'No se pudo obtener el dato',
+                    'error' => 'No se pudo obtener el dato: ' . $e->getMessage(),
                 ];
             }
         }
-    
+
         return response()->json([
             'message' => 'Datos obtenidos correctamente',
             'data' => $datalist,
@@ -84,7 +85,7 @@ class AdafruitController extends Controller
                     'feed_key' => $sensor->tipo_sensor,
                     'nombre_amigable' => $sensor->nombre_amigable,
                     'unidad' => $sensor->unidad,
-                    'value' => $data['value'],
+                    'value' => $data['value'] ?? 'Sin datos disponibles',
                 ], 200);
             }
 
@@ -100,41 +101,49 @@ class AdafruitController extends Controller
                 'feed_key' => $sensor->tipo_sensor,
                 'nombre_amigable' => $sensor->nombre_amigable,
                 'unidad' => $sensor->unidad,
-                'error' => 'No se pudo obtener el dato',
+                'error' => 'No se pudo obtener el dato: ' . $e->getMessage(),
             ], 500);
         }
     }
 
-        // Métodos para cada sensor
-    public function bpm() {
+    // Métodos para cada sensor
+    public function bpm()
+    {
         return $this->obtenerDatosSensor('bpm');
     }
 
-    public function fotoresistencia() {
+    public function fotoresistencia()
+    {
         return $this->obtenerDatosSensor('fotoresistencia');
     }
 
-    public function humedad() {
+    public function humedad()
+    {
         return $this->obtenerDatosSensor('humedad');
     }
 
-    public function oxigeno() {
+    public function oxigeno()
+    {
         return $this->obtenerDatosSensor('oxigeno');
     }
 
-    public function rgb() {
+    public function rgb()
+    {
         return $this->obtenerDatosSensor('rgb');
     }
 
-    public function temperaturacorporal() {
+    public function temperaturacorporal()
+    {
         return $this->obtenerDatosSensor('temperaturacorporal');
     }
 
-    public function temperaturambiental() {
+    public function temperaturambiental()
+    {
         return $this->obtenerDatosSensor('temperaturambiental');
     }
 
-    public function vibraciones() {
+    public function vibraciones()
+    {
         return $this->obtenerDatosSensor('vibraciones');
     }
 }
