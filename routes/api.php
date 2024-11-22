@@ -62,6 +62,7 @@ Route::prefix('sensores')->group(function () {
     // Ruta para obtener todos los sensores
     Route::get('/', [AdafruitController::class, 'obtenerTodosLosSensores']);
 });
+Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
 
 
 // Ruta de prueba

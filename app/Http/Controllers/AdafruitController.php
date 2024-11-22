@@ -13,8 +13,8 @@ class AdafruitController extends Controller
 
     public function __construct()
     {
-        $this->AIOkey = env('AIOKEY', 'aio_CdSd32sWXEBivEDROv09jU4cfXBQ');
-        $this->AIOuser = env('AIOUSER', 'Shuy03');
+        $this->AIOkey = 'aio_CdSd32sWXEBivEDROv09jU4cfXBQ';
+        $this->AIOuser = 'Shuy03';
     }
 
     public function obtenerTodosLosSensores()
