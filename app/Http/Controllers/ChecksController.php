@@ -11,11 +11,11 @@ class ChecksController extends Controller
 {
     public function index()
     {
-        $checks = Check::all();
+        $checks = Check::with('nurse', 'baby')->all();
 
         if (!$checks) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Checks Found'
             ], 204);
         }
 
@@ -27,7 +27,7 @@ class ChecksController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'nurse_id' => 'required|integer|exists:nurses,id',
-            'baby_id' => 'required|integer|exists:babies,id',
+            'baby_incubator_id' => 'required|integer|exists:babies_incubators,id',
             'description' => 'required|string',
         ]);
 
@@ -46,6 +46,7 @@ class ChecksController extends Controller
         }
 
         return response()->json([
+            'msg' => 'Data Registered Successfully',
             'data' => $check
         ], 200);
     }
@@ -58,7 +59,7 @@ class ChecksController extends Controller
 
         if (!$check) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Check Found'
             ], 404);
         }
 
@@ -85,7 +86,7 @@ class ChecksController extends Controller
 
         if (!$check) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Check Found'
             ], 404);
         }
 
