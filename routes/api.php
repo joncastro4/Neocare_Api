@@ -22,7 +22,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('sessions')->group(function () {
         Route::post('register', [SessionsController::class, 'register']);
         Route::post('login', [SessionsController::class, 'login']);
-        Route::get('verify-email', [SessionsController::class, 'verifyEmail'])->middleware('signed')->name('verify-email');
+        Route::get('verify-email', [SessionsController::class, 'verifyEmail'])->name('verify-email');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
 
