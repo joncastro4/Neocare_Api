@@ -14,7 +14,7 @@ class IncubatorsController extends Controller
     {
         $incubators = Incubator::all();
 
-        if (isEmpty($incubators)) {
+        if (!$incubators) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
