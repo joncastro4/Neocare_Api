@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\URL;
 use App\Mail\RegisterMail;
 use App\Mail\NurseActivatedNotification;
 
+
 class SessionsController extends Controller
 {
     public function register(Request $request)
@@ -194,11 +195,28 @@ class SessionsController extends Controller
         ], 200);
     }
 
-    public function me(Request $request)
+    public function me()
     {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found'
+            ], 404);
+        }
+
+        $nurse = Nurse::with('person')->where('user_id', $user->id)->first();
+
+        if (!$nurse) {
+            return response()->json([
+                'message' => 'Nurse not found'
+            ], 404);
+        }
+
         return response()->json([
             'message' => 'User data',
-            'user' => $request->user()
+            'user' => $user,
+            'nurse' => $nurse
         ], 200);
     }
     public function activateNurse($id)
