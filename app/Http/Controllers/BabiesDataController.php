@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\BabyData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+
+use App\Models\BabyData;
+use App\Models\Baby;
 
 class BabiesDataController extends Controller
 {
@@ -55,6 +57,8 @@ class BabiesDataController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
+
+        // Cargar BabyData
         $data = BabyData::find($id);
 
         if (!$data) {
@@ -63,10 +67,28 @@ class BabiesDataController extends Controller
             ], 404);
         }
 
+        $oxigen = $data->oxigen;
+        $heart_rate = $data->heart_rate;
+        $temperature = $data->temperature;
+        $egressDate = $data->baby_incubator->baby->egress_date ?? null;
+        $baby = $data->baby_incubator->baby->person->name ?? null;
+        $state = $data->baby_incubator->incubator->state ?? null;
+
+        $data = [
+            'oxigen' => $oxigen,
+            'heart_rate' => $heart_rate,
+            'temperature' => $temperature,
+            'baby' => $baby, // Nombre de la persona asociada
+            'egress_date' => $egressDate,
+            'state' => $state
+        ];
+
+        // Retornar solo los datos de BabyData y el nombre de la persona
         return response()->json([
             'data' => $data
         ], 200);
     }
+
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {

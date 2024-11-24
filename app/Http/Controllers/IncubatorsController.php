@@ -14,6 +14,8 @@ use App\Models\Nurse;
 
 class IncubatorsController extends Controller
 {
+    public $incubatorNotFound = 'No Incubator Found';
+
     public function index()
     {
         $incubators = Incubator::all();
@@ -81,7 +83,7 @@ class IncubatorsController extends Controller
 
         if (!$incubator) {
             return response()->json([
-                'msg' => 'No Incubator Found'
+                'msg' => $this->incubatorNotFound
             ], 404);
         }
 
@@ -109,7 +111,7 @@ class IncubatorsController extends Controller
 
         if (!$incubator) {
             return response()->json([
-                'msg' => 'No Incubator Found'
+                'msg' => $this->incubatorNotFound
             ], 404);
         }
 
@@ -130,7 +132,7 @@ class IncubatorsController extends Controller
 
         if (!$incubator) {
             return response()->json([
-                'msg' => 'No Incubator Found'
+                'msg' => $this->incubatorNotFound
             ], 404);
         }
 
