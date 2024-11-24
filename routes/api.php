@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('babies-data', BabiesDataController::class);
             Route::apiResource('baby-incubators', BabyIncubatorsController::class);
             Route::apiResource('incubators', IncubatorsController::class);
+            Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
             Route::apiResource('nurses', NursesController::class);
             Route::apiResource('people', PeopleController::class);
             Route::apiResource('relatives', RelativesController::class);

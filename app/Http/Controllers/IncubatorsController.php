@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\BabyIncubator;
+use App\Models\NurseBaby;
+use Auth;
 use Illuminate\Http\Request;
 use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
-use function PHPUnit\Framework\isEmpty;
+
+use App\Models\Nurse;
 
 class IncubatorsController extends Controller
 {
@@ -14,7 +18,7 @@ class IncubatorsController extends Controller
     {
         $incubators = Incubator::all();
 
-        if (isEmpty($incubators)) {
+        if (!$incubators) {
             return response()->json([
                 'msg' => 'No Data Found'
             ], 204);
@@ -24,6 +28,40 @@ class IncubatorsController extends Controller
             'data' => $incubators
         ], 200);
     }
+    public function incubatorNurse()
+    {
+        $user = auth()->user();
+    
+        if (!$user) {
+            return response()->json([
+                'msg' => 'No user found'
+            ], 404);
+        }
+    
+        // Obtén los registros NurseBaby asociados al usuario (enfermera)
+        $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
+    
+        if ($babyNurses->isEmpty()) {
+            return response()->json([
+                'msg' => 'No baby nurses found for this user'
+            ], 404);
+        }
+    
+        // Ahora, obtenemos las incubadoras asociadas a los bebés de esa enfermera
+        $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
+    
+        if ($incubators->isEmpty()) {
+            return response()->json([
+                'msg' => 'No incubators found for these babies'
+            ], 204);
+        }
+    
+        // Retorna la respuesta con los datos de incubadoras
+        return response()->json([
+            'data' => $incubators
+        ], 200);
+    }
+    
     public function store()
     {
         $incubator = new Incubator();
