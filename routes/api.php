@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
             Route::get('profile-image-nurses', [NursesController::class, 'viewImage']);
             Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
             Route::get('sessions/me', [SessionsController::class, 'me']);
+            Route::post('sessions/logout', [SessionsController::class, 'logout']);
         });
 
     });
