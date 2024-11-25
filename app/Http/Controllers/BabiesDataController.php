@@ -67,7 +67,7 @@ class BabiesDataController extends Controller
             ], 404);
         }
 
-        $oxigen = $data->oxigen;
+        $oxygen = $data->oxygen;
         $heart_rate = $data->heart_rate;
         $temperature = $data->temperature;
         $egressDate = $data->baby_incubator->baby->egress_date ?? null;
@@ -79,7 +79,7 @@ class BabiesDataController extends Controller
         $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
 
         $data = [
-            'oxigen' => $oxigen,
+            'oxygen' => $oxygen,
             'heart_rate' => $heart_rate,
             'temperature' => $temperature,
             'baby' => $baby, // Nombre de la persona asociada

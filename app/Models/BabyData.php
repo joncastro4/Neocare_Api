@@ -17,6 +17,12 @@ class BabyData extends Model
         'oxygen',
         'heart_rate',
         'temperature',
+        'ambient_temperature',
+        'humidity',
+        'sound',
+        'light',
+        'vibration',
+        'movement'
     ];
 
     public function baby_incubator()

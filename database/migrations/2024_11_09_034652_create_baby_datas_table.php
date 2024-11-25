@@ -10,9 +10,16 @@ return new class extends Migration {
         Schema::create('baby_datas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('baby_incubator_id')->constrained('babies_incubators')->onDelete('cascade');
-            $table->tinyInteger('oxigen');
+            $table->tinyInteger('oxygen');
             $table->tinyInteger('heart_rate');
             $table->decimal('temperature');
+            $table->decimal('ambient_temperature');
+            $table->tinyInteger('humidity');
+            $table->integer('sound');
+            $table->integer('light');
+            $table->boolean('vibration');
+            $table->boolean('movement');
+            
             $table->softDeletes();
             $table->timestamps();
         });

@@ -28,8 +28,8 @@ class SchedulesController extends Controller
         $validate = Validator::make($request->all(), [
             'nurse_id' => 'required|integer|exists:nurses,id',
             'day' => 'required|in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday',
-            'start_time' => 'required|date_format:H:i:s',
-            'end_time' => 'required|date_format:H:i:s',
+            'start_time' => 'required|date_format:H:i:s|before:end_time',
+            'end_time' => 'required|date_format:H:i:s|after:start_time',
         ]);
 
         if ($validate->fails()) {
@@ -69,8 +69,8 @@ class SchedulesController extends Controller
         $validate = Validator::make($request->all(), [
             'nurse_id' => 'integer|exists:nurses,id|nullable',
             'day' => 'in:Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday|nullable',
-            'start_time' => 'date_format:H:i:s|nullable',
-            'end_time' => 'date_format:H:i:s|nullable',
+            'start_time' => 'date_format:H:i:s|nullable|before:end_time',
+            'end_time' => 'date_format:H:i:s|nullable|after:start_time',
         ]);
 
         if ($validate->fails()) {

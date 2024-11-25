@@ -9,9 +9,15 @@ class BabyDataFactory extends Factory
     {
         return [
             'baby_incubator_id' => $this->faker->numberBetween(1, 10),
-            'oxigen' => $this->faker->numberBetween(0, 100),
+            'oxygen' => $this->faker->numberBetween(0, 100),
             'heart_rate' => $this->faker->numberBetween(0, 100),
             'temperature' => $this->faker->numberBetween(0, 100),
+            'ambient_temperature' => $this->faker->numberBetween(0, 100),
+            'humidity' => $this->faker->numberBetween(0, 100),
+            'sound' => $this->faker->numberBetween(0, 1),
+            'light' => $this->faker->numberBetween(0, 100),
+            'vibration' => $this->faker->numberBetween(0, 1),
+            'movement' => $this->faker->numberBetween(0, 1),
         ];
     }
 }
