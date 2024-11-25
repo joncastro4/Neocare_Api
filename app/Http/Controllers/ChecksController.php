@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Check;
+use App\Models\Nurse;
 use Illuminate\Support\Facades\Validator;
 
 class ChecksController extends Controller
@@ -25,8 +26,33 @@ class ChecksController extends Controller
     }
     public function store(Request $request)
     {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'msg' => 'Unauthorized'
+            ], 403);
+        }
+
+        $user_id = $user->id;
+
+        $nurse = Nurse::where('user_id', $user_id)->first();
+
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'Unauthorized'
+            ], 403);
+        }
+
+        $nurse_id = $nurse->id;
+
+        if (!$nurse_id) {
+            return response()->json([
+                'msg' => 'No Nurse Found'
+            ], 404);
+        }
+
         $validate = Validator::make($request->all(), [
-            'nurse_id' => 'required|integer|exists:nurses,id',
             'baby_incubator_id' => 'required|integer|exists:babies_incubators,id',
             'description' => 'required|string',
         ]);
@@ -37,7 +63,11 @@ class ChecksController extends Controller
             ], 422);
         }
 
-        $check = Check::create($request->all());
+        $check = Check::create([
+            'nurse_id' => $nurse_id,
+            'baby_incubator_id' => $request->baby_incubator_id,
+            'description' => $request->description
+        ]);
 
         if (!$check) {
             return response()->json([
