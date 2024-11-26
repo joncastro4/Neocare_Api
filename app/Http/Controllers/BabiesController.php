@@ -10,35 +10,34 @@ use App\Models\Person;
 
 class BabiesController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $user = $request->user(); // Usuario autenticado.
+        // Obtén al usuario autenticado
+        $user = Auth::user();
     
+        // Si el rol es admin, muestra todos los bebés
         if ($user->role === 'admin') {
             $babies = Baby::with('person')->get();
-        } elseif ($user->role === 'nurse') {
-            $nurse = $user->nurse;
-    
-            if (!$nurse) {
-                return response()->json([
-                    'msg' => "No se encontró una enfermera asociada al usuario."
-                ], 404);
-            }
-    
-            // Obtén los bebés relacionados con la enfermera.
-            $babies = $nurse->babies()->with('person')->get();
+        }
+        // Si el rol es nurse, muestra solo los bebés asociados a la enfermera
+        elseif ($user->role === 'nurse') {
+            // Obtener los bebés asociados a la enfermera a través de la relación 'nurses_babies'
+            $babies = $user->nurses_babies->pluck('baby')->load('person');
         } else {
+            // Si el rol no es ni admin ni nurse, devolver un error
             return response()->json([
-                'msg' => "No tienes permisos para acceder a esta información."
+                'msg' => 'Role not authorized'
             ], 403);
         }
     
+        // Si no hay bebés encontrados
         if ($babies->isEmpty()) {
             return response()->json([
-                'msg' => "No se encontraron bebés."
+                'msg' => 'No Babies Found'
             ], 204);
         }
     
+        // Si hay bebés, devolver la lista de bebés
         return response()->json([
             'babies' => $babies
         ], 200);
