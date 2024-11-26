@@ -5,12 +5,24 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 
 use App\Models\BabyData;
-use App\Models\Baby;
+use App\Models\Sensor;
 
 class BabiesDataController extends Controller
 {
+    public $dataNotFound = "Data not found";
+
+    private $AIOkey;
+    private $AIOuser;
+
+    public function __construct()
+    {
+        $this->AIOkey = 'aio_CdSd32sWXEBivEDROv09jU4cfXBQ';
+        $this->AIOuser = 'Shuy03';
+    }
+
     public function index()
     {
         $data = BabyData::all();
@@ -63,33 +75,60 @@ class BabiesDataController extends Controller
 
         if (!$data) {
             return response()->json([
-                'msg' => "Data not found"
+                'msg' => $this->dataNotFound
             ], 404);
         }
 
-        $oxygen = $data->oxygen;
-        $heart_rate = $data->heart_rate;
-        $temperature = $data->temperature;
         $egressDate = $data->baby_incubator->baby->egress_date ?? null;
         $name = $data->baby_incubator->baby->person->name ?? null;
         $last_name_1 = $data->baby_incubator->baby->person->last_name_1 ?? null;
         $last_name_2 = $data->baby_incubator->baby->person->last_name_2 ?? null;
         $state = $data->baby_incubator->incubator->state ?? null;
-
         $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
 
-        $data = [
-            'oxygen' => $oxygen,
-            'heart_rate' => $heart_rate,
-            'temperature' => $temperature,
-            'baby' => $baby, // Nombre de la persona asociada
+        $sensores = Sensor::all();
+
+        $datalist = [];
+
+        foreach ($sensores as $sensor) {
+            try {
+                $response = Http::withHeaders([
+                    'X-AIO-Key' => $this->AIOkey,
+                ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/incubadora.{$sensor->tipo_sensor}/data/last");
+
+                if ($response->successful()) {
+                    $data = $response->json();
+
+                    $datalist[] = [
+                        'feed_key' => $sensor->tipo_sensor,
+                        'unidad' => $sensor->unidad,
+                        'value' => $data['value'] ?? 'Sin datos disponibles',
+                    ];
+                } else {
+                    $datalist[] = [
+                        'feed_key' => $sensor->tipo_sensor,
+                        'unidad' => $sensor->unidad,
+                        'error' => 'No se pudo obtener el dato',
+                    ];
+                }
+            } catch (\Exception $e) {
+                $datalist[] = [
+                    'feed_key' => $sensor->tipo_sensor,
+                    'unidad' => $sensor->unidad,
+                    'error' => 'No se pudo obtener el dato: ' . $e->getMessage(),
+                ];
+            }
+        }
+
+        $datalist[] = [
             'egress_date' => $egressDate,
+            'baby' => $baby,
             'state' => $state
         ];
 
-        // Retornar solo los datos de BabyData y el nombre de la persona
         return response()->json([
-            'data' => $data
+            'message' => 'Datos obtenidos correctamente',
+            'data' => $datalist,
         ], 200);
     }
 
@@ -114,7 +153,7 @@ class BabiesDataController extends Controller
 
         if (!$data) {
             return response()->json([
-                'msg' => "Data not found"
+                'msg' => $this->dataNotFound
             ], 404);
         }
 
@@ -136,7 +175,7 @@ class BabiesDataController extends Controller
 
         if (!$data) {
             return response()->json([
-                'msg' => "Data not found"
+                'msg' => $this->dataNotFound
             ], 404);
         }
 
