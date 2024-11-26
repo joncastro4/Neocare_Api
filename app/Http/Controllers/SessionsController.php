@@ -65,9 +65,8 @@ class SessionsController extends Controller
 
         $nurse->save();
 
-        $signedUrl = URL::temporarySignedRoute(
+        $signedUrl = URL::signedRoute(
             'verify-email',
-            now()->addMinutes(1),
             ['user' => $user->id]
         );
 
@@ -87,6 +86,12 @@ class SessionsController extends Controller
             return response()->json([
                 'message' => 'User not found'
             ], 404);
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json([
+                'message' => 'Email already verified'
+            ], 400);
         }
 
         $user->email_verified_at = now();
@@ -168,15 +173,20 @@ class SessionsController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
+        if (!$user) {
+            return response()->json([
+                'message' => 'User not found'
+            ], 404);
+        }
+
         if ($user->email_verified_at) {
             return response()->json([
                 'message' => 'Email already verified'
             ], 400);
         }
 
-        $signedUrl = URL::temporarySignedRoute(
+        $signedUrl = URL::signedRoute(
             'verify-email',
-            now()->addMinutes(15),
             ['user' => $user->id]
         );
 
