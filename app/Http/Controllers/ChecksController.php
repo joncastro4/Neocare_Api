@@ -146,4 +146,47 @@ class ChecksController extends Controller
             'msg' => 'Data Deleted'
         ], 200);
     }
+
+    public function checksByNurse()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'msg' => 'unauthorized'
+            ], 403);
+        }
+
+        $nurse = Nurse::where('user_id', $user->id)->first();
+
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'unauthorized'
+            ], 403);
+        }
+
+        $checks = Check::where('nurse_id', $nurse->id)
+            ->with(['baby_incubator.baby.person'])
+            ->get();
+
+        $data = $checks->map(function ($check) {
+            $babyIncubator = $check->baby_incubator;
+            $baby = $babyIncubator ? $babyIncubator->baby : null;
+            $person = $baby ? $baby->person : null;
+
+            return [
+                'check_id' => $check->id,
+                'description' => $check->description,
+                'created_at' => $check->created_at,
+                'baby' => [
+                    'id' => $baby ? $baby->id : null,
+                    'name' => $person ? $person->name . ' ' . $person->last_name_1 . ' ' . $person->last_name_2 : null
+                ]
+            ];
+        });
+
+        return response()->json([
+            'checks' => $data
+        ], 200);
+    }
 }
