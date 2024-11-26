@@ -5,25 +5,45 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Baby;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
 
 class BabiesController extends Controller
 {
-    public function index()
-    {
+ public function index()
+{
+    // Obtén al usuario autenticado
+    $user = Auth::user();
+
+    // Si el rol es admin, muestra todos los bebés
+    if ($user->role === 'admin') {
         $babies = Baby::with('person')->get();
-
-        if ($babies->isEmpty()) {
-            return response()->json([
-                'msg' => "No Babiess Found"
-            ], 204);
-        }
-
-        return response()->json([
-            'babies' => $babies
-        ], 200);
     }
+    // Si el rol es nurse, muestra solo los bebés asociados a la enfermera
+    elseif ($user->role === 'nurse') {
+        // Obtener los bebés asociados a la enfermera a través de la relación 'nurses_babies'
+        $babies = $user->nurses_babies->pluck('baby')->load('person');
+    } else {
+        // Si el rol no es ni admin ni nurse, devolver un error
+        return response()->json([
+            'msg' => 'Role not authorized'
+        ], 403);
+    }
+
+    // Si no hay bebés encontrados
+    if ($babies->isEmpty()) {
+        return response()->json([
+            'msg' => 'No Babies Found'
+        ], 204);
+    }
+
+    // Si hay bebés, devolver la lista de bebés
+    return response()->json([
+        'babies' => $babies
+    ], 200);
+}
+
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
