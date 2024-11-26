@@ -14,14 +14,6 @@ class BabiesDataController extends Controller
 {
     public $dataNotFound = "Data not found";
 
-    private $AIOkey;
-    private $AIOuser;
-
-    public function __construct()
-    {
-        $this->AIOkey = 'aio_CdSd32sWXEBivEDROv09jU4cfXBQ';
-        $this->AIOuser = 'Shuy03';
-    }
 
     public function index()
     {
@@ -86,46 +78,13 @@ class BabiesDataController extends Controller
         $state = $data->baby_incubator->incubator->state ?? null;
         $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
 
-        $sensores = Sensor::all();
-
-        $datalist = [];
-
-        foreach ($sensores as $sensor) {
-            try {
-                $response = Http::withHeaders([
-                    'X-AIO-Key' => $this->AIOkey,
-                ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/incubadora.{$sensor->tipo_sensor}/data/last");
-
-                if ($response->successful()) {
-                    $data = $response->json();
-
-                    $datalist[] = [
-                        'feed_key' => $sensor->tipo_sensor,
-                        'unidad' => $sensor->unidad,
-                        'value' => $data['value'] ?? 'Sin datos disponibles',
-                    ];
-                } else {
-                    $datalist[] = [
-                        'feed_key' => $sensor->tipo_sensor,
-                        'unidad' => $sensor->unidad,
-                        'error' => 'No se pudo obtener el dato',
-                    ];
-                }
-            } catch (\Exception $e) {
-                $datalist[] = [
-                    'feed_key' => $sensor->tipo_sensor,
-                    'unidad' => $sensor->unidad,
-                    'error' => 'No se pudo obtener el dato: ' . $e->getMessage(),
-                ];
-            }
-        }
-
         return response()->json([
-            'message' => 'Datos obtenidos correctamente',
-            'data' => $datalist,
-            'egress_date' => $egressDate,
-            'baby' => $baby,
-            'state' => $state
+            "message" => 'Datos obtenidos correctamente',
+            "data" => [
+                "egress_date" => $egressDate,
+                "baby" => $baby,
+                "state" => $state
+            ],
         ], 200);
     }
 
