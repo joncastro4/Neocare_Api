@@ -174,10 +174,15 @@ class ChecksController extends Controller
             $baby = $babyIncubator ? $babyIncubator->baby : null;
             $person = $baby ? $baby->person : null;
 
+            $createdAt = $check->created_at;
+            $date = $createdAt->format('Y-m-d');
+            $time = $createdAt->format('H:i:s');
+
             return [
                 'check_id' => $check->id,
                 'description' => $check->description,
-                'created_at' => $check->created_at,
+                'date' => $date,
+                'time' => $time,
                 'baby' => $person ? $person->name . ' ' . $person->last_name_1 . ' ' . $person->last_name_2 : null
             ];
         });
