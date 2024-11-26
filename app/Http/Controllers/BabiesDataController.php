@@ -120,15 +120,12 @@ class BabiesDataController extends Controller
             }
         }
 
-        $datalist[] = [
-            'egress_date' => $egressDate,
-            'baby' => $baby,
-            'state' => $state
-        ];
-
         return response()->json([
             'message' => 'Datos obtenidos correctamente',
             'data' => $datalist,
+            'egress_date' => $egressDate,
+            'baby' => $baby,
+            'state' => $state
         ], 200);
     }
 
