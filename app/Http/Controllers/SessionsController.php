@@ -65,8 +65,9 @@ class SessionsController extends Controller
 
         $nurse->save();
 
-        $signedUrl = URL::signedRoute(
+        $signedUrl = URL::temporarySignedRoute(
             'verify-email',
+            now()->addMinutes(30),
             ['user' => $user->id]
         );
 
@@ -185,8 +186,9 @@ class SessionsController extends Controller
             ], 400);
         }
 
-        $signedUrl = URL::signedRoute(
+        $signedUrl = URL::temporarySignedRoute(
             'verify-email',
+            now()->addMinutes(30),
             ['user' => $user->id]
         );
 
