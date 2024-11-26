@@ -11,32 +11,39 @@ use App\Models\Person;
 class BabiesController extends Controller
 {
     public function index(Request $request)
-{
-    $user = $request->user(); // Obtén el usuario autenticado.
-
-    if ($user->role === 'admin') {
-        
-        $babies = Baby::with('person')->get();
-    } elseif ($user->role === 'nurse') {
-
-        $babies = Baby::with('person')->where('nurse_id', $user->id)->get();
-    } else {
+    {
+        $user = $request->user(); // Usuario autenticado.
+    
+        if ($user->role === 'admin') {
+            $babies = Baby::with('person')->get();
+        } elseif ($user->role === 'nurse') {
+            $nurse = $user->nurse;
+    
+            if (!$nurse) {
+                return response()->json([
+                    'msg' => "No se encontró una enfermera asociada al usuario."
+                ], 404);
+            }
+    
+            // Obtén los bebés relacionados con la enfermera.
+            $babies = $nurse->babies()->with('person')->get();
+        } else {
+            return response()->json([
+                'msg' => "No tienes permisos para acceder a esta información."
+            ], 403);
+        }
+    
+        if ($babies->isEmpty()) {
+            return response()->json([
+                'msg' => "No se encontraron bebés."
+            ], 204);
+        }
+    
         return response()->json([
-            'msg' => "No tienes permisos para acceder a esta información"
-        ], 403);
+            'babies' => $babies
+        ], 200);
     }
-
-    if ($babies->isEmpty()) {
-        return response()->json([
-            'msg' => "No se encontraron bebés"
-        ], 204);
-    }
-
-    return response()->json([
-        'babies' => $babies
-    ], 200);
-}
-
+    
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
