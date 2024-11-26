@@ -178,10 +178,7 @@ class ChecksController extends Controller
                 'check_id' => $check->id,
                 'description' => $check->description,
                 'created_at' => $check->created_at,
-                'baby' => [
-                    'id' => $baby ? $baby->id : null,
-                    'name' => $person ? $person->name . ' ' . $person->last_name_1 . ' ' . $person->last_name_2 : null
-                ]
+                'baby' => $person ? $person->name . ' ' . $person->last_name_1 . ' ' . $person->last_name_2 : null
             ];
         });
 
