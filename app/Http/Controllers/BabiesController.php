@@ -10,20 +10,33 @@ use App\Models\Person;
 
 class BabiesController extends Controller
 {
-    public function index()
-    {
+    public function index(Request $request)
+{
+    $user = $request->user(); // Obtén el usuario autenticado.
+
+    if ($user->role === 'admin') {
+        
         $babies = Baby::with('person')->get();
+    } elseif ($user->role === 'nurse') {
 
-        if ($babies->isEmpty()) {
-            return response()->json([
-                'msg' => "No Babiess Found"
-            ], 204);
-        }
-
+        $babies = Baby::with('person')->where('nurse_id', $user->id)->get();
+    } else {
         return response()->json([
-            'babies' => $babies
-        ], 200);
+            'msg' => "No tienes permisos para acceder a esta información"
+        ], 403);
     }
+
+    if ($babies->isEmpty()) {
+        return response()->json([
+            'msg' => "No se encontraron bebés"
+        ], 204);
+    }
+
+    return response()->json([
+        'babies' => $babies
+    ], 200);
+}
+
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
