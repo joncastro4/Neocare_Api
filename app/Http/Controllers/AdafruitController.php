@@ -17,6 +17,8 @@ class AdafruitController extends Controller
         $this->AIOuser = 'Shuy03';
     }
 
+    public $sinDatos = 'Sin datos disponibles';
+
     public function obtenerTodosLosSensores()
     {
         $sensores = Sensor::all();
@@ -40,6 +42,8 @@ class AdafruitController extends Controller
                         }
                     }
 
+                    $value = !empty($data) ? $data[count($data) - 1]['value'] : $this->sinDatos;
+
                     // Calcular métricas solo si hay valores válidos
                     if (!empty($values)) {
                         $datalist[] = [
@@ -49,16 +53,17 @@ class AdafruitController extends Controller
                             'min_value' => min($values),
                             'max_value' => max($values),
                             'weekly_average' => array_sum($values) / count($values),
-                            'value' => $data['value'] ?? 'Sin datos disponibles',
+                            'current_value' => $value,
                         ];
                     } else {
                         $datalist[] = [
                             'feed_key' => $sensor->tipo_sensor,
                             'nombre_amigable' => $sensor->nombre_amigable,
                             'unidad' => $sensor->unidad,
-                            'min_value' => 'Sin datos disponibles',
-                            'max_value' => 'Sin datos disponibles',
-                            'weekly_average' => 'Sin datos disponibles',
+                            'min_value' => $this->sinDatos,
+                            'max_value' => $this->sinDatos,
+                            'weekly_average' => $this->sinDatos,
+                            'current_valuevalue' => $this->sinDatos,
                         ];
                     }
                 } else {
@@ -108,7 +113,7 @@ class AdafruitController extends Controller
                     'feed_key' => $sensor->tipo_sensor,
                     'nombre_amigable' => $sensor->nombre_amigable,
                     'unidad' => $sensor->unidad,
-                    'value' => $data['value'] ?? 'Sin datos disponibles',
+                    'value' => $data['value'] ?? $this->sinDatos,
                 ], 200);
             }
 
