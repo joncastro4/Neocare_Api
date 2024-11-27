@@ -10,20 +10,41 @@ use App\Models\Person;
 
 class BabiesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $babies = Baby::with('person')->get();
-
+        // Obtener el usuario autenticado
+        $user = $request->user();
+    
+        // Verificar el rol del usuario
+        if ($user->role === 'nurse') {
+            // Si el rol es 'nurse', traer solo los bebés relacionados con esa enfermera.
+            $babies = Baby::with('person') // Obtener los bebés con su información de persona
+                ->whereHas('nurses', function ($query) use ($user) {
+                    // Filtrar por la relación a través de la tabla intermedia 'nurses_babies'
+                    $query->where('user_id', $user->id); // Filtrar por el 'user_id' de la enfermera
+                })
+                ->get();
+        } elseif ($user->role === 'admin') {
+            // Si el rol es 'admin', traer todos los bebés.
+            $babies = Baby::with('person')->get();
+        } else {
+            // Si el rol no es ni 'nurse' ni 'admin', retornar un error.
+            return response()->json(['msg' => 'Unauthorized role'], 403);
+        }
+    
+        // Verificar si no se encontraron bebés
         if ($babies->isEmpty()) {
             return response()->json([
-                'msg' => "No Babiess Found"
+                'msg' => "No Babies Found"
             ], 204);
         }
-
+    
+        // Retornar los bebés encontrados
         return response()->json([
             'babies' => $babies
         ], 200);
     }
+    
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
