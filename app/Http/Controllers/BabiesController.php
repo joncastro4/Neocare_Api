@@ -20,15 +20,16 @@ class BabiesController extends Controller
         if ($user->role === 'admin') {
             $babies = Baby::with('person')->get();
         }
+    
         // Si el rol es nurse, muestra solo los bebés asociados a la enfermera
         elseif ($user->role === 'nurse') {
-            // Verifica si la relación 'nurses_babies' no está vacía
-            if ($user->nurses_babies->isEmpty()) {
+            // Verifica si la relación 'nurses_babies' está cargada y no es vacía
+            if ($user->nurses_babies && $user->nurses_babies->isEmpty()) {
                 return response()->json([
                     'msg' => 'No Babies Found'
                 ], 204);
             }
-            
+    
             // Obtener los bebés asociados a la enfermera a través de la relación 'nurses_babies'
             $babies = $user->nurses_babies->pluck('baby')->load('person');
         } else {
@@ -45,10 +46,7 @@ class BabiesController extends Controller
             ], 204);
         }
     
-        // Si hay bebés, devolver la lista de bebés
-        return response()->json([
-            'babies' => $babies
-        ], 200);
+        return response()->json($babies);
     }
     
 
