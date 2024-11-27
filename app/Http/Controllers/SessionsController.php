@@ -151,6 +151,11 @@ class SessionsController extends Controller
                 'message' => 'Invalid credentials, or email not verified'
             ], 401);
         }
+        if ($user->role == 'guest') {
+            return response()->json([
+                'message' => 'Not verified as a nurse by admin'
+            ], 401);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
