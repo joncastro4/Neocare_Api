@@ -51,10 +51,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
-});
 
-Route::prefix('sensores')->group(function () {
-    // Rutas individuales
     Route::get('/bpm', [AdafruitController::class, 'bpm']);
     Route::get('/fotoresistencia', [AdafruitController::class, 'fotoresistencia']);
     Route::get('/humedad', [AdafruitController::class, 'humedad']);
@@ -65,9 +62,8 @@ Route::prefix('sensores')->group(function () {
     Route::get('/vibraciones', [AdafruitController::class, 'vibraciones']);
     // Ruta para obtener todos los sensores
     Route::get('/', [AdafruitController::class, 'obtenerTodosLosSensores']);
+    Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
 });
-Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
-
 
 // Ruta de prueba
 Route::get('/test', function () {
