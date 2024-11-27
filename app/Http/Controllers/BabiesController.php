@@ -5,52 +5,45 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Baby;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
 
 class BabiesController extends Controller
 {
-    public function index()
-    {
-        // Obtén al usuario autenticado
-        $user = Auth::user();
-    
-        // Si el rol es admin, muestra todos los bebés
-        if ($user->role === 'admin') {
-            $babies = Baby::with('person')->get();
-        }
-        // Si el rol es nurse, muestra solo los bebés asociados a la enfermera
-        elseif ($user->role === 'nurse') {
-            // Verifica si la relación 'nurses_babies' no está vacía
-            if ($user->nurses_babies->isEmpty()) {
-                return response()->json([
-                    'msg' => 'No Babies Found'
-                ], 204);
-            }
-            
-            // Obtener los bebés asociados a la enfermera a través de la relación 'nurses_babies'
-            $babies = $user->nurses_babies->pluck('baby')->load('person');
-        } else {
-            // Si el rol no es ni admin ni nurse, devolver un error
-            return response()->json([
-                'msg' => 'Role not authorized'
-            ], 403);
-        }
-    
-        // Si no hay bebés encontrados
-        if ($babies->isEmpty()) {
-            return response()->json([
-                'msg' => 'No Babies Found'
-            ], 204);
-        }
-    
-        // Si hay bebés, devolver la lista de bebés
-        return response()->json([
-            'babies' => $babies
-        ], 200);
+    public function index(Request $request)
+{
+    // Obtener el usuario autenticado
+    $user = $request->user();
+
+    // Verificar el rol del usuario
+    if ($user->role === 'nurse') {
+        // Si el rol es 'nurse', traer solo los bebés relacionados con esa enfermera.
+        $babies = Baby::with('person') // Obtener los bebés con su información de persona
+            ->whereHas('nurse_baby', function ($query) use ($user) {
+                // Filtrar por la relación a través de la tabla intermedia 'nurses_babies'
+                $query->whereHas('nurse', function ($q) use ($user) {
+                    $q->where('user_id', $user->id); // Filtrar por el 'user_id' de la enfermera
+                });
+            })
+            ->get();
+    } elseif ($user->role === 'admin') {
+        // Si el rol es 'admin', traer todos los bebés.
+        $babies = Baby::with('person')->get();
+    } else {
+        // Si el rol no es ni 'nurse' ni 'admin', retornar un error.
+        return response()->json(['msg' => 'Unauthorized role'], 403);
     }
-    
+
+    // Verificar si no se encontraron bebés
+    if ($babies->isEmpty()) {
+        return response()->json(['msg' => "No Babies Found"], 204);
+    }
+
+    // Retornar los bebés encontrados
+    return response()->json([
+        'babies' => $babies
+    ], 200);
+}
 
     public function store(Request $request)
     {
