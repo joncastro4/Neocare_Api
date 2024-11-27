@@ -49,6 +49,7 @@ class AdafruitController extends Controller
                             'min_value' => min($values),
                             'max_value' => max($values),
                             'weekly_average' => array_sum($values) / count($values),
+                            'value' => $data['value'] ?? 'Sin datos disponibles',
                         ];
                     } else {
                         $datalist[] = [
