@@ -49,7 +49,7 @@ class IncubatorsController extends Controller
             ], 404);
         }
     
-        // Ahora, obtenemos las incubadoras asociadas a los bebés de esa enfermera
+        // Obtén las incubadoras asociadas a los bebés de esa enfermera
         $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
     
         if ($incubators->isEmpty()) {
@@ -58,11 +58,18 @@ class IncubatorsController extends Controller
             ], 204);
         }
     
-        // Retorna la respuesta con los datos de incubadoras
+        // Agrega el estado de cada incubadora al arreglo
+        $incubatorsWithState = $incubators->map(function ($incubator) {
+            $incubatorDetails = Incubator::find($incubator->incubator_id);
+            $incubator->state = $incubatorDetails ? $incubatorDetails->state : 'Unknown';
+            return $incubator;
+        });
+    
+        // Retorna la respuesta con los datos de incubadoras y sus estados
         return response()->json([
-            'data' => $incubators
+            'data' => $incubatorsWithState
         ], 200);
-    }
+    }    
     
     public function store()
     {
