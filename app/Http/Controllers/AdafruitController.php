@@ -20,24 +20,46 @@ class AdafruitController extends Controller
     public function obtenerTodosLosSensores()
     {
         $sensores = Sensor::all();
-
         $datalist = [];
 
         foreach ($sensores as $sensor) {
             try {
+                // Obtener datos históricos para el sensor actual
                 $response = Http::withHeaders([
                     'X-AIO-Key' => $this->AIOkey,
-                ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/incubadora.{$sensor->tipo_sensor}/data/last");
+                ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/incubadora.{$sensor->tipo_sensor}/data");
 
                 if ($response->successful()) {
-                    $data = $response->json();
+                    $data = $response->json(); // Datos históricos en formato JSON
+                    $values = [];
 
-                    $datalist[] = [
-                        'feed_key' => $sensor->tipo_sensor,
-                        'nombre_amigable' => $sensor->nombre_amigable,
-                        'unidad' => $sensor->unidad,
-                        'value' => $data['value'] ?? 'Sin datos disponibles',
-                    ];
+                    // Filtrar y convertir valores válidos
+                    foreach ($data as $entry) {
+                        if (isset($entry['value']) && is_numeric($entry['value'])) {
+                            $values[] = (float) $entry['value'];
+                        }
+                    }
+
+                    // Calcular métricas solo si hay valores válidos
+                    if (!empty($values)) {
+                        $datalist[] = [
+                            'feed_key' => $sensor->tipo_sensor,
+                            'nombre_amigable' => $sensor->nombre_amigable,
+                            'unidad' => $sensor->unidad,
+                            'min_value' => min($values),
+                            'max_value' => max($values),
+                            'weekly_average' => array_sum($values) / count($values),
+                        ];
+                    } else {
+                        $datalist[] = [
+                            'feed_key' => $sensor->tipo_sensor,
+                            'nombre_amigable' => $sensor->nombre_amigable,
+                            'unidad' => $sensor->unidad,
+                            'min_value' => 'Sin datos disponibles',
+                            'max_value' => 'Sin datos disponibles',
+                            'weekly_average' => 'Sin datos disponibles',
+                        ];
+                    }
                 } else {
                     $datalist[] = [
                         'feed_key' => $sensor->tipo_sensor,
