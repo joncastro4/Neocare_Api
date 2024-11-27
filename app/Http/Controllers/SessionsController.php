@@ -116,7 +116,7 @@ class SessionsController extends Controller
 
         Mail::to($admin->email)->send(new NurseActivatedNotification($user, $person, $signedUrl));
 
-        return view('success.email-verified', ['user' => $user, 'person' => $person, 'signedUrl' => $signedUrl]);
+        return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
     }
 
     public function login(Request $request)
