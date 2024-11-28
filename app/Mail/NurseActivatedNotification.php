@@ -12,7 +12,7 @@ use App\Models\Person;
 use App\Models\User;
 
 
-class NurseActivatedNotification extends Mailable
+class NurseActivatedNotification extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
