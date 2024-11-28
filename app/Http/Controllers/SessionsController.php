@@ -84,15 +84,11 @@ class SessionsController extends Controller
         $user = User::where('id', $request->user)->first();
 
         if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
+            return view('errors.user-not-found', ['message' => 'User not found']);
         }
 
         if ($user->email_verified_at) {
-            return response()->json([
-                'message' => 'Email already verified'
-            ], 400);
+            return view('errors.email-already-verified', ['message' => 'Email already verified']);
         }
 
         $user->email_verified_at = now();
@@ -101,34 +97,26 @@ class SessionsController extends Controller
         $nurse = Nurse::where('user_id', $user->id)->first();
 
         if (!$nurse) {
-            return response()->json([
-                'message' => 'Nurse not found'
-            ], 404);
+            return view('errors.nurse-not-found', ['message' => 'Nurse not found']);
         }
 
         $person = Person::where('id', $nurse->person_id)->first();
 
         if (!$person) {
-            return response()->json([
-                'message' => 'Person not found'
-            ]);
+            return view('errors.person-not-found', ['message' => 'Person not found']);
         }
 
         $admin = User::where('role', 'admin')->first();
 
         if (!$admin) {
-            return response()->json([
-                'message' => 'Admin not found'
-            ]);
+            return view('errors.admin-not-found', ['message' => 'Admin not found']);
         }
 
         $signedUrl = URL::signedRoute('nurse-activate', ['id' => $user->id]);
 
-        Mail::to($admin->email)->send(new NurseActivatedNotification($user, $person, $signedUrl));
+        Mail::to($admin->email)->queue(new NurseActivatedNotification($user, $person, $signedUrl));
 
-        return response()->json([
-            'message' => 'Email verified successfully'
-        ], 200);
+        return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
     }
 
     public function login(Request $request)
@@ -197,7 +185,7 @@ class SessionsController extends Controller
             ['user' => $user->id]
         );
 
-        Mail::to($request->email)->send(new RegisterMail($user->name, $user->email, $signedUrl));
+        Mail::to($request->email)->queue(new RegisterMail($user->name, $user->email, $signedUrl));
 
         return response()->json([
             'message' => 'Email sent'
