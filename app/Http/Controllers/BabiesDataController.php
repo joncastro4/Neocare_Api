@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Incubator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Http;
@@ -75,15 +76,15 @@ class BabiesDataController extends Controller
         $name = $data->baby_incubator->baby->person->name ?? null;
         $last_name_1 = $data->baby_incubator->baby->person->last_name_1 ?? null;
         $last_name_2 = $data->baby_incubator->baby->person->last_name_2 ?? null;
-        $state = $data->baby_incubator->incubator->state ?? null;
         $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
+        $state = $data->baby_incubator->incubator->state ?? null;
 
         return response()->json([
             "message" => 'Datos obtenidos correctamente',
             "data" => [
                 "egress_date" => $egressDate,
                 "baby" => $baby,
-                "state" => $state
+                "state" => $state,
             ],
         ], 200);
     }

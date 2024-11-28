@@ -39,9 +39,12 @@ class IncubatorsController extends Controller
                 'msg' => 'No user found'
             ], 404);
         }
-    
-        // Obtén los registros NurseBaby asociados al usuario (enfermera)
-        $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
+
+        if ($user->role == 'nurse') {
+            $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
+        } elseif ($user->role == 'admin') {
+            $babyNurses = NurseBaby::all();
+        }
     
         if ($babyNurses->isEmpty()) {
             return response()->json([
@@ -69,8 +72,7 @@ class IncubatorsController extends Controller
         return response()->json([
             'data' => $incubatorsWithState
         ], 200);
-    }    
-    
+    }
     public function store()
     {
         $incubator = new Incubator();
