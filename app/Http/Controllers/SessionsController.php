@@ -114,7 +114,7 @@ class SessionsController extends Controller
 
         $signedUrl = URL::signedRoute('nurse-activate', ['id' => $user->id]);
 
-        Mail::to($admin->email)->queue(new NurseActivatedNotification($user, $person, $signedUrl));
+        Mail::to($admin->email)->send(new NurseActivatedNotification($user, $person, $signedUrl));
 
         return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
     }
@@ -185,7 +185,7 @@ class SessionsController extends Controller
             ['user' => $user->id]
         );
 
-        Mail::to($request->email)->queue(new RegisterMail($user->name, $user->email, $signedUrl));
+        Mail::to($request->email)->send(new RegisterMail($user->name, $user->email, $signedUrl));
 
         return response()->json([
             'message' => 'Email sent'
