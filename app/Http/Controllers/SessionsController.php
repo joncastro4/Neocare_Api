@@ -14,7 +14,6 @@ use Illuminate\Support\Facades\URL;
 use App\Mail\RegisterMail;
 use App\Mail\NurseActivatedNotification;
 
-
 class SessionsController extends Controller
 {
     public function register(Request $request)

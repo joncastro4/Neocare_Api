@@ -193,8 +193,7 @@ class NursesController extends Controller
         $nurse->save();
 
         return response()->json([
-            'msg' => 'Image Uploaded Successfully',
-            'data' => $nurse
+            'msg' => 'Image Uploaded Successfully'
         ], 200);
 
     }
