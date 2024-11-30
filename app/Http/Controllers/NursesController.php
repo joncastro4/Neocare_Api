@@ -171,7 +171,7 @@ class NursesController extends Controller
 
         if (!$user) {
             return response()->json([
-                'msg' => 'No User Found'
+                'message' => 'No User Found'
             ], 404);
         }
 
@@ -179,7 +179,7 @@ class NursesController extends Controller
 
         if (!$nurse) {
             return response()->json([
-                'msg' => 'No Nurse Found'
+                'message' => 'No Nurse Found'
             ], 404);
         }
 
@@ -193,7 +193,7 @@ class NursesController extends Controller
         $nurse->save();
 
         return response()->json([
-            'msg' => 'Image Uploaded Successfully'
+            'message' => 'Image Uploaded Successfully'
         ], 200);
 
     }
@@ -204,7 +204,7 @@ class NursesController extends Controller
 
         if (!$user) {
             return response()->json([
-                'msg' => 'No User Found'
+                'message' => 'No User Found'
             ], 404);
         }
 
@@ -212,7 +212,7 @@ class NursesController extends Controller
 
         if (!$nurse) {
             return response()->json([
-                'msg' => 'No Nurse Found'
+                'message' => 'No Nurse Found'
             ], 404);
         }
 
@@ -222,8 +222,7 @@ class NursesController extends Controller
         Storage::disk('s3')->delete($nurse->image_path);
 
         return response()->json([
-            'msg' => 'Image Deleted Successfully',
-            'data' => $nurse
+            'message' => 'Image Deleted Successfully'
         ], 200);
     }
     public function viewImage()
