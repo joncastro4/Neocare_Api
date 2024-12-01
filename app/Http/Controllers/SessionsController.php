@@ -148,7 +148,8 @@ class SessionsController extends Controller
 
         return response()->json([
             'message' => 'Login successful',
-            'token' => $token
+            'token' => $token,
+            'role' => $user->role
         ], 200);
     }
 
