@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\BabyIncubator;
 use App\Models\NurseBaby;
-use Auth;
 use Illuminate\Http\Request;
 use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
@@ -40,11 +39,7 @@ class IncubatorsController extends Controller
             ], 404);
         }
 
-        if ($user->role == 'nurse') {
-            $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
-        } elseif ($user->role == 'admin') {
-            $babyNurses = NurseBaby::all();
-        }
+        $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
     
         if ($babyNurses->isEmpty()) {
             return response()->json([
@@ -54,6 +49,10 @@ class IncubatorsController extends Controller
     
         // Obtén las incubadoras asociadas a los bebés de esa enfermera
         $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
+
+        if ($user->role == 'admin') {
+            $incubators = BabyIncubator::all();
+        }
     
         if ($incubators->isEmpty()) {
             return response()->json([
