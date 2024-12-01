@@ -98,7 +98,7 @@ class NursesController extends Controller
 
         if (!$nurse) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'message' => 'No Data Found'
             ], 404);
         }
 
@@ -106,7 +106,7 @@ class NursesController extends Controller
 
         if (!$person) {
             return response()->json([
-                'msg' => 'No Person Found'
+                'message' => 'No Person Found'
             ], 404);
         }
 
@@ -119,9 +119,7 @@ class NursesController extends Controller
         $nurse->save();
 
         return response()->json([
-            'msg' => 'Nurse Updated Successfully',
-            'data' => $nurse,
-            'person' => $person
+            'message' => 'Nurse Updated Successfully',
         ], 200);
     }
     // Posiblemente no se utilize para la aplicación
