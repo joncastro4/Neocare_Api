@@ -17,14 +17,13 @@ class SensoresTableSeeder extends Seeder
     public function run()
     {
         DB::table('sensores')->insert([
-            ['tipo_sensor' => 'bpm', 'nombre_amigable' => 'Frecuencia Cardíaca', 'unidad' => 'bpm'],
-            ['tipo_sensor' => 'fotoresistencia', 'nombre_amigable' => 'Fotoresistencia', 'unidad' => 'lux'],
-            ['tipo_sensor' => 'humedad', 'nombre_amigable' => 'Humedad', 'unidad' => '%'],
-            ['tipo_sensor' => 'oxigeno', 'nombre_amigable' => 'Oxígeno', 'unidad' => '%'],
-            ['tipo_sensor' => 'rgb', 'nombre_amigable' => 'Color RGB', 'unidad' => ''],
-            ['tipo_sensor' => 'temperaturacorporal', 'nombre_amigable' => 'Temperatura Corporal', 'unidad' => '°C'],
-            ['tipo_sensor' => 'temperaturambiental', 'nombre_amigable' => 'Temperatura Ambiental', 'unidad' => '°C'],
-            ['tipo_sensor' => 'vibraciones', 'nombre_amigable' => 'Vibraciones', 'unidad' => 'Hz'],
+            ['tipo_sensor' => 'luz', 'nombre_amigable' => 'Luz', 'unidad' => 'lux'],
+            ['tipo_sensor' => 'humedad-ambiental', 'nombre_amigable' => 'Humedad', 'unidad' => '%'],
+            ['tipo_sensor' => 'temperatura-infrarojo', 'nombre_amigable' => 'Temperatura Corporal', 'unidad' => '°C'],
+            ['tipo_sensor' => 'temperatura-ambiental', 'nombre_amigable' => 'Temperatura Ambiental', 'unidad' => '°C'],
+            ['tipo_sensor' => 'vibracion', 'nombre_amigable' => 'Vibraciones', 'unidad' => 'Hz'],
+            ['tipo_sensor' => 'sonido', 'nombre_amigable' => 'Sonido', 'unidad' => 'dB'],
+            ['tipo_sensor' => 'movimiento', 'nombre_amigable' => 'Movimiento', 'unidad' => ''],
         ]);
     }
 }

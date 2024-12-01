@@ -13,8 +13,8 @@ class AdafruitController extends Controller
 
     public function __construct()
     {
-        $this->AIOkey = 'aio_CdSd32sWXEBivEDROv09jU4cfXBQ';
-        $this->AIOuser = 'Shuy03';
+        $this->AIOkey = 'aio_nBRg95EbrYiAnrK6jxq89C2bTHXH';
+        $this->AIOuser = 'Tunas';
     }
 
     public $sinDatos = 'Sin datos disponibles';
@@ -29,7 +29,7 @@ class AdafruitController extends Controller
                 // Obtener datos históricos para el sensor actual
                 $response = Http::withHeaders([
                     'X-AIO-Key' => $this->AIOkey,
-                ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/incubadora.{$sensor->tipo_sensor}/data");
+                ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/pruebas.{$sensor->tipo_sensor}/data");
 
                 if ($response->successful()) {
                     $data = $response->json(); // Datos históricos en formato JSON
