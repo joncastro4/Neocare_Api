@@ -220,10 +220,12 @@ class NursesController extends Controller
             ], 404);
         }
 
+        Storage::disk('s3')->delete($nurse->image_path);
+
         $nurse->image_path = null;
         $nurse->save();
 
-        Storage::disk('s3')->delete($nurse->image_path);
+
 
         return response()->json([
             'message' => 'Image Deleted Successfully'
