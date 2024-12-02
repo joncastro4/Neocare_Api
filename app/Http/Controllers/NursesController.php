@@ -214,14 +214,14 @@ class NursesController extends Controller
             ], 404);
         }
 
-        $nurse->image_path = null;
-        $nurse->save();
-
         if (!$nurse->image_path) {
             return response()->json([
                 'message' => 'No Image Found'
             ], 404);
         }
+
+        $nurse->image_path = null;
+        $nurse->save();
 
         Storage::disk('s3')->delete($nurse->image_path);
 
