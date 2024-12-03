@@ -40,7 +40,7 @@ class IncubatorsController extends Controller
         }
 
         $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
-    
+
         if ($babyNurses->isEmpty()) {
             return response()->json([
                 'msg' => 'No baby nurses found for this user'
@@ -49,7 +49,7 @@ class IncubatorsController extends Controller
     
         // Obtén las incubadoras asociadas a los bebés de esa enfermera
         $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
-
+ 
         if ($user->role == 'admin') {
             $incubators = BabyIncubator::all();
         }
@@ -78,7 +78,7 @@ class IncubatorsController extends Controller
         $incubator->save();
 
         return response()->json([
-            'msg' => 'Incubator Created Successfully',
+            'msg' => 'Incubadora Agregada Correctamente',
             'data' => $incubator
         ], 201);
     }

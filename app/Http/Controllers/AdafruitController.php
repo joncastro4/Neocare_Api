@@ -21,7 +21,7 @@ class AdafruitController extends Controller
 
     public function obtenerTodosLosSensores()
     {
-        $sensores = Sensor::whereNot('tipo_sensor', 'rgb')->whereNot('tipo_sensor', 'vibraciones')->get();
+        $sensores = Sensor::whereNot('tipo_sensor', 'rgb')->get();
         $datalist = [];
 
         foreach ($sensores as $sensor) {
