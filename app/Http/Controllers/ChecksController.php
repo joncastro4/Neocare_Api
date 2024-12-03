@@ -76,7 +76,7 @@ class ChecksController extends Controller
         }
 
         return response()->json([
-            'msg' => 'Data Registered Successfully',
+            'msg' => 'Chequeo registrado exitosamente',
             'data' => $check
         ], 200);
     }
