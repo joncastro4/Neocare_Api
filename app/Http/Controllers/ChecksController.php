@@ -160,9 +160,27 @@ class ChecksController extends Controller
         if ($user->role == 'admin') {
             $checks = Check::all();
 
+            $data = $checks->map(function ($check) {
+                $babyIncubator = $check->baby_incubator;
+                $baby = $babyIncubator ? $babyIncubator->baby : null;
+                $person = $baby ? $baby->person : null;
+    
+                $createdAt = $check->created_at;
+                $date = $createdAt->format('Y-m-d');
+                $time = $createdAt->format('H:i:s');
+    
+                return [
+                    'check_id' => $check->id,
+                    'description' => $check->description,
+                    'date' => $date,
+                    'time' => $time,
+                    'baby' => $person ? $person->name . ' ' . $person->last_name_1 . ' ' . $person->last_name_2 : null
+                ];
+            });
+
             return response()->json([
-                'checks' => $checks
-            ]);
+                'checks' => $data
+            ], 200);
         }
 
         $nurse = Nurse::where('user_id', $user->id)->first();
