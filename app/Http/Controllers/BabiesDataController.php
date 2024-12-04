@@ -78,6 +78,7 @@ class BabiesDataController extends Controller
         $last_name_2 = $data->baby_incubator->baby->person->last_name_2 ?? null;
         $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
         $state = $data->baby_incubator->incubator->state ?? null;
+        $baby_incubator_id = $data->baby_incubator->id ?? null;
 
         return response()->json([
             "message" => 'Datos obtenidos correctamente',
@@ -85,6 +86,7 @@ class BabiesDataController extends Controller
                 "egress_date" => $egressDate,
                 "baby" => $baby,
                 "state" => $state,
+                "baby_incubator_id" => $baby_incubator_id
             ],
         ], 200);
     }
