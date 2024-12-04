@@ -157,6 +157,14 @@ class ChecksController extends Controller
             ], 403);
         }
 
+        if ($user->role == 'admin') {
+            $checks = Check::all();
+
+            return response()->json([
+                'checks' => $checks
+            ]);
+        }
+
         $nurse = Nurse::where('user_id', $user->id)->first();
 
         if (!$nurse) {
