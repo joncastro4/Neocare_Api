@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function () {
             Route::get('sessions/me', [SessionsController::class, 'me']);
             Route::post('sessions/logout', [SessionsController::class, 'logout']);
             Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
+            Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
         });
 
     });
