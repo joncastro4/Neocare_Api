@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
 use App\Models\BabyIncubator;
 use DB;
+use DateTime;
+use Carbon\Carbon;
 
 class BabiesController extends Controller
 {
@@ -50,7 +52,18 @@ class BabiesController extends Controller
             'name' => 'required|string|max:255',
             'last_name_1' => 'required|string|max:255',
             'last_name_2' => 'nullable|string|max:255',
-            'date_of_birth' => 'required|date|before_or_equal:today',
+            'date_of_birth' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    // Valida el formato dd/MM/yyyy
+                    $date = DateTime::createFromFormat('d/m/Y', $value);
+                    if (!$date || $date->format('d/m/Y') !== $value) {
+                        $fail('The ' . $attribute . ' must be in the format dd/MM/yyyy.');
+                    }
+                },
+                'before_or_equal:today'
+            ],
             'ingress_date' => 'nullable|date|after_or_equal:date_of_birth|before_or_equal:today',
             'egress_date' => [
                 'nullable',
@@ -71,6 +84,8 @@ class BabiesController extends Controller
             ], 422);
         }
 
+        $dateOfBirth = Carbon::createFromFormat('d/m/Y', $request->date_of_birth)->format('Y-m-d');
+
         $person = new Person();
         $person->name = $request->name;
         $person->last_name_1 = $request->last_name_1;
@@ -79,7 +94,7 @@ class BabiesController extends Controller
 
         $baby = new Baby();
         $baby->person_id = $person->id;
-        $baby->date_of_birth = $request->date_of_birth;
+        $baby->date_of_birth = $dateOfBirth;
         $baby->ingress_date = $request->ingress_date ?? now()->toDateString();
         $baby->save();
 
