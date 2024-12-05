@@ -29,6 +29,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('role')->group(function () {
             Route::apiResource('babies', BabiesController::class);
+            Route::post('add-person-relative/{baby_id}', [RelativesController::class, 'addPersonRelative']);
             Route::apiResource('babies-data', BabiesDataController::class);
             Route::apiResource('baby-incubators', BabyIncubatorsController::class);
             Route::apiResource('incubators', IncubatorsController::class);
