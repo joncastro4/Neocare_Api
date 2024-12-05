@@ -79,6 +79,7 @@ class RelativesController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
+
         $relative = Relative::find($id);
 
         if (!$relative) {
@@ -95,10 +96,24 @@ class RelativesController extends Controller
             ], 404);
         }
 
+        $relativeData = $person->relative->map(function ($relative) {
+            return [
+                'name' => $relative->contact,
+                'phone_number' => $relative->phone_number,
+                'contact' => $relative->contact,
+            ];
+        })->first();
+
         return response()->json([
             'msg' => 'Relative Found Successfully',
-            'person' => $person,
-            'relative' => $relative
+            'person' => [
+                'id' => $person->id,
+                'name' => $person->name,
+                'last_name_1' => $person->last_name_1,
+                'last_name_2' => $person->last_name_2,
+                'phone_number' => $relative->phone_number,
+                'contact' => $relative->contact,
+            ]
         ], 200);
     }
     public function update(Request $request, $id)
