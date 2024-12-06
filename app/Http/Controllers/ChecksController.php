@@ -157,18 +157,22 @@ class ChecksController extends Controller
             ], 403);
         }
 
-        $nurse = Nurse::where('user_id', $user->id)->first();
+        // Obtener las IDs de las enfermeras asociadas al usuario
+        $nurseIds = Nurse::where('user_id', $user->id)->orderByDesc('id')->pluck('id');
 
-        if (!$nurse) {
+        if ($nurseIds->isEmpty()) {
             return response()->json([
                 'msg' => 'unauthorized'
             ], 403);
         }
 
-        $checks = Check::where('nurse_id', $nurse->id)
+        // Obtener los chequeos asociados, ordenados de manera descendiente por created_at
+        $checks = Check::whereIn('nurse_id', $nurseIds)
             ->with(['baby_incubator.baby.person'])
+            ->orderByDesc('created_at') // Orden descendente
             ->get();
 
+        // Mapear los resultados
         $data = $checks->map(function ($check) {
             $babyIncubator = $check->baby_incubator;
             $baby = $babyIncubator ? $babyIncubator->baby : null;
@@ -187,6 +191,7 @@ class ChecksController extends Controller
             ];
         });
 
+        // Retornar los chequeos
         return response()->json([
             'checks' => $data
         ], 200);
