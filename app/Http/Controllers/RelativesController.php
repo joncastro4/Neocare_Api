@@ -206,9 +206,9 @@ class RelativesController extends Controller
         $validate = Validator::make($request->all(), [
             'name' => 'string|max:255|required',
             'last_name_1' => 'string|max:255|required',
-            'last_name_2' => 'string|max:255',
+            'last_name_2' => 'string|max:255|nullable',
             'phone_number' => 'string|min:10|max:10|required',
-            'contact' => 'string',
+            'contact' => 'string|nullable',
         ]);
 
         if ($validate->fails()) 
