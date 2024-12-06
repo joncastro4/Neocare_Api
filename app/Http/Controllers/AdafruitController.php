@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Sensor;
+use Illuminate\Support\Facades\Validator;
 
 class AdafruitController extends Controller
 {
@@ -88,6 +89,55 @@ class AdafruitController extends Controller
             'message' => 'Datos obtenidos correctamente',
             'data' => $datalist,
         ], 200);
+    }
+
+    public function crearGrupo(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'message' => 'Error de validación',
+                'errors' => $validate->errors(),
+            ], 422);
+        }
+
+        $groupData = [
+            'name' => $request->input('name'),
+            'description' => $request->input('description', ''),
+        ];
+
+        try 
+        {
+            $response = Http::withHeaders([
+                'X-AIO-Key' => $this->AIOkey,
+            ])->post("https://io.adafruit.com/api/v2/{$this->AIOuser}/groups", $groupData);
+
+            if ($response->successful()) 
+            {
+                return response()->json([
+                    'message' => 'Grupo creado exitosamente.',
+                    'data' => $response->json(),
+                ], 201);
+            }
+            else 
+            {
+                return response()->json([
+                    'message' => 'Error al crear el grupo.',
+                    'error' => $response->json(),
+                ], $response->status());
+            }
+        } 
+        catch (\Exception $e) 
+        {
+            return response()->json([
+                'message' => 'No se pudo crear el grupo.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     private function obtenerDatosSensor($tipoSensor)

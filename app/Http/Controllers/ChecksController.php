@@ -158,7 +158,7 @@ class ChecksController extends Controller
         }
 
         // Obtener las IDs de las enfermeras asociadas al usuario
-        $nurseIds = Nurse::where('user_id', $user->id)->orderByDesc('id')->pluck('id');
+        $nurseIds = Nurse::where('user_id', $user->id)->orderByDesc('created_at')->pluck('id');
 
         if ($nurseIds->isEmpty()) {
             return response()->json([

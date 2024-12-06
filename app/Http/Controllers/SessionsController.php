@@ -229,35 +229,36 @@ class SessionsController extends Controller
         $user = User::where('id', $id)->first();
 
         if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
+            return view('errors.user-not-found', [
+                'message' => 'User not found',
+            ]);
         }
 
         if (!$user->email_verified_at) {
-            return response()->json([
-                'message' => 'Email not verified'
-            ], 400);
+            return view('errors.email-not-verified', [
+                'message' => 'Email not verified',
+            ]);
         }
 
         if ($user->role == 'nurse') {
-            return response()->json([
-                'message' => 'User already activated'
-            ], 400);
+            return view('errors.already-activated', [
+                'message' => 'User already activated as a nurse',
+            ]);
         }
 
         if ($user->role == 'admin') {
-            return response()->json([
-                'message' => 'Admin cannot be activated'
-            ], 400);
+            return view('errors.admin-cannot-be-activated', [
+                'message' => 'Admin cannot be activated as a nurse',
+            ]);
         }
 
         $user->role = 'nurse';
         $user->save();
 
-        return response()->json([
-            'message' => 'Nurse activated successfully'
-        ], 200);
+        return view('success.nurse-verified', [
+            'message' => 'Nurse activated successfully',
+            'user' => $user,
+        ]);
     }
 
 }

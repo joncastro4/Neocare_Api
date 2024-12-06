@@ -29,6 +29,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('role')->group(function () {
             Route::apiResource('babies', BabiesController::class);
+            Route::post('add-person-relative/{baby_id}', [RelativesController::class, 'addPersonRelative']);
             Route::apiResource('babies-data', BabiesDataController::class);
             Route::apiResource('baby-incubators', BabyIncubatorsController::class);
             Route::apiResource('incubators', IncubatorsController::class);
@@ -46,8 +47,10 @@ Route::prefix('v1')->group(function () {
             Route::get('sessions/me', [SessionsController::class, 'me']);
             Route::post('sessions/logout', [SessionsController::class, 'logout']);
             Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
-        });
+            Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
 
+            Route::post('crear-grupo', [AdafruitController::class, 'crearGrupo']);
+        });
     });
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
