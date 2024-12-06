@@ -10,6 +10,7 @@ use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Nurse;
+use Illuminate\Support\Facades\Http;
 
 class IncubatorsController extends Controller
 {
@@ -49,7 +50,7 @@ class IncubatorsController extends Controller
     
         // Obtén las incubadoras asociadas a los bebés de esa enfermera
         $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
- 
+
         if ($user->role == 'admin') {
             $incubators = BabyIncubator::all();
         }
@@ -67,7 +68,6 @@ class IncubatorsController extends Controller
             return $incubator;
         });
     
-        // Retorna la respuesta con los datos de incubadoras y sus estados
         return response()->json([
             'data' => $incubatorsWithState
         ], 200);
@@ -76,6 +76,41 @@ class IncubatorsController extends Controller
     {
         $incubator = new Incubator();
         $incubator->save();
+
+        $groupName = 'incubator' . $incubator->id;
+        $groupData = [
+            'name' => $groupName,
+            'description' => 'Incubator ' . $incubator->id,
+        ];
+
+        try 
+        {
+            $response = Http::withHeaders([
+                'X-AIO-Key' => "aio_nBRg95EbrYiAnrK6jxq89C2bTHXH",
+            ])->post("https://io.adafruit.com/api/v2/Tunas/groups", $groupData);
+
+            if ($response->successful()) 
+            {
+                return response()->json([
+                    'message' => 'Grupo creado exitosamente.',
+                    'data' => $response->json(),
+                ], 201);
+            }
+            else 
+            {
+                return response()->json([
+                    'message' => 'Error al crear el grupo.',
+                    'error' => $response->json(),
+                ], $response->status());
+            }
+        } 
+        catch (\Exception $e) 
+        {
+            return response()->json([
+                'message' => 'No se pudo crear el grupo.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
 
         return response()->json([
             'msg' => 'Incubadora Agregada Correctamente',

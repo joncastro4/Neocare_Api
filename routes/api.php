@@ -48,8 +48,9 @@ Route::prefix('v1')->group(function () {
             Route::post('sessions/logout', [SessionsController::class, 'logout']);
             Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
             Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
-        });
 
+            Route::post('crear-grupo', [AdafruitController::class, 'crearGrupo']);
+        });
     });
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
