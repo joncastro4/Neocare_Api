@@ -110,6 +110,14 @@ class IncubatorsController extends Controller
             'data' => $incubator
         ], 201);
     }
+/*************  ✨ Codeium Command ⭐  *************/
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+/******  d84b1638-09d6-4bf4-8a77-5121e38dd887  *******/
     public function show($id)
     {
         if (!is_numeric($id)) {
