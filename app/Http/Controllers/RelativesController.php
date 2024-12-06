@@ -208,7 +208,7 @@ class RelativesController extends Controller
             'last_name_1' => 'string|max:255|required',
             'last_name_2' => 'string|max:255',
             'phone_number' => 'string|min:10|max:10|required',
-            'contact' => 'string|required',
+            'contact' => 'string',
         ]);
 
         if ($validate->fails()) 
