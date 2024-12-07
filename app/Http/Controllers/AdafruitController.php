@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Sensor;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class AdafruitController extends Controller
 {
@@ -25,58 +26,74 @@ class AdafruitController extends Controller
         $sensores = Sensor::whereNot('tipo_sensor', 'rgb')->get();
         $datalist = [];
 
-        foreach ($sensores as $sensor) 
-        {
-            try 
-            {
+        foreach ($sensores as $sensor) {
+            try {
                 $response = Http::withHeaders([
                     'X-AIO-Key' => $this->AIOkey,
                 ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/pruebas.{$sensor->tipo_sensor}/data");
 
-                if ($response->successful()) 
-                {
+                if ($response->successful()) {
                     $data = $response->json();
                     $values = [];
+                    $eventosHoy = 0;
+                    $eventosUltimaHora = 0;
+                    $ultimoEvento = null;
 
+                    $currentTime = now();
                     foreach ($data as $entry) {
                         if (isset($entry['value']) && is_numeric($entry['value'])) {
-                            $values[] = (float) $entry['value'];
+                            $value = (float) $entry['value'];
+                            $values[] = $value;
+
+                            if (in_array($sensor->tipo_sensor, ['movimiento', 'vibracion'])) {
+                                $timestamp = Carbon::parse($entry['created_at']);
+                                if ($value === 1.0) {
+                                    // Contar eventos de hoy
+                                    $eventosHoy += $timestamp->isToday() ? 1 : 0;
+
+                                    // Contar eventos en la última hora
+                                    $eventosUltimaHora += $timestamp->diffInHours($currentTime) < 1 ? 1 : 0;
+
+                                    // Actualizar último evento
+                                    $ultimoEvento = $ultimoEvento ? max($ultimoEvento, $timestamp) : $timestamp;
+                                }
+                            }
                         }
                     }
 
                     $currentValue = !empty($data) ? $data[0]['value'] : $this->sinDatos;
 
-                    $datalist[] = [
-                        'feed_key' => $sensor->tipo_sensor,
-                        'nombre_amigable' => $sensor->nombre_amigable,
-                        'unidad' => $sensor->unidad,
-                        'min_value' => !empty($values) ? min($values) : $this->sinDatos,
-                        'max_value' => !empty($values) ? max($values) : $this->sinDatos,
-                        'weekly_average' => !empty($values) ? (array_sum($values) / count($values)) : $this->sinDatos,
-                        'current_value' => $currentValue,
-                    ];
-                } 
-                else 
-                {
-                    $datalist[] = [
-                        'feed_key' => $sensor->tipo_sensor,
-                        'nombre_amigable' => $sensor->nombre_amigable,
-                        'unidad' => $sensor->unidad,
-                        'min_value' => $this->sinDatos,
-                        'max_value' => $this->sinDatos,
-                        'weekly_average' => $this->sinDatos,
-                        'current_value' => $this->sinDatos,
-                    ];
+                    if (in_array($sensor->tipo_sensor, ['movimiento', 'vibracion'])) {
+                        // Cálculo del porcentaje de actividad diaria
+                        $maxEventosPosibles = 288; // Supongamos 288 posibles eventos en un día
+                        $porcentajeActividad = ($eventosHoy / $maxEventosPosibles) * 100;
+
+                        $datalist[] = [
+                            'feed_key' => $sensor->tipo_sensor,
+                            'nombre_amigable' => $sensor->nombre_amigable,
+                            'unidad' => $sensor->unidad,
+                            'current_value' => $currentValue,
+                            'eventos_hoy' => $eventosHoy,
+                            'eventos_ultima_hora' => $eventosUltimaHora,
+                            'ultimo_evento' => $ultimoEvento ? $ultimoEvento->diffForHumans() : 'Sin eventos',
+                            'porcentaje_actividad' => round($porcentajeActividad, 2) . '%',
+                        ];
+                    } else {
+                        $datalist[] = [
+                            'feed_key' => $sensor->tipo_sensor,
+                            'nombre_amigable' => $sensor->nombre_amigable,
+                            'unidad' => $sensor->unidad,
+                            'min_value' => !empty($values) ? min($values) : $this->sinDatos,
+                            'max_value' => !empty($values) ? max($values) : $this->sinDatos,
+                            'weekly_average' => !empty($values) ? (array_sum($values) / count($values)) : $this->sinDatos,
+                            'current_value' => $currentValue,
+                        ];
+                    }
+                } else {
+                    $datalist[] = $this->datosSinConexion($sensor);
                 }
-            } 
-            catch (\Exception $e) 
-            {
-                $datalist[] = [
-                    'feed_key' => $sensor->tipo_sensor,
-                    'nombre_amigable' => $sensor->nombre_amigable,
-                    'unidad' => $sensor->unidad,
-                    'error' => 'No se pudo obtener el dato: ' . $e->getMessage(),
-                ];
+            } catch (\Exception $e) {
+                $datalist[] = $this->datosError($sensor, $e);
             }
         }
 
@@ -84,6 +101,31 @@ class AdafruitController extends Controller
             'message' => 'Datos obtenidos correctamente',
             'data' => $datalist,
         ], 200);
+    }
+
+
+    private function datosSinConexion($sensor)
+    {
+        return [
+            'feed_key' => $sensor->tipo_sensor,
+            'nombre_amigable' => $sensor->nombre_amigable,
+            'unidad' => $sensor->unidad,
+            'current_value' => $this->sinDatos,
+            'eventos_hoy' => $this->sinDatos,
+            'eventos_ultima_hora' => $this->sinDatos,
+            'ultimo_evento' => $this->sinDatos,
+            'porcentaje_actividad' => $this->sinDatos,
+        ];
+    }
+
+    private function datosError($sensor, $exception)
+    {
+        return [
+            'feed_key' => $sensor->tipo_sensor,
+            'nombre_amigable' => $sensor->nombre_amigable,
+            'unidad' => $sensor->unidad,
+            'error' => 'No se pudo obtener el dato: ' . $exception->getMessage(),
+        ];
     }
 
     public function crearGrupo(Request $request)
@@ -105,29 +147,23 @@ class AdafruitController extends Controller
             'description' => $request->input('description', ''),
         ];
 
-        try 
-        {
+        try {
             $response = Http::withHeaders([
                 'X-AIO-Key' => $this->AIOkey,
             ])->post("https://io.adafruit.com/api/v2/{$this->AIOuser}/groups", $groupData);
 
-            if ($response->successful()) 
-            {
+            if ($response->successful()) {
                 return response()->json([
                     'message' => 'Grupo creado exitosamente.',
                     'data' => $response->json(),
                 ], 201);
-            }
-            else 
-            {
+            } else {
                 return response()->json([
                     'message' => 'Error al crear el grupo.',
                     'error' => $response->json(),
                 ], $response->status());
             }
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'No se pudo crear el grupo.',
                 'error' => $e->getMessage(),
