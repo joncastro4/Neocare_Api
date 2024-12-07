@@ -18,26 +18,20 @@ class BabiesController extends Controller
     {
         $user = $request->user();
 
-        if ($user->role === 'nurse') 
-        {
+        if ($user->role === 'nurse') {
             $babies = Baby::with('person')
                 ->whereHas('nurse_baby', function ($query) use ($user) {
                     $query->whereHas('nurse', function ($q) use ($user) {
                         $q->where('user_id', $user->id);
                     });
-                })->get();
-        } 
-        else if ($user->role === 'admin') 
-        {
-            $babies = Baby::with('person')->get();
-        } 
-        else 
-        {
+                })->orderBy('created_at', 'desc')->get();
+        } else if ($user->role === 'admin') {
+            $babies = Baby::with('person')->orderBy('created_at', 'desc')->get();
+        } else {
             return response()->json(['msg' => 'Unauthorized role'], 403);
         }
 
-        if ($babies->isEmpty()) 
-        {
+        if ($babies->isEmpty()) {
             return response()->json(['msg' => "No Babies Found"], 204);
         }
 
