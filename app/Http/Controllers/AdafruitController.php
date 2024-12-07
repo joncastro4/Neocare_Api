@@ -25,57 +25,52 @@ class AdafruitController extends Controller
         $sensores = Sensor::whereNot('tipo_sensor', 'rgb')->get();
         $datalist = [];
 
-        foreach ($sensores as $sensor) {
-            try {
-                // Obtener datos históricos para el sensor actual
+        foreach ($sensores as $sensor) 
+        {
+            try 
+            {
                 $response = Http::withHeaders([
                     'X-AIO-Key' => $this->AIOkey,
                 ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/pruebas.{$sensor->tipo_sensor}/data");
 
-                if ($response->successful()) {
-                    $data = $response->json(); // Datos históricos en formato JSON
+                if ($response->successful()) 
+                {
+                    $data = $response->json();
                     $values = [];
 
-                    // Filtrar y convertir valores válidos
                     foreach ($data as $entry) {
                         if (isset($entry['value']) && is_numeric($entry['value'])) {
                             $values[] = (float) $entry['value'];
                         }
                     }
 
-                    $value = !empty($data) ? $data[count($data) - 1]['value'] : $this->sinDatos;
+                    $currentValue = !empty($data) ? $data[0]['value'] : $this->sinDatos;
 
-                    // Calcular métricas solo si hay valores válidos
-                    if (!empty($values)) {
-                        $datalist[] = [
-                            'feed_key' => $sensor->tipo_sensor,
-                            'nombre_amigable' => $sensor->nombre_amigable,
-                            'unidad' => $sensor->unidad,
-                            'min_value' => min($values),
-                            'max_value' => max($values),
-                            'weekly_average' => array_sum($values) / count($values),
-                            'current_value' => $value,
-                        ];
-                    } else {
-                        $datalist[] = [
-                            'feed_key' => $sensor->tipo_sensor,
-                            'nombre_amigable' => $sensor->nombre_amigable,
-                            'unidad' => $sensor->unidad,
-                            'min_value' => $this->sinDatos,
-                            'max_value' => $this->sinDatos,
-                            'weekly_average' => $this->sinDatos,
-                            'current_valuevalue' => $this->sinDatos,
-                        ];
-                    }
-                } else {
                     $datalist[] = [
                         'feed_key' => $sensor->tipo_sensor,
                         'nombre_amigable' => $sensor->nombre_amigable,
                         'unidad' => $sensor->unidad,
-                        'error' => 'No se pudo obtener el dato',
+                        'min_value' => !empty($values) ? min($values) : $this->sinDatos,
+                        'max_value' => !empty($values) ? max($values) : $this->sinDatos,
+                        'weekly_average' => !empty($values) ? (array_sum($values) / count($values)) : $this->sinDatos,
+                        'current_value' => $currentValue,
+                    ];
+                } 
+                else 
+                {
+                    $datalist[] = [
+                        'feed_key' => $sensor->tipo_sensor,
+                        'nombre_amigable' => $sensor->nombre_amigable,
+                        'unidad' => $sensor->unidad,
+                        'min_value' => $this->sinDatos,
+                        'max_value' => $this->sinDatos,
+                        'weekly_average' => $this->sinDatos,
+                        'current_value' => $this->sinDatos,
                     ];
                 }
-            } catch (\Exception $e) {
+            } 
+            catch (\Exception $e) 
+            {
                 $datalist[] = [
                     'feed_key' => $sensor->tipo_sensor,
                     'nombre_amigable' => $sensor->nombre_amigable,
