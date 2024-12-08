@@ -34,25 +34,32 @@ class AdafruitController extends Controller
 
                 if ($response->successful()) {
                     $data = $response->json(); // Datos históricos en formato JSON
+                    $valuesByDate = [];
                     $values = [];
 
-                    // Filtrar y convertir valores válidos
+                    // Filtrar y agrupar datos por fecha
                     foreach ($data as $entry) {
-                        if (isset($entry['value']) && is_numeric($entry['value'])) {
-                            $values[] = (float) $entry['value'];
+                        if (isset($entry['value']) && is_numeric($entry['value']) && isset($entry['created_at'])) {
+                            $value = (float) $entry['value'];
+                            $date = (new \DateTime($entry['created_at']))->format('Y-m-d');
+                            $valuesByDate[$date][] = $value;
+                            $values[] = $value;
                         }
                     }
+
+                    $lastDate = array_key_last($valuesByDate);
+                    $dailyValues = $lastDate ? $valuesByDate[$lastDate] : [];
 
                     $value = !empty($data) ? $data[count($data) - 1]['value'] : $this->sinDatos;
 
                     // Calcular métricas solo si hay valores válidos
-                    if (!empty($values)) {
+                    if (!empty($dailyValues)) {
                         $datalist[] = [
                             'feed_key' => $sensor->tipo_sensor,
                             'nombre_amigable' => $sensor->nombre_amigable,
                             'unidad' => $sensor->unidad,
-                            'min_value' => min($values),
-                            'max_value' => max($values),
+                            'min_value' => min($dailyValues), // Mínimo del último día
+                            'max_value' => max($dailyValues), // Máximo del último día
                             'weekly_average' => array_sum($values) / count($values),
                             'current_value' => $value,
                         ];
@@ -64,7 +71,7 @@ class AdafruitController extends Controller
                             'min_value' => $this->sinDatos,
                             'max_value' => $this->sinDatos,
                             'weekly_average' => $this->sinDatos,
-                            'current_valuevalue' => $this->sinDatos,
+                            'current_value' => $this->sinDatos,
                         ];
                     }
                 } else {
@@ -89,55 +96,6 @@ class AdafruitController extends Controller
             'message' => 'Datos obtenidos correctamente',
             'data' => $datalist,
         ], 200);
-    }
-
-    public function crearGrupo(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string|max:500',
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'message' => 'Error de validación',
-                'errors' => $validate->errors(),
-            ], 422);
-        }
-
-        $groupData = [
-            'name' => $request->input('name'),
-            'description' => $request->input('description', ''),
-        ];
-
-        try 
-        {
-            $response = Http::withHeaders([
-                'X-AIO-Key' => $this->AIOkey,
-            ])->post("https://io.adafruit.com/api/v2/{$this->AIOuser}/groups", $groupData);
-
-            if ($response->successful()) 
-            {
-                return response()->json([
-                    'message' => 'Grupo creado exitosamente.',
-                    'data' => $response->json(),
-                ], 201);
-            }
-            else 
-            {
-                return response()->json([
-                    'message' => 'Error al crear el grupo.',
-                    'error' => $response->json(),
-                ], $response->status());
-            }
-        } 
-        catch (\Exception $e) 
-        {
-            return response()->json([
-                'message' => 'No se pudo crear el grupo.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
     }
 
     private function obtenerDatosSensor($tipoSensor)
