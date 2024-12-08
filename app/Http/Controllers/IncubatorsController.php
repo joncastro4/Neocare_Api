@@ -18,7 +18,7 @@ class IncubatorsController extends Controller
 
     public function index()
     {
-        $incubators = Incubator::all();
+        $incubators = Incubator::all()->where('state', 'available');
 
         if (!$incubators) {
             return response()->json([
@@ -33,7 +33,7 @@ class IncubatorsController extends Controller
     public function incubatorNurse()
     {
         $user = auth()->user();
-    
+
         if (!$user) {
             return response()->json([
                 'msg' => 'No user found'
@@ -47,27 +47,27 @@ class IncubatorsController extends Controller
                 'msg' => 'No baby nurses found for this user'
             ], 404);
         }
-    
+
         // Obtén las incubadoras asociadas a los bebés de esa enfermera
         $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
 
         if ($user->role == 'admin') {
             $incubators = BabyIncubator::all();
         }
-    
+
         if ($incubators->isEmpty()) {
             return response()->json([
                 'msg' => 'No incubators found for these babies'
             ], 204);
         }
-    
+
         // Agrega el estado de cada incubadora al arreglo
         $incubatorsWithState = $incubators->map(function ($incubator) {
             $incubatorDetails = Incubator::find($incubator->incubator_id);
             $incubator->state = $incubatorDetails ? $incubatorDetails->state : 'Unknown';
             return $incubator;
         });
-    
+
         return response()->json([
             'data' => $incubatorsWithState
         ], 200);
@@ -83,22 +83,18 @@ class IncubatorsController extends Controller
             'description' => 'Incubator ' . $incubator->id,
         ];
 
-        try 
-        {
+        try {
             $response = Http::withHeaders([
                 'X-AIO-Key' => "aio_nBRg95EbrYiAnrK6jxq89C2bTHXH",
             ])->post("https://io.adafruit.com/api/v2/Tunas/groups", $groupData);
 
-            if (!$response->successful()) 
-            {
+            if (!$response->successful()) {
                 return response()->json([
                     'message' => 'Error al crear el grupo.',
                     'error' => $response->json(),
                 ], $response->status());
             }
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'No se pudo crear el grupo.',
                 'error' => $e->getMessage(),
