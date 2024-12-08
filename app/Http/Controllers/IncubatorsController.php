@@ -18,7 +18,7 @@ class IncubatorsController extends Controller
 
     public function index()
     {
-        $incubators = Incubator::all()->where('state', 'available');
+        $incubators = Incubator::where('state', 'available')->get();
 
         if (!$incubators) {
             return response()->json([
