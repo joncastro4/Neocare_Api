@@ -53,16 +53,31 @@ class BabyIncubatorsController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby_incubator = BabyIncubator::find($id);
 
-        if (!$baby_incubator) {
+        $data = BabyIncubator::find($id);
+
+        if (!$data) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'Data not found'
             ], 404);
         }
 
+        $egressDate = $data->baby->egress_date ?? null;
+        $name = $data->baby->person->name ?? null;
+        $last_name_1 = $data->baby->person->last_name_1 ?? null;
+        $last_name_2 = $data->baby->person->last_name_2 ?? null;
+        $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
+        $state = $data->incubator->state ?? null;
+        $baby_incubator_id = $data->id ?? null;
+
         return response()->json([
-            'baby_incubator' => $baby_incubator
+            "message" => 'Datos obtenidos correctamente',
+            "data" => [
+                "egress_date" => $egressDate,
+                "baby" => $baby,
+                "state" => $state,
+                "baby_incubator_id" => $baby_incubator_id
+            ],
         ], 200);
     }
     public function update(Request $request, $id)
