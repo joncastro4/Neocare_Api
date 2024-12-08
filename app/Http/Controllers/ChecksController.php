@@ -177,20 +177,28 @@ class ChecksController extends Controller
             ], 403);
         }
 
-        // Obtener las IDs de las enfermeras asociadas al usuario
-        $nurseIds = Nurse::where('user_id', $user->id)->orderByDesc('created_at')->pluck('id');
+        // Verificar si el usuario es admin
+        if ($user->role === 'admin') {
+            // Si es admin, obtener todos los chequeos
+            $checks = Check::with(['baby_incubator.baby.person'])
+                ->orderByDesc('created_at') // Orden descendente
+                ->get();
+        } else {
+            // Obtener las IDs de las enfermeras asociadas al usuario
+            $nurseIds = Nurse::where('user_id', $user->id)->orderByDesc('created_at')->pluck('id');
 
-        if ($nurseIds->isEmpty()) {
-            return response()->json([
-                'msg' => 'unauthorized'
-            ], 403);
+            if ($nurseIds->isEmpty()) {
+                return response()->json([
+                    'msg' => 'unauthorized'
+                ], 403);
+            }
+
+            // Obtener los chequeos asociados a las enfermeras del usuario
+            $checks = Check::whereIn('nurse_id', $nurseIds)
+                ->with(['baby_incubator.baby.person'])
+                ->orderByDesc('created_at') // Orden descendente
+                ->get();
         }
-
-        // Obtener los chequeos asociados, ordenados de manera descendiente por created_at
-        $checks = Check::whereIn('nurse_id', $nurseIds)
-            ->with(['baby_incubator.baby.person'])
-            ->orderByDesc('created_at') // Orden descendente
-            ->get();
 
         // Mapear los resultados
         $data = $checks->map(function ($check) {

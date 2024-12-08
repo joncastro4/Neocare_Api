@@ -51,10 +51,12 @@ class IncubatorsController extends Controller
             }
         
             // Obtén las incubadoras asociadas a los bebés de esa enfermera
-            $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
+            $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))
+                ->orderByDesc('created_at')  // Orden descendente por fecha de creación
+                ->get();
         } else {
             // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
-            $incubators = BabyIncubator::all();
+            $incubators = BabyIncubator::orderByDesc('created_at')->get();
         }
         
         if ($incubators->isEmpty()) {
