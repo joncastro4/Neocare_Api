@@ -70,7 +70,9 @@ class BabyIncubatorsController extends Controller
         }
     
         // Buscar la relación en BabyIncubator usando el incubator_id
-        $babyIncubator = BabyIncubator::where('incubator_id', $incubator->id)->first();
+        $babyIncubator = BabyIncubator::where('incubator_id', $incubator->id)
+        ->orderBy('created_at', 'desc') // Ordenar por la columna de tiempo descendente
+        ->first();
     
         if (!$babyIncubator) {
             return response()->json([
@@ -114,7 +116,7 @@ class BabyIncubatorsController extends Controller
                 "baby_incubator_id" => $babyIncubator->id
             ],
         ], 200);
-    }    
+    }
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {
