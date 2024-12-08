@@ -18,7 +18,7 @@ class IncubatorsController extends Controller
 
     public function index()
     {
-        $incubators = Incubator::all();
+        $incubators = Incubator::all()->where('state', 'available');
 
         if (!$incubators) {
             return response()->json([
@@ -73,8 +73,8 @@ class IncubatorsController extends Controller
         return response()->json([
             'data' => $incubatorsWithState
         ], 200);
-    }    
-
+    }
+    
     public function store()
     {
         $incubator = new Incubator();
@@ -86,22 +86,18 @@ class IncubatorsController extends Controller
             'description' => 'Incubator ' . $incubator->id,
         ];
 
-        try 
-        {
+        try {
             $response = Http::withHeaders([
                 'X-AIO-Key' => "aio_nBRg95EbrYiAnrK6jxq89C2bTHXH",
             ])->post("https://io.adafruit.com/api/v2/Tunas/groups", $groupData);
 
-            if (!$response->successful()) 
-            {
+            if (!$response->successful()) {
                 return response()->json([
                     'message' => 'Error al crear el grupo.',
                     'error' => $response->json(),
                 ], $response->status());
             }
-        } 
-        catch (\Exception $e) 
-        {
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'No se pudo crear el grupo.',
                 'error' => $e->getMessage(),
