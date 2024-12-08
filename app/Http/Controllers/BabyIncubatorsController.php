@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Baby;
 use App\Models\BabyIncubator;
+use App\Models\Incubator;
+use App\Models\Person;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -54,21 +57,44 @@ class BabyIncubatorsController extends Controller
             abort(404);
         }
 
-        $data = BabyIncubator::find($id);
+        $incubatorId = Incubator::where('id', $id)->first();
 
-        if (!$data) {
+        if (!$incubatorId) {
             return response()->json([
-                'msg' => 'Data not found'
+                'msg' => 'Error al obtener los datos'
             ], 404);
         }
 
-        $egressDate = $data->baby->egress_date ?? null;
-        $name = $data->baby->person->name ?? null;
-        $last_name_1 = $data->baby->person->last_name_1 ?? null;
-        $last_name_2 = $data->baby->person->last_name_2 ?? null;
+        $babyIncubatorId = BabyIncubator::where('incubator_id', $incubatorId->id)->first();
+
+        if (!$babyIncubatorId) {
+            return response()->json([
+                'msg' => 'Error al obtener los datos'
+            ], 404);
+        }
+
+        $babyId = Baby::where('id', $babyIncubatorId->baby_id)->first();
+
+        if (!$babyId) {
+            return response()->json([
+                'msg' => 'Error al obtener los datos'
+            ], 404);
+        }
+
+        $person = Person::where('id', $babyId->person_id)->first();
+
+        if (!$person) {
+            return response()->json([
+                'msg' => 'Error al obtener los datos'
+            ], 404);
+        }
+        
+        $egressDate = $babyId->egress_date ?? null;
+        $name = $person->name ?? null;
+        $last_name_1 = $person->last_name_1 ?? null;
+        $last_name_2 = $person->last_name_2 ?? null;
         $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
-        $state = $data->incubator->state ?? null;
-        $baby_incubator_id = $data->id ?? null;
+        $state = $incubatorId->state ?? null;
 
         return response()->json([
             "message" => 'Datos obtenidos correctamente',
@@ -76,7 +102,7 @@ class BabyIncubatorsController extends Controller
                 "egress_date" => $egressDate,
                 "baby" => $baby,
                 "state" => $state,
-                "baby_incubator_id" => $baby_incubator_id
+                "baby_incubator_id" => $babyIncubatorId->id
             ],
         ], 200);
     }
