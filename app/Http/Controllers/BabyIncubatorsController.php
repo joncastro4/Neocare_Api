@@ -152,18 +152,31 @@ class BabyIncubatorsController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby_incubator = BabyIncubator::find($id);
-
-        if (!$baby_incubator) {
+    
+        // Buscar el incubator relacionado
+        $incubator = Incubator::find($id);
+    
+        if (!$incubator) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'Incubadora no encontrada'
+            ], 404);
+        }
+    
+        // Buscar la relación en BabyIncubator usando el incubator_id
+        $babyIncubator = BabyIncubator::where('incubator_id', $incubator->id)->first();
+    
+        if (!$babyIncubator) {
+            return response()->json([
+                'msg' => 'Relación entre bebé e incubadora no encontrada'
             ], 404);
         }
 
-        $baby_incubator->delete();
-
+        // Eliminar la relación
+        $babyIncubator->delete();
+    
         return response()->json([
-            'msg' => 'Data Deleted'
+            'msg' => 'Data Deleted',
+            'babyIncubatorId' => $babyIncubator->id
         ], 200);
     }
 }
