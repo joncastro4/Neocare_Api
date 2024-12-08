@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use App\Models\Sensor;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class AdafruitController extends Controller
 {
@@ -27,7 +28,6 @@ class AdafruitController extends Controller
 
         foreach ($sensores as $sensor) {
             try {
-                // Obtener datos históricos para el sensor actual
                 $response = Http::withHeaders([
                     'X-AIO-Key' => $this->AIOkey,
                 ])->get("https://io.adafruit.com/api/v2/{$this->AIOuser}/feeds/pruebas.{$sensor->tipo_sensor}/data");
@@ -36,14 +36,32 @@ class AdafruitController extends Controller
                     $data = $response->json(); // Datos históricos en formato JSON
                     $valuesByDate = [];
                     $values = [];
+                    $eventosHoy = 0;
+                    $eventosUltimaHora = 0;
+                    $ultimoEvento = null;
 
                     // Filtrar y agrupar datos por fecha
                     foreach ($data as $entry) {
                         if (isset($entry['value']) && is_numeric($entry['value']) && isset($entry['created_at'])) {
                             $value = (float) $entry['value'];
-                            $date = (new \DateTime($entry['created_at']))->format('Y-m-d');
+                            $createdAt = new \DateTime($entry['created_at']);
+                            $date = $createdAt->format('Y-m-d');
                             $valuesByDate[$date][] = $value;
                             $values[] = $value;
+
+                            // Contar eventos de hoy
+                            if ($createdAt->format('Y-m-d') === (new \DateTime())->format('Y-m-d')) {
+                                $eventosHoy++;
+                            }
+
+                            // Contar eventos de la última hora
+                            $ultimaHora = (new \DateTime())->modify('-1 hour');
+                            if ($createdAt >= $ultimaHora) {
+                                $eventosUltimaHora++;
+                            }
+
+
+                            $ultimoEvento = $entry;
                         }
                     }
 
@@ -54,14 +72,20 @@ class AdafruitController extends Controller
 
                     // Calcular métricas solo si hay valores válidos
                     if (!empty($dailyValues)) {
+                        $minValue = min($dailyValues); // Mínimo del último día
+                        $maxValue = max($dailyValues); // Máximo del último día
+
                         $datalist[] = [
                             'feed_key' => $sensor->tipo_sensor,
                             'nombre_amigable' => $sensor->nombre_amigable,
                             'unidad' => $sensor->unidad,
-                            'min_value' => min($dailyValues), // Mínimo del último día
-                            'max_value' => max($dailyValues), // Máximo del último día
+                            'min_value' => $minValue,
+                            'max_value' => $maxValue,
                             'weekly_average' => array_sum($values) / count($values),
                             'current_value' => $value,
+                            'eventos_hoy' => $eventosHoy,
+                            'eventos_ultima_hora' => $eventosUltimaHora,
+                            'ultimo_evento' => $ultimoEvento,
                         ];
                     } else {
                         $datalist[] = [
@@ -72,23 +96,16 @@ class AdafruitController extends Controller
                             'max_value' => $this->sinDatos,
                             'weekly_average' => $this->sinDatos,
                             'current_value' => $this->sinDatos,
+                            'eventos_hoy' => $this->sinDatos,
+                            'eventos_ultima_hora' => $this->sinDatos,
+                            'ultimo_evento' => $this->sinDatos,
                         ];
                     }
                 } else {
-                    $datalist[] = [
-                        'feed_key' => $sensor->tipo_sensor,
-                        'nombre_amigable' => $sensor->nombre_amigable,
-                        'unidad' => $sensor->unidad,
-                        'error' => 'No se pudo obtener el dato',
-                    ];
+                    $datalist[] = $this->datosSinConexion($sensor);
                 }
             } catch (\Exception $e) {
-                $datalist[] = [
-                    'feed_key' => $sensor->tipo_sensor,
-                    'nombre_amigable' => $sensor->nombre_amigable,
-                    'unidad' => $sensor->unidad,
-                    'error' => 'No se pudo obtener el dato: ' . $e->getMessage(),
-                ];
+                $datalist[] = $this->datosError($sensor, $e);
             }
         }
 

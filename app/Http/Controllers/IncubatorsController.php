@@ -89,14 +89,7 @@ class IncubatorsController extends Controller
                 'X-AIO-Key' => "aio_nBRg95EbrYiAnrK6jxq89C2bTHXH",
             ])->post("https://io.adafruit.com/api/v2/Tunas/groups", $groupData);
 
-            if ($response->successful()) 
-            {
-                return response()->json([
-                    'message' => 'Grupo creado exitosamente.',
-                    'data' => $response->json(),
-                ], 201);
-            }
-            else 
+            if (!$response->successful()) 
             {
                 return response()->json([
                     'message' => 'Error al crear el grupo.',

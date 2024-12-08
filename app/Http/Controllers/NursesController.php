@@ -250,11 +250,9 @@ class NursesController extends Controller
         }
 
         if (!$nurse->image_path) {
-            return response()->json([
-                'msg' => 'No Image Found'
-            ], 404);
+            return response('neocare/nurses_images/cnJUhC6PhoNCa6MPi1wVyQHozA3wQiHOIpPRclhN.jpg', 200)->header('Content-Type', 'image/jpg');
         }
-
+        
         try {
             $content = Storage::disk('s3')->get($nurse->image_path);
         } catch (FileNotFoundException $e) {
