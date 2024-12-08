@@ -163,7 +163,15 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        $incubator = Incubator::find($id);
+        $BabyIncubator = BabyIncubator::find($id);
+
+        if (!$BabyIncubator) {
+            return response()->json([
+                'msg' => 'No se encontraron los datos'
+            ], 404);
+        }
+
+        $incubator = Incubator::find($BabyIncubator->incubator_id);
 
         if (!$incubator) {
             return response()->json([
