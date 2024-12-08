@@ -17,14 +17,27 @@ class ChecksController extends Controller
         if (!$user) {
             return response()->json([
                 'msg' => 'Unauthorized'
-            ])
+            ]);
         }
-        $checks = Check::with('nurse', 'baby')->all();
 
-        if (!$checks) {
+
+        // Si el usuario no es admin, obtenemos los BabyNurses asociados
+        if ($user->role != 'admin') {
+            $checks = Check::where('nurse_id', $user->id)->get();
+
+            if ($checks->isEmpty()) {
+                return response()->json([
+                    'msg' => 'No hay chequeos para esta enfermera'
+                ], 404);
+            }
+
+
             return response()->json([
-                'msg' => 'No Checks Found'
-            ], 204);
+                'data' => $checks
+            ]);
+        } else {
+            // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
+            $checks = Check::all();
         }
 
         return response()->json([
