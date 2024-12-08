@@ -11,6 +11,7 @@ use App\Models\BabyIncubator;
 use DB;
 use DateTime;
 use Carbon\Carbon;
+use App\Models\Incubator;
 
 class BabiesController extends Controller
 {
@@ -221,7 +222,14 @@ class BabiesController extends Controller
 
         $babyIncubator->baby_id = $request->baby_id;
         $babyIncubator->incubator_id = $request->incubator_id;
+
         $babyIncubator->save();
+
+        $incubator = Incubator::find($request->incubator_id);
+        if ($incubator) {
+            $incubator->state = 'active';
+            $incubator->save();
+        }
 
         return response()->json([
             'msg' => 'Baby assigned to incubator successfully'
