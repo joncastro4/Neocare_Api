@@ -57,17 +57,39 @@ class BabiesController extends Controller
                         $fail('The ' . $attribute . ' must be in the format dd/MM/yyyy.');
                     }
                 },
-                'before_or_equal:today'
+                'before_or_equal:today',
             ],
-            'ingress_date' => 'nullable|date|after_or_equal:date_of_birth|before_or_equal:today',
-            'egress_date' => [
-                'nullable',
-                'date',
+            'ingress_date' => [
+                'nullable', // Permitir que no se envíe
+                'string',
+                function ($attribute, $value, $fail) {
+                    // Si se envía, valida el formato
+                    if ($value) {
+                        $date = DateTime::createFromFormat('d/m/Y', $value);
+                        if (!$date || $date->format('d/m/Y') !== $value) {
+                            $fail('The ' . $attribute . ' must be in the format dd/MM/yyyy.');
+                        }
+                    }
+                },
                 'after_or_equal:date_of_birth',
-                function ($value, $fail) use ($request) {
-                    $ingressDate = $request->ingress_date ?? now()->toDateString();
-                    if ($value < $ingressDate) {
-                        $fail('The egress date cannot be earlier than the ingress date.');
+                'before_or_equal:today',
+            ],
+            'egress_date' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) use ($request) {
+                    // Valida el formato dd/MM/yyyy
+                    $date = DateTime::createFromFormat('d/m/Y', $value);
+                    if (!$date || $date->format('d/m/Y') !== $value) {
+                        $fail('The ' . $attribute . ' must be in the format dd/MM/yyyy.');
+                        return;
+                    }
+
+                    $ingressDate = $request->input('ingress_date', now()->format('d/m/Y'));
+                    $ingressDateParsed = DateTime::createFromFormat('d/m/Y', $ingressDate);
+
+                    if ($ingressDateParsed && $date < $ingressDateParsed) {
+                        $fail('The ' . $attribute . ' cannot be earlier than the ingress date.');
                     }
                 },
             ],
@@ -80,6 +102,7 @@ class BabiesController extends Controller
         }
 
         $dateOfBirth = Carbon::createFromFormat('d/m/Y', $request->date_of_birth)->format('Y-m-d');
+        $egressDate = Carbon::createFromFormat('d/m/Y', $request->egress_date)->format('Y-m-d');
 
         $person = new Person();
         $person->name = $request->name;
@@ -91,6 +114,7 @@ class BabiesController extends Controller
         $baby->person_id = $person->id;
         $baby->date_of_birth = $dateOfBirth;
         $baby->ingress_date = $request->ingress_date ?? now()->toDateString();
+        $baby->egress_date = $egressDate;
         $baby->save();
 
         return response()->json([
