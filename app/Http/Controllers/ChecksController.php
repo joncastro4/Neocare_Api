@@ -12,6 +12,13 @@ class ChecksController extends Controller
 {
     public function index()
     {
+        $user = auth()->user();
+
+        if (!$user) {
+            return response()->json([
+                'msg' => 'Unauthorized'
+            ])
+        }
         $checks = Check::with('nurse', 'baby')->all();
 
         if (!$checks) {
