@@ -53,59 +53,68 @@ class BabyIncubatorsController extends Controller
     }
     public function show($id)
     {
+        // Verificar que el ID es numérico
         if (!is_numeric($id)) {
-            abort(404);
-        }
-
-        $incubatorId = Incubator::where('id', $id)->first();
-
-        if (!$incubatorId) {
             return response()->json([
-                'msg' => 'Error al obtener los datos'
+                'msg' => 'ID inválido'
             ], 404);
         }
-
-        $babyIncubatorId = BabyIncubator::where('incubator_id', $incubatorId->id)->first();
-
-        if (!$babyIncubatorId) {
+    
+        // Buscar el incubator relacionado
+        $incubator = Incubator::find($id);
+    
+        if (!$incubator) {
             return response()->json([
-                'msg' => 'Error al obtener los datos'
+                'msg' => 'Incubadora no encontrada'
             ], 404);
         }
-
-        $babyId = Baby::where('id', $babyIncubatorId->baby_id)->first();
-
-        if (!$babyId) {
+    
+        // Buscar la relación en BabyIncubator usando el incubator_id
+        $babyIncubator = BabyIncubator::where('incubator_id', $incubator->id)->first();
+    
+        if (!$babyIncubator) {
             return response()->json([
-                'msg' => 'Error al obtener los datos'
+                'msg' => 'Relación entre bebé e incubadora no encontrada'
             ], 404);
         }
-
-        $person = Person::where('id', $babyId->person_id)->first();
-
+    
+        // Buscar el bebé relacionado
+        $baby = Baby::find($babyIncubator->baby_id);
+    
+        if (!$baby) {
+            return response()->json([
+                'msg' => 'Bebé no encontrado'
+            ], 404);
+        }
+    
+        // Buscar la persona asociada al bebé
+        $person = Person::find($baby->person_id);
+    
         if (!$person) {
             return response()->json([
-                'msg' => 'Error al obtener los datos'
+                'msg' => 'Persona no encontrada'
             ], 404);
         }
-        
-        $egressDate = $babyId->egress_date ?? null;
+    
+        // Preparar los datos
+        $egressDate = $baby->egress_date ?? null;
         $name = $person->name ?? null;
-        $last_name_1 = $person->last_name_1 ?? null;
-        $last_name_2 = $person->last_name_2 ?? null;
-        $baby = $name . ' ' . $last_name_1 . ' ' . $last_name_2;
-        $state = $incubatorId->state ?? null;
-
+        $lastName1 = $person->last_name_1 ?? null;
+        $lastName2 = $person->last_name_2 ?? null;
+        $babyName = trim("{$name} {$lastName1} {$lastName2}");
+        $state = $incubator->state ?? null;
+    
+        // Retornar los datos en la respuesta
         return response()->json([
             "message" => 'Datos obtenidos correctamente',
             "data" => [
                 "egress_date" => $egressDate,
-                "baby" => $baby,
+                "baby" => $babyName,
                 "state" => $state,
-                "baby_incubator_id" => $babyIncubatorId->id
+                "baby_incubator_id" => $babyIncubator->id
             ],
         ], 200);
-    }
+    }    
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {
