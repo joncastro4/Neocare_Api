@@ -33,45 +33,48 @@ class IncubatorsController extends Controller
     public function incubatorNurse()
     {
         $user = auth()->user();
-    
+        
         if (!$user) {
             return response()->json([
                 'msg' => 'No user found'
             ], 404);
         }
-
-        $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
-
-        if ($babyNurses->isEmpty()) {
-            return response()->json([
-                'msg' => 'No baby nurses found for this user'
-            ], 404);
-        }
     
-        // Obtén las incubadoras asociadas a los bebés de esa enfermera
-        $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
-
-        if ($user->role == 'admin') {
+        // Si el usuario no es admin, obtenemos los BabyNurses asociados
+        if ($user->role != 'admin') {
+            $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
+    
+            if ($babyNurses->isEmpty()) {
+                return response()->json([
+                    'msg' => 'No baby nurses found for this user'
+                ], 404);
+            }
+        
+            // Obtén las incubadoras asociadas a los bebés de esa enfermera
+            $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))->get();
+        } else {
+            // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
             $incubators = BabyIncubator::all();
         }
-    
+        
         if ($incubators->isEmpty()) {
             return response()->json([
                 'msg' => 'No incubators found for these babies'
             ], 204);
         }
-    
+        
         // Agrega el estado de cada incubadora al arreglo
         $incubatorsWithState = $incubators->map(function ($incubator) {
             $incubatorDetails = Incubator::find($incubator->incubator_id);
             $incubator->state = $incubatorDetails ? $incubatorDetails->state : 'Unknown';
             return $incubator;
         });
-    
+        
         return response()->json([
             'data' => $incubatorsWithState
         ], 200);
-    }
+    }    
+
     public function store()
     {
         $incubator = new Incubator();
