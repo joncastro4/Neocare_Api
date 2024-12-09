@@ -40,47 +40,34 @@ class IncubatorsController extends Controller
             ], 404);
         }
 
-        // Si el usuario no es admin, obtenemos los BabyNurses asociados
+        // Si el usuario no es admin, obtenemos todas las incubadoras sin importar la relación con la enfermera
         if ($user->role != 'admin') {
-            $babyNurses = NurseBaby::where('nurse_id', $user->id)->get();
+            $incubators = Incubator::orderByDesc('created_at')->get();
 
-            if ($babyNurses->isEmpty()) {
+            if ($incubators->isEmpty()) {
                 return response()->json([
-                    'msg' => 'No baby nurses found for this user'
+                    'msg' => 'No incubators found'
                 ], 404);
             }
 
-            // Obtén las incubadoras asociadas a los bebés de esa enfermera
-            $incubators = BabyIncubator::whereIn('baby_id', $babyNurses->pluck('baby_id'))
-                ->orderByDesc('created_at')  // Orden descendente por fecha de creación
-                ->get();
+            // Agrega el estado de cada incubadora al arreglo
+            $incubatorsWithState = $incubators->map(function ($incubator) {
+                $incubatorDetails = Incubator::find($incubator->id);
+                $incubator->state = $incubatorDetails ? $incubatorDetails->state : 'Unknown';
+                return $incubator;
+            });
 
-            // Verifica si el array de incubadoras no está vacío
-            if ($incubators->isNotEmpty()) {
-                // Obtén los incubator_ids de todas las incubadoras
-                $incubatorIds = $incubators->pluck('incubator_id');  // pluck devuelve una colección con los valores de la columna 'id'
-                $incubatorState = Incubator::whereIn('id', $incubatorIds)->get();
-
-                return response()->json([
-                    'data' => $incubatorState
-                ]);
-            } else {
-                // Si no hay incubadoras, maneja el caso según sea necesario
-                $incubatorIds = collect(); // Devuelve una colección vacía
-                $incubatorState = Incubator::whereIn('id', $incubatorIds)->get();
-
-                return response()->json([
-                    'data' => $incubatorState
-                ]);
-            }
-        } else {
-            // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
-            $incubators = Incubator::orderByDesc('created_at')->get();
+            return response()->json([
+                'data' => $incubatorsWithState
+            ], 200);
         }
+
+        // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
+        $incubators = Incubator::orderByDesc('created_at')->get();
 
         if ($incubators->isEmpty()) {
             return response()->json([
-                'msg' => 'No incubators found for these babies'
+                'msg' => 'No incubators found'
             ], 204);
         }
 
@@ -95,6 +82,7 @@ class IncubatorsController extends Controller
             'data' => $incubatorsWithState
         ], 200);
     }
+
 
     public function store()
     {
