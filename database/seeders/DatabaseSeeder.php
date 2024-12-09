@@ -22,18 +22,18 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            PersonSeeder::class,
-            BabySeeder::class,
-            RelativeSeeder::class,
-            NurseSeeder::class,
-            ScheduleSeeder::class,
-            NurseBabySeeder::class,
-            NotificationSeeder::class,
-            IncubatorSeeder::class,
-            BabyIncubatorSeeder::class,
-            CheckSeeder::class,
-            BabyDataSeeder::class,
-            SensoresTableSeeder::class
+            //PersonSeeder::class,
+            //BabySeeder::class,
+            //RelativeSeeder::class,
+            //NurseSeeder::class,
+            //ScheduleSeeder::class,
+            //NurseBabySeeder::class,
+            //NotificationSeeder::class,
+            //IncubatorSeeder::class,
+            //BabyIncubatorSeeder::class,
+            //CheckSeeder::class,
+            //BabyDataSeeder::class,
+            //SensoresTableSeeder::class
         ]);
     }
 }
