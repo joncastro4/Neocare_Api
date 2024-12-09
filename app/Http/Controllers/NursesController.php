@@ -173,7 +173,7 @@ class NursesController extends Controller
             ], 404);
         }
 
-        $nurse = Nurse::find($user->id);
+        $nurse = Nurse::where('user_id', $user->id)->first();
 
         if (!$nurse) {
             return response()->json([
@@ -225,8 +225,6 @@ class NursesController extends Controller
         $nurse->image_path = null;
         $nurse->save();
 
-
-
         return response()->json([
             'message' => 'Image Deleted Successfully'
         ], 200);
@@ -241,7 +239,7 @@ class NursesController extends Controller
             ], 404);
         }
 
-        $nurse = Nurse::find($user->id);
+        $nurse = Nurse::where('user_id', $user->id)->first();
 
         if (!$nurse) {
             return response()->json([
@@ -252,7 +250,7 @@ class NursesController extends Controller
         if (!$nurse->image_path) {
             return response('neocare/nurses_images/cnJUhC6PhoNCa6MPi1wVyQHozA3wQiHOIpPRclhN.jpg', 200)->header('Content-Type', 'image/jpg');
         }
-        
+
         try {
             $content = Storage::disk('s3')->get($nurse->image_path);
         } catch (FileNotFoundException $e) {
