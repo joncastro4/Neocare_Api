@@ -206,7 +206,7 @@ class NursesController extends Controller
             ], 404);
         }
 
-        $nurse = Nurse::find($user->id);
+        $nurse = Nurse::where('user_id', $user->id)->first();
 
         if (!$nurse) {
             return response()->json([
