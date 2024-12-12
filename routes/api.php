@@ -68,9 +68,14 @@ Route::prefix('v1')->group(function () {
     Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
 });
 
-// Ruta de prueba
-Route::get('/test', function () {
+
+Route::get('/operaciones', function () {
     return response()->json([
-        'message' => 'Hello World'
+        'operaciones' => [
+            'suma',
+            'resta',
+            'multiplicacion',
+            'division'
+        ]
     ]);
 });
