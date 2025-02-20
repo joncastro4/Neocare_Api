@@ -5,19 +5,31 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
     public function up()
     {
-        Schema::create('babies_incubators', function (Blueprint $table) {
+        Schema::create('relatives', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
             $table->foreignId('baby_id')->constrained('babies')->onDelete('cascade');
-            $table->foreignId('incubator_id')->constrained('incubators')->onDelete('cascade');
+            $table->char('phone_number', 10);
+            $table->string('contact')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
     public function down()
     {
-        Schema::dropIfExists('babies_incubators');
+        Schema::dropIfExists('relatives');
     }
 };
