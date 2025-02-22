@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function () {
             Route::get('profile-image-nurses', [NursesController::class, 'viewImage']);
             Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
             Route::get('sessions/me', [SessionsController::class, 'me']);
+            Route::get('sessions/role', [SessionsController::class, 'userRole']);
             Route::post('sessions/logout', [SessionsController::class, 'logout']);
             Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
             Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
