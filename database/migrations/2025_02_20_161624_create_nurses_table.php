@@ -14,7 +14,7 @@ return new class extends Migration {
     {
         Schema::create('nurses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('hospital_id')->constrained('hospitals')->onDelete('cascade');
+            $table->foreignId('hospital_id')->constrained('hospitals')->onDelete('cascade')->nullable();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
             $table->string('rfc')->nullable();

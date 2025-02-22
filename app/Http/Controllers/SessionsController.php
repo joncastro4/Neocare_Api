@@ -16,7 +16,7 @@ use App\Mail\NurseActivatedNotification;
 
 class SessionsController extends Controller
 {
-    public function register(Request $request)
+    public function registerWeb(Request $request)
     {
         $validate = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
@@ -25,6 +25,43 @@ class SessionsController extends Controller
             'username' => 'required|string|max:255|unique:users,name',
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|max:32|confirmed',
+        ]);
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json([
+                'message' => 'Invalid email'
+            ], 400);
+        }
+
+        // Registrar usuario
+        $user = $this->createUser($request);
+
+        // Registrar persona
+        $this->createPerson($request);
+
+        // Enviar correo de verificación
+        $this->sendVerificationEmail($user, $user->name, $user->email);
+
+        return response()->json([
+            'message' => 'User created successfully',
+            'user' => $user
+        ], 201);
+    }
+    public function registerApp(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'last_name_1' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
+            'username' => 'required|string|max:255|unique:users,name',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8|max:32|confirmed',
+            'hospital_id' => 'required|integer|exists:hospitals,id',
         ]);
 
         if ($validate->fails()) {
@@ -40,37 +77,18 @@ class SessionsController extends Controller
         }
 
         // Registrar usuario
-        $user = new User();
-
-        $user->name = $request->username;
-        $user->email = $request->email;
-        $user->password = Hash::make($request->password);
-        $user->save();
-
+        $user = $this->createUser($request);
         // Registrar persona
-        $person = new Person();
-
-        $person->name = $request->name;
-        $person->last_name_1 = $request->last_name_1;
-        $person->last_name_2 = $request->last_name_2;
-
-        $person->save();
+        $person = $this->createPerson($request);
 
         // Registrar enfermera
-        // $nurse = new Nurse();
+        Nurse::create([
+            'user_id' => $user->id,
+            'person_id' => $person->id,
+            'hospital_id' => $request->hospital_id
+        ]);
 
-        // $nurse->user_id = $user->id;
-        // $nurse->person_id = $person->id;
-
-        // $nurse->save();
-
-        // $signedUrl = URL::temporarySignedRoute(
-        //     'verify-email',
-        //     now()->addMinutes(30),
-        //     ['user' => $user->id]
-        // );
-
-        // Mail::to($request->email)->send(new RegisterMail($request->name, $request->email, $signedUrl));
+        $this->sendVerificationEmail($user, $request->name, $request->email);
 
         return response()->json([
             'message' => 'User created successfully',
@@ -78,20 +96,39 @@ class SessionsController extends Controller
         ], 201);
     }
 
+    private function createPerson(Request $request)
+    {
+        $person = Person::create([
+            'name' => $request->name,
+            'last_name_1' => $request->last_name_1,
+            'last_name_2' => $request->last_name_2,
+        ]);
+        return $person;
+    }
+
+    private function createUser(Request $request)
+    {
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+        return $user;
+    }
+    private function sendVerificationEmail(User $user, $name, $email)
+    {
+        $signedUrl = URL::temporarySignedRoute(
+            'verify-email',
+            now()->addMinutes(30),
+            ['user' => $user->id]
+        );
+
+        Mail::to($email)->send(new RegisterMail($name, $email, $signedUrl));
+    }
+
     public function verifyEmail(Request $request)
     {
-        $user = User::where('id', $request->user)->first();
-
-        if (!$user) {
-            return view('errors.user-not-found', ['message' => 'User not found']);
-        }
-
-        if ($user->email_verified_at) {
-            return view('errors.email-already-verified', ['message' => 'Email already verified']);
-        }
-
-        $user->email_verified_at = now();
-        $user->save();
+        $user = $this->verifyUserEmail($request);
 
         $nurse = Nurse::where('user_id', $user->id)->first();
 
@@ -118,6 +155,24 @@ class SessionsController extends Controller
         return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
     }
 
+    public function verifyUserEmail(Request $request)
+    {
+        $user = User::where('id', $request->user)->first();
+
+        if (!$user) {
+            return view('errors.user-not-found', ['message' => 'User not found']);
+        }
+
+        if ($user->email_verified_at) {
+            return view('errors.email-already-verified', ['message' => 'Email already verified']);
+        }
+
+        $user->email_verified_at = now();
+        $user->save();
+
+        return $user;
+    }
+
     public function login(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -138,11 +193,12 @@ class SessionsController extends Controller
                 'message' => 'Invalid credentials, or email not verified'
             ], 401);
         }
-        // if ($user->role == 'guest') {
-        //     return response()->json([
-        //         'message' => 'Not verified as a nurse by admin'
-        //     ], 401);
-        // }
+
+        if ($user->role == 'guest') {
+            return response()->json([
+                'message' => 'Not verified as a nurse by admin'
+            ], 401);
+        }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -179,13 +235,7 @@ class SessionsController extends Controller
             ], 400);
         }
 
-        $signedUrl = URL::temporarySignedRoute(
-            'verify-email',
-            now()->addMinutes(30),
-            ['user' => $user->id]
-        );
-
-        Mail::to($request->email)->send(new RegisterMail($user->name, $user->email, $signedUrl));
+        $this->sendVerificationEmail($user, $user->name, $user->email);
 
         return response()->json([
             'message' => 'Email sent'

@@ -21,7 +21,8 @@ use App\Http\Controllers\HospitalsController;
 Route::prefix('v1')->group(function () {
 
     Route::prefix('sessions')->group(function () {
-        Route::post('register', [SessionsController::class, 'register']);
+        Route::post('register-app', [SessionsController::class, 'registerApp']);
+        Route::post('register-web', [SessionsController::class, 'registerWeb']);
         Route::post('login', [SessionsController::class, 'login']);
         Route::get('verify-email', [SessionsController::class, 'verifyEmail'])->name('verify-email');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
