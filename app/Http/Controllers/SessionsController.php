@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\URL;
 use App\Mail\RegisterMail;
 use App\Mail\NurseActivatedNotification;
+use App\Mail\UserAccessNotification;
+use App\Models\UserPerson;
 
 class SessionsController extends Controller
 {
@@ -26,6 +28,7 @@ class SessionsController extends Controller
             'email' => 'required|email|unique:users',
             'password' => 'required|string|min:8|max:32|confirmed',
         ]);
+
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
@@ -42,7 +45,12 @@ class SessionsController extends Controller
         $user = $this->createUser($request);
 
         // Registrar persona
-        $this->createPerson($request);
+        $person = $this->createPerson($request);
+
+        UserPerson::create([
+            'user_id' => $user->id,
+            'person_id' => $person->id
+        ]);
 
         // Enviar correo de verificación
         $this->sendVerificationEmail($user, $user->name, $user->email);
@@ -126,7 +134,7 @@ class SessionsController extends Controller
         Mail::to($email)->send(new RegisterMail($name, $email, $signedUrl));
     }
 
-    public function verifyEmail(Request $request)
+    public function verifyEmailApp(Request $request)
     {
         $user = $this->verifyUserEmail($request);
 
@@ -153,6 +161,27 @@ class SessionsController extends Controller
         Mail::to($admin->email)->send(new NurseActivatedNotification($user, $person, $signedUrl));
 
         return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
+    }
+
+    public function verifyEmailWeb(Request $request)
+    {
+        $user = $this->verifyUserEmail($request);
+
+        $userPerson = UserPerson::where('user_id', $user->id)->first();
+
+        $person = Person::where('id', $userPerson->person_id)->first();
+
+        $admin = User::where('role', 'super-admin')->first();
+
+        if (!$admin) {
+            return view('errors.admin-not-found', ['message' => 'Admin not found']);
+        }
+
+        $signedUrl = URL::signedRoute('nurse-activate', ['id' => $user->id]);
+
+        Mail::to($admin->email)->send(new UserAccessNotification($user, $person, $signedUrl));
+
+        //return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
     }
 
     public function verifyUserEmail(Request $request)
