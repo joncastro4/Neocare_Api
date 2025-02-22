@@ -57,20 +57,20 @@ class SessionsController extends Controller
         $person->save();
 
         // Registrar enfermera
-        $nurse = new Nurse();
+        // $nurse = new Nurse();
 
-        $nurse->user_id = $user->id;
-        $nurse->person_id = $person->id;
+        // $nurse->user_id = $user->id;
+        // $nurse->person_id = $person->id;
 
-        $nurse->save();
+        // $nurse->save();
 
-        $signedUrl = URL::temporarySignedRoute(
-            'verify-email',
-            now()->addMinutes(30),
-            ['user' => $user->id]
-        );
+        // $signedUrl = URL::temporarySignedRoute(
+        //     'verify-email',
+        //     now()->addMinutes(30),
+        //     ['user' => $user->id]
+        // );
 
-        Mail::to($request->email)->send(new RegisterMail($request->name, $request->email, $signedUrl));
+        // Mail::to($request->email)->send(new RegisterMail($request->name, $request->email, $signedUrl));
 
         return response()->json([
             'message' => 'User created successfully',
@@ -131,18 +131,18 @@ class SessionsController extends Controller
             ], 422);
         }
 
-        $user = User::where('email', $request->email)->where('email_verified_at', '!=', null)->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid credentials, or email not verified'
             ], 401);
         }
-        if ($user->role == 'guest') {
-            return response()->json([
-                'message' => 'Not verified as a nurse by admin'
-            ], 401);
-        }
+        // if ($user->role == 'guest') {
+        //     return response()->json([
+        //         'message' => 'Not verified as a nurse by admin'
+        //     ], 401);
+        // }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

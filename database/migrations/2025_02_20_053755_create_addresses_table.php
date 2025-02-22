@@ -18,6 +18,7 @@ return new class extends Migration {
             $table->string('neighborhood');
             $table->string('city');
             $table->string('state');
+            $table->unsignedBigInteger('number');
             $table->char('zip_code', 5);
             $table->timestamps();
         });

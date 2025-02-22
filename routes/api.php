@@ -15,7 +15,8 @@ use App\Http\Controllers\SchedulesController;
 use App\Http\Controllers\BabyNursesController;
 use App\Http\Controllers\SessionsController;
 use App\Http\Controllers\AdafruitController;
-
+use App\Http\Controllers\AddressesController;
+use App\Http\Controllers\HospitalsController;
 
 Route::prefix('v1')->group(function () {
 
@@ -28,6 +29,10 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('role')->group(function () {
+
+            Route::apiResource('addresses', AddressesController::class);
+            Route::apiResource('hospitals', HospitalsController::class);
+
             Route::apiResource('babies', BabiesController::class);
             Route::post('add-person-relative/{baby_id}', [RelativesController::class, 'addPersonRelative']);
             Route::apiResource('babies-data', BabiesDataController::class);
