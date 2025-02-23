@@ -5,7 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 
-class Role
+class NurseAdmin
 {
     /**
      * Handle an incoming request.
@@ -18,7 +18,7 @@ class Role
     {
         $user = auth()->user();
 
-        if ($user->role !== 'admin' && $user->role !== 'nurse') {
+        if (!($user->role == 'nurse-admin')) {
             return response()->json([
                 'message' => 'Forbidden'
             ], 403);
