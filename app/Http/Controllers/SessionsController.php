@@ -137,9 +137,8 @@ class SessionsController extends Controller
     private function sendVerificationEmail(User $user, $name, $email, $isApp = false)
     {
         $routeName = $isApp ? 'verify-email-app' : 'verify-email-web';
-        $signedUrl = URL::temporarySignedRoute(
+        $signedUrl = URL::signedRoute(
             $routeName,
-            now()->addMinutes(30),
             ['user' => $user->id]
         );
 
