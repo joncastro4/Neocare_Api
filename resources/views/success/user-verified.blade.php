@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nurse Verified</title>
+    <title>User Verified</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -65,7 +65,7 @@
 
 <body>
     <div class="container">
-        <div class="icon">👩‍⚕️</div>
+        <div class="icon">️✅</div>
         <h1>{{ $message }}</h1>
         <p><strong>User:</strong> {{ $user->name }}</p>
     </div>

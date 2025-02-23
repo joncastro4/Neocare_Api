@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\Nurse;
+use App\Models\UserPerson;
 
 class UserSeeder extends Seeder
 {
@@ -18,12 +19,13 @@ class UserSeeder extends Seeder
      */
     public function run()
     {
+        // Super admin
         $user = User::create([
-            'name' => 'admin',
-            'email' => 'neocarea@gmail.com',
+            'name' => 'superAdmin',
+            'email' => 'neocare@gmail.com',
             'email_verified_at' => now(),
             'password' => Hash::make('admin'),
-            'role' => 'admin',
+            'role' => 'super-admin',
         ]);
 
         $person = Person::create([
@@ -32,11 +34,29 @@ class UserSeeder extends Seeder
             'last_name_2' => 'Admin',
         ]);
 
-        Nurse::create([
+        UserPerson::create([
             'user_id' => $user->id,
             'person_id' => $person->id,
         ]);
 
-        User::factory(10)->create();
+        // Nurse Admin
+        $user = User::create([
+            'name' => 'nurseAdmin',
+            'email' => 'imms@gmail.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('admin'),
+            'role' => 'nurse-admin',
+        ]);
+
+        $person = Person::create([
+            'name' => 'nurseAdmin',
+            'last_name_1' => 'nurseAdmin',
+            'last_name_2' => 'nurseAdmin',
+        ]);
+
+        UserPerson::create([
+            'user_id' => $user->id,
+            'person_id' => $person->id,
+        ]);
     }
 }

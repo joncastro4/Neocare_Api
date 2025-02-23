@@ -24,16 +24,15 @@ Route::prefix('v1')->group(function () {
         Route::post('register-app', [SessionsController::class, 'registerApp']);
         Route::post('register-web', [SessionsController::class, 'registerWeb']);
         Route::post('login', [SessionsController::class, 'login']);
-        Route::get('verify-email', [SessionsController::class, 'verifyEmail'])->name('verify-email');
+        Route::get('verify-email-web', [SessionsController::class, 'verifyEmailWeb'])->name('verify-email-web');
+        Route::get('verify-email-app', [SessionsController::class, 'verifyEmailApp'])->name('verify-email-app');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('role')->group(function () {
-
             Route::apiResource('addresses', AddressesController::class);
             Route::apiResource('hospitals', HospitalsController::class);
-
             Route::apiResource('babies', BabiesController::class);
             Route::post('add-person-relative/{baby_id}', [RelativesController::class, 'addPersonRelative']);
             Route::apiResource('babies-data', BabiesDataController::class);
@@ -43,10 +42,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('nurses', NursesController::class);
             Route::apiResource('people', PeopleController::class);
             Route::apiResource('relatives', RelativesController::class);
-            Route::apiResource('notifications', NotificationsController::class);
             Route::apiResource('checks', ChecksController::class);
-            Route::apiResource('schedules', SchedulesController::class);
-            Route::apiResource('baby-nurses', BabyNursesController::class);
             Route::post('profile-image-nurses', [NursesController::class, 'uploadImage']);
             Route::get('profile-image-nurses', [NursesController::class, 'viewImage']);
             Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
@@ -61,6 +57,7 @@ Route::prefix('v1')->group(function () {
     });
 
     Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
+    Route::get('user-activate/{id}', [SessionsController::class, 'activateUser'])->name('user-activate')->where('id', '[0-9]+');
 
     Route::get('/bpm', [AdafruitController::class, 'bpm']);
     Route::get('/fotoresistencia', [AdafruitController::class, 'fotoresistencia']);

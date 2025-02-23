@@ -15,6 +15,7 @@ use App\Mail\RegisterMail;
 use App\Mail\NurseActivatedNotification;
 use App\Mail\UserAccessNotification;
 use App\Models\UserPerson;
+use Illuminate\View\View;
 
 class SessionsController extends Controller
 {
@@ -47,14 +48,13 @@ class SessionsController extends Controller
         // Registrar persona
         $person = $this->createPerson($request);
 
-        UserPerson::create([
-            'user_id' => $user->id,
-            'person_id' => $person->id
-        ]);
+        // Relacionar usuario y persona
+        $this->createUserPerson($user, $person);
 
         // Enviar correo de verificación
         $this->sendVerificationEmail($user, $user->name, $user->email);
 
+        // Devolver respuesta
         return response()->json([
             'message' => 'User created successfully',
             'user' => $user
@@ -134,10 +134,11 @@ class SessionsController extends Controller
         ]);
         return $user;
     }
-    private function sendVerificationEmail(User $user, $name, $email)
+    private function sendVerificationEmail(User $user, $name, $email, $isApp = false)
     {
+        $routeName = $isApp ? 'verify-email-app' : 'verify-email-web';
         $signedUrl = URL::temporarySignedRoute(
-            'verify-email',
+            $routeName,
             now()->addMinutes(30),
             ['user' => $user->id]
         );
@@ -178,9 +179,11 @@ class SessionsController extends Controller
     {
         $user = $this->verifyUserEmail($request);
 
-        $userPerson = UserPerson::where('user_id', $user->id)->first();
+        if ($user instanceof View) {
+            return $user;
+        }
 
-        $person = Person::where('id', $userPerson->person_id)->first();
+        $person = $user->people()->first();
 
         $admin = User::where('role', 'super-admin')->first();
 
@@ -188,11 +191,11 @@ class SessionsController extends Controller
             return view('errors.admin-not-found', ['message' => 'Admin not found']);
         }
 
-        $signedUrl = URL::signedRoute('nurse-activate', ['id' => $user->id]);
+        $signedUrl = URL::signedRoute('user-activate', ['id' => $user->id]);
 
         Mail::to($admin->email)->send(new UserAccessNotification($user, $person, $signedUrl));
 
-        //return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
+        return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
     }
 
     public function verifyUserEmail(Request $request)
@@ -360,6 +363,42 @@ class SessionsController extends Controller
 
         return view('success.nurse-verified', [
             'message' => 'Nurse activated successfully',
+            'user' => $user,
+        ]);
+    }
+    public function activateUser($id)
+    {
+        $user = User::where('id', $id)->first();
+
+        if (!$user) {
+            return view('errors.user-not-found', [
+                'message' => 'User not found',
+            ]);
+        }
+
+        if (!$user->email_verified_at) {
+            return view('errors.email-not-verified', [
+                'message' => 'Email not verified',
+            ]);
+        }
+
+        if ($user->role == 'user') {
+            return view('errors.already-activated', [
+                'message' => 'User already activated as a user',
+            ]);
+        }
+
+        if ($user->role == 'admin') {
+            return view('errors.admin-cannot-be-activated', [
+                'message' => 'Admin cannot be activated as a user',
+            ]);
+        }
+
+        $user->role = 'user';
+        $user->save();
+
+        return view('success.user-verified', [
+            'message' => 'User activated successfully',
             'user' => $user,
         ]);
     }

@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -47,9 +46,10 @@ class UserAccessNotification extends Mailable
     public function content()
     {
         return new Content(
-            view: 'view.user-access-notification',
+            view: 'emails.user-access-notification',
             with: [
                 'user' => $this->user,
+                'person' => $this->person,
                 'signedUrl' => $this->signedUrl
             ]
         );
