@@ -89,10 +89,13 @@ class SessionsController extends Controller
         // Registrar persona
         $person = $this->createPerson($request);
 
+        // Registrar usuario_persona
+        $userPerson = $this->createUserPerson($user, $person);
+
         // Registrar enfermera
         Nurse::create([
             'user_id' => $user->id,
-            'person_id' => $person->id,
+            'user_person_id' => $userPerson->id,
             'hospital_id' => $request->hospital_id
         ]);
 
@@ -112,6 +115,14 @@ class SessionsController extends Controller
             'last_name_2' => $request->last_name_2,
         ]);
         return $person;
+    }
+    private function createUserPerson(User $user, Person $person)
+    {
+        $userPerson = UserPerson::create([
+            'user_id' => $user->id,
+            'person_id' => $person->id,
+        ]);
+        return $userPerson;
     }
 
     private function createUser(Request $request)
