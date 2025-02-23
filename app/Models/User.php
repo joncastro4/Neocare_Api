@@ -27,9 +27,16 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
-
-    public function nurses()
+    public function userPerson()
     {
-        return $this->hasMany(Nurse::class);
+        return $this->hasMany(UserPerson::class, 'user_id');
+    }
+    public function people()
+    {
+        return $this->hasManyThrough(Person::class, UserPerson::class, 'user_id', 'id', 'id', 'person_id');
+    }
+    public function nurse()
+    {
+        return $this->hasOneThrough(Nurse::class, UserPerson::class, 'user_id', 'user_person_id', 'id', 'id');
     }
 }

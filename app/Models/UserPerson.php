@@ -24,4 +24,8 @@ class UserPerson extends Model
     {
         return $this->belongsTo(Person::class, 'person_id');
     }
+    public function nurse()
+    {
+        return $this->hasOne(Nurse::class, 'user_person_id');
+    }
 }
