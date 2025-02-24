@@ -319,18 +319,29 @@ class SessionsController extends Controller
             ], 404);
         }
 
-        $nurse = Nurse::with('person')->where('user_id', $user->id)->first();
+        $userperson = UserPerson::where('user_id', $user->id)->first();
 
-        if (!$nurse) {
+        if (!$userperson) {
             return response()->json([
-                'message' => 'Nurse not found'
+                'message' => 'UserPerson not found'
             ], 404);
         }
+
+        $person = Person::where('id', $userperson->person_id)->first();
+
+        if (!$person) {
+            return response()->json([
+                'message' => 'Person not found'
+            ], 404);
+        }
+
+        $nurse = Nurse::where('user_person_id', $userperson->id)->first();
 
         return response()->json([
             'message' => 'User data',
             'user' => $user,
-            'nurse' => $nurse
+            'person' => $person,
+            'nurse' => $nurse ?? null,
         ], 200);
     }
     public function userRole()
