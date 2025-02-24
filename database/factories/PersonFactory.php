@@ -3,9 +3,11 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Person;
 
 class PersonFactory extends Factory
 {
+    protected $model = Person::class;
     public function definition()
     {
         return [

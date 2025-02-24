@@ -38,9 +38,9 @@ class HospitalsController extends Controller
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'address_id' => 'required|integer',
+            'address_id' => 'required|integer|exists:addresses,id',
             'name' => 'required|string|max:255',
-            'phone_number' => 'required|string|max:255'
+            'phone_number' => 'required|string|size:10',
         ]);
 
         if ($validate->fails()) {

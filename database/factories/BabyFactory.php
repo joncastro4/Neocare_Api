@@ -3,16 +3,19 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Baby;
+use App\Models\Person;
+use App\Models\Hospital;
 
 class BabyFactory extends Factory
 {
+    protected $model = Baby::class;
     public function definition()
     {
         return [
-            'person_id' => $this->faker->numberBetween(1, 10),
+            'hospital_id' => Hospital::factory(),
+            'person_id' => Person::factory(),
             'date_of_birth' => $this->faker->date(),
-            'ingress_date' => $this->faker->date(),
-            'egress_date' => $this->faker->date(),
         ];
     }
 }

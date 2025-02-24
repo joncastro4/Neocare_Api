@@ -3,16 +3,20 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\Relative;
+use App\Models\Person;
+use App\Models\Baby;
 
 class RelativeFactory extends Factory
 {
+    protected $model = Relative::class;
     public function definition()
     {
         return [
-            'person_id' => $this->faker->numberBetween(int1: 11, int2: 20),
-            'baby_id' => $this->faker->numberBetween(1, 10),
-            'phone_number' => $this->faker->phoneNumber,
-            'contact' => $this->faker->name
+            'person_id' => Person::factory(),
+            'baby_id' => Baby::factory(),
+            'phone_number' => substr($this->faker->phoneNumber, 0, 10),
+            'correo' => $this->faker->email,
         ];
     }
 }

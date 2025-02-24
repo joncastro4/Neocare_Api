@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
             $table->foreignId('baby_id')->constrained('babies')->onDelete('cascade');
             $table->char('phone_number', 10);
-            $table->string('contact')->nullable();
+            $table->string('email')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

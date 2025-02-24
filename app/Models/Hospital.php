@@ -15,7 +15,12 @@ class Hospital extends Model
         'phone_number'
     ];
 
-    public function addresses() {
-        return $this->belongsTo(Address::class);
+    public function addresses()
+    {
+        return $this->belongsTo(Address::class, 'address_id');
+    }
+    public function rooms()
+    {
+        return $this->hasMany(Room::class);
     }
 }
