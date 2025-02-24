@@ -26,4 +26,8 @@ class Nurse extends Model
     {
         return $this->belongsTo(UserPerson::class, 'user_person_id');
     }
+    public function babyIncubator()
+    {
+        return $this->hasMany(BabyIncubator::class);
+    }
 }

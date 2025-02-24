@@ -29,11 +29,6 @@ class Baby extends Model
         return $this->hasMany(BabyIncubator::class);
     }
 
-    public function nurse_baby()
-    {
-        return $this->hasMany(NurseBaby::class);
-    }
-
     public function relative()
     {
         return $this->hasMany(Relative::class);

@@ -14,21 +14,27 @@ class BabyIncubator extends Model
 
     protected $fillable = [
         'baby_id',
-        'incubator_id'
+        'incubator_id',
+        'nurse_id',
     ];
 
     public function baby()
     {
-        return $this->belongsTo(Baby::class);
+        return $this->belongsTo(Baby::class, 'baby_id');
     }
 
     public function incubator()
     {
-        return $this->belongsTo(Incubator::class);
+        return $this->belongsTo(Incubator::class, 'incubator_id');
     }
 
     public function baby_data()
     {
         return $this->hasMany(BabyData::class);
+    }
+
+    public function nurse()
+    {
+        return $this->belongsTo(Nurse::class, 'nurse_id');
     }
 }

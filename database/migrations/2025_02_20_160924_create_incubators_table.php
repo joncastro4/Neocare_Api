@@ -15,7 +15,7 @@ return new class extends Migration {
         Schema::create('incubators', function (Blueprint $table) {
             $table->id();
             $table->foreignId('room_id')->constrained('rooms')->onDelete('cascade');
-            $table->enum('state', ['active', 'available', 'inactive'])->default('available');
+            $table->enum('state', ['active', 'available'])->default('available');
             $table->softDeletes();
             $table->timestamps();
         });
