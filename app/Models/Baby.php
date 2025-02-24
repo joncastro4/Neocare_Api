@@ -13,6 +13,7 @@ class Baby extends Model
     protected $table = 'babies';
 
     protected $fillable = [
+        'hospital_id',
         'person_id',
         'date_of_birth',
         'ingress_date',
@@ -32,5 +33,9 @@ class Baby extends Model
     public function relative()
     {
         return $this->hasMany(Relative::class);
+    }
+    public function hospital()
+    {
+        return $this->belongsTo(Hospital::class, 'hospital_id');
     }
 }

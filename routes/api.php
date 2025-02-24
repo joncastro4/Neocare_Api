@@ -15,6 +15,7 @@ use App\Http\Controllers\AdafruitController;
 use App\Http\Controllers\AddressesController;
 use App\Http\Controllers\HospitalsController;
 use App\Http\Controllers\UsersManagementController;
+use App\Http\Controllers\RoomsController;
 
 Route::prefix('v1')->group(function () {
 
@@ -29,6 +30,7 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('roleguest')->group(function () {
             Route::middleware('superadmin')->group(function () {
+                Route::apiResource('rooms', RoomsController::class);
                 Route::apiResource('addresses', AddressesController::class);
                 Route::apiResource('hospitals', HospitalsController::class);
                 Route::apiResource('babies', BabiesController::class);

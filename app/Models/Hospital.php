@@ -23,4 +23,8 @@ class Hospital extends Model
     {
         return $this->hasMany(Room::class);
     }
+    public function babies()
+    {
+        return $this->hasMany(Baby::class);
+    }
 }

@@ -94,12 +94,11 @@ class SessionsController extends Controller
 
         // Registrar enfermera
         Nurse::create([
-            'user_id' => $user->id,
             'user_person_id' => $userPerson->id,
             'hospital_id' => $request->hospital_id
         ]);
 
-        $this->sendVerificationEmail($user, $request->name, $request->email);
+        $this->sendVerificationEmail($user, $request->name, $request->email, true);
 
         return response()->json([
             'message' => 'User created successfully',
@@ -149,26 +148,43 @@ class SessionsController extends Controller
     {
         $user = $this->verifyUserEmail($request);
 
-        $nurse = Nurse::where('user_id', $user->id)->first();
+        // Verifica si $user es una instancia de la vista
+        if ($user instanceof View) {
+            return $user;
+        }
+
+        // Buscar enfermera del usuario
+        $nurse = $user->nurse;
 
         if (!$nurse) {
             return view('errors.nurse-not-found', ['message' => 'Nurse not found']);
         }
 
-        $person = Person::where('id', $nurse->person_id)->first();
+        // Buscar persona del usuario
+        $person = $nurse->userPerson->person;
 
         if (!$person) {
             return view('errors.person-not-found', ['message' => 'Person not found']);
         }
 
-        $admin = User::where('role', 'admin')->first();
+        // Buscar al administrador enfermero del hospital
+        $admin = User::whereHas('nurse', function ($query) use ($nurse) {
+            $query->where('hospital_id', $nurse->hospital_id)
+                ->where('role', 'nurse-admin');
+        })->first();
 
+        // Si no se encuentra al administrador enfermero, se busca al super administrador
         if (!$admin) {
-            return view('errors.admin-not-found', ['message' => 'Admin not found']);
+            $admin = User::where('role', 'super-admin')->first();
+            if (!$admin) {
+                return view('errors.admin-not-found', ['message' => 'Admin not found']);
+            }
         }
 
+        // Crear URL firmada para activar la cuenta de enfermero
         $signedUrl = URL::signedRoute('nurse-activate', ['id' => $user->id]);
 
+        // Enviar correo de verificación al administrador enfermero o super administrador
         Mail::to($admin->email)->send(new NurseActivatedNotification($user, $person, $signedUrl));
 
         return view('success.email-verified', ['user' => $user, 'person' => $person, 'message' => 'Email verified successfully']);
@@ -178,6 +194,7 @@ class SessionsController extends Controller
     {
         $user = $this->verifyUserEmail($request);
 
+        // Verifica si $user es una instancia de la vista para devolverla
         if ($user instanceof View) {
             return $user;
         }

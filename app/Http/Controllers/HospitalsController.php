@@ -15,7 +15,7 @@ class HospitalsController extends Controller
      */
     public function index()
     {
-        $hospitals = Hospital::all();
+        $hospitals = Hospital::orderByDesc('created_at')->get();
 
         if ($hospitals->isEmpty()) {
             return response()->json([
@@ -107,9 +107,9 @@ class HospitalsController extends Controller
         }
 
         $validate = Validator::make($request->all(), [
-            'address_id' => 'integer',
-            'name' => 'string|max:255',
-            'phone_number' => 'string|max:255'
+            'address_id' => 'required|integer|exists:addresses,id',
+            'name' => 'required|string|max:255',
+            'phone_number' => 'required|string|max:255'
         ]);
 
         if ($validate->fails()) {

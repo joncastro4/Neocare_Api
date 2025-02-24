@@ -14,6 +14,8 @@ class Nurse extends Model
     protected $table = 'nurses';
 
     protected $fillable = [
+        'user_person_id',
+        'hospital_id',
         'rfc',
         'image_path',
     ];
@@ -29,5 +31,9 @@ class Nurse extends Model
     public function babyIncubator()
     {
         return $this->hasMany(BabyIncubator::class);
+    }
+    public function hospital()
+    {
+        return $this->belongsTo(Hospital::class, 'hospital_id');
     }
 }

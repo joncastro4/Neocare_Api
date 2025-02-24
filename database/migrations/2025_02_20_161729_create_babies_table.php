@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->foreignId('hospital_id')->constrained('hospitals')->onDelete('cascade');
             $table->foreignId('person_id')->constrained('people')->onDelete('cascade');
             $table->date('date_of_birth');
+            $table->date('egress_date')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

@@ -48,8 +48,21 @@ class UsersManagementController extends Controller
                 'message' => 'User not found'
             ], 404);
         }
+        if ($user->role == $request->role) {
+            return response()->json([
+                'message' => 'User role is already ' . $request->role
+            ], 400);
+        }
+        if ($user->role == 'super-admin') {
+            return response()->json([
+                'message' => 'You cannot remove the last super admin'
+            ], 400);
+        }
         $user->role = $request->role;
         $user->save();
-        return response()->json($user, 200);
+        return response()->json([
+            'message' => 'User role updated',
+            'user' => $user
+        ], 200);
     }
 }
