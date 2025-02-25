@@ -32,7 +32,7 @@ class RoomsController extends Controller
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'required|integer|exists:hospitals,id',
             'name' => 'required|string|max:255',
-            'number' => 'required|integer|min:0|unique:rooms,number',
+            'number' => 'required|integer|min:1|unique:rooms,number',
         ]);
 
         if ($validate->fails()) {
@@ -53,7 +53,7 @@ class RoomsController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'number' => 'required|integer|min:0|unique:rooms,number,' . $id,
+            'number' => 'required|integer|min:1|unique:rooms,number,' . $id,
         ]);
 
         if ($validate->fails()) {

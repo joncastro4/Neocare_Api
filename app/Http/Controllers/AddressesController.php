@@ -106,12 +106,12 @@ class AddressesController extends Controller
         }
 
         $validate = Validator::make($request->all(), [
-            'street' => 'string|max:255',
-            'number' => 'integer|min:0',
-            'neighborhood' => 'string|max:255',
-            'city' => 'string|max:255',
-            'state' => 'string|max:255',
-            'zip_code' => 'integer|digits:5'
+            'street' => 'required|string|max:255',
+            'number' => 'required|integer|min:0',
+            'neighborhood' => 'required|string|max:255',
+            'city' => 'required|string|max:255',
+            'state' => 'required|string|max:255',
+            'zip_code' => 'required|integer|digits:5'
         ]);
 
         if ($validate->fails()) {
