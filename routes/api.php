@@ -16,6 +16,7 @@ use App\Http\Controllers\AddressesController;
 use App\Http\Controllers\HospitalsController;
 use App\Http\Controllers\UsersManagementController;
 use App\Http\Controllers\RoomsController;
+use App\Http\Controllers\ProfileController;
 
 Route::prefix('v1')->group(function () {
 
@@ -58,9 +59,13 @@ Route::prefix('v1')->group(function () {
                     Route::get('/{id}', [UsersManagementController::class, 'show']);
                 });
             });
-            Route::get('sessions/me', [SessionsController::class, 'me']);
-            Route::post('profile-image-nurses', [NursesController::class, 'uploadImage']);
-            Route::get('profile-image-nurses', [NursesController::class, 'viewImage']);
+            Route::prefix('profile')->group(function () {
+                Route::get('me', [ProfileController::class, 'me']);
+                Route::put('/', [ProfileController::class, 'update']);
+                Route::delete('/', [ProfileController::class, 'destroy']);
+                Route::post('upload-image', [NursesController::class, 'uploadImage']);
+                Route::get('view-image', [NursesController::class, 'viewImage']);
+            });
         });
     });
 
