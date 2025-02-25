@@ -7,7 +7,6 @@ use Illuminate\Database\Seeder;
 
 use App\Models\User;
 use App\Models\Person;
-use App\Models\Nurse;
 use App\Models\UserPerson;
 
 class UserSeeder extends Seeder
