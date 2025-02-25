@@ -22,33 +22,35 @@ Route::prefix('v1')->group(function () {
     Route::prefix('sessions')->group(function () {
         Route::post('register-app', [SessionsController::class, 'registerApp']);
         Route::post('register-web', [SessionsController::class, 'registerWeb']);
-        Route::post('login', [SessionsController::class, 'login']);
+        Route::post('login/app', [SessionsController::class, 'loginApp']);
+        Route::post('login/web', [SessionsController::class, 'loginWeb']);
         Route::get('verify-email-web', [SessionsController::class, 'verifyEmailWeb'])->name('verify-email-web');
         Route::get('verify-email-app', [SessionsController::class, 'verifyEmailApp'])->name('verify-email-app');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('roleguest')->group(function () {
-
             Route::middleware('superadmin')->group(function () {
-                Route::apiResource('rooms', RoomsController::class);
+                Route::middleware('nurseadmin')->group(function () {
+                    Route::apiResource('rooms', RoomsController::class);
+                    Route::apiResource('incubators', IncubatorsController::class);
+                    Route::apiResource('babies', BabiesController::class);
+                    Route::apiResource('babies-data', BabiesDataController::class);
+                    Route::apiResource('relatives', RelativesController::class);
+                    Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
+                    Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
+                });
                 Route::apiResource('addresses', AddressesController::class);
                 Route::apiResource('hospitals', HospitalsController::class);
-                Route::apiResource('babies', BabiesController::class);
                 Route::post('add-person-relative/{baby_id}', [RelativesController::class, 'addPersonRelative']);
-                Route::apiResource('babies-data', BabiesDataController::class);
                 Route::apiResource('baby-incubators', BabyIncubatorsController::class);
-                Route::apiResource('incubators', IncubatorsController::class);
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
                 Route::apiResource('nurses', NursesController::class);
                 Route::apiResource('people', PeopleController::class);
-                Route::apiResource('relatives', RelativesController::class);
                 Route::apiResource('checks', ChecksController::class);
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
                 Route::get('sessions/role', [SessionsController::class, 'userRole']);
                 Route::post('sessions/logout', [SessionsController::class, 'logout']);
-                Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
-                Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
                 Route::post('crear-grupo', [AdafruitController::class, 'crearGrupo']);
                 Route::prefix('users')->group(function () {
                     Route::put('role-management', [UsersManagementController::class, 'roleManagement']);

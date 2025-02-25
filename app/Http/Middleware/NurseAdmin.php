@@ -18,7 +18,7 @@ class NurseAdmin
     {
         $user = auth()->user();
 
-        if (!($user->role == 'nurse-admin')) {
+        if (!($user->role == 'nurse-admin' || $user->role == 'super-admin')) {
             return response()->json([
                 'message' => 'Forbidden'
             ], 403);

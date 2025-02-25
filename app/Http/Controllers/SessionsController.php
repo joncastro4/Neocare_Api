@@ -232,7 +232,7 @@ class SessionsController extends Controller
         return $user;
     }
 
-    public function login(Request $request)
+    public function login(Request $request, $isWeb = false)
     {
         $validate = Validator::make($request->all(), [
             'email' => 'required|email',
@@ -253,10 +253,22 @@ class SessionsController extends Controller
             ], 401);
         }
 
+        if (!$user->email_verified_at) {
+            return response()->json([
+                'message' => 'Email not verified'
+            ], 401);
+        }
+
         if ($user->role == 'guest') {
             return response()->json([
-                'message' => 'Not verified as a nurse by admin'
+                'message' => 'Not verified by an admin'
             ], 401);
+        }
+
+        if ($isWeb && !in_array($user->role, ['super-admin', 'admin'])) {
+            return response()->json([
+                'message' => 'Forbidden'
+            ], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -267,6 +279,15 @@ class SessionsController extends Controller
             'role' => $user->role
         ], 200);
     }
+    public function loginApp(Request $request)
+    {
+        return $this->login($request);
+    }
+    public function loginWeb(Request $request)
+    {
+        return $this->login($request, True);
+    }
+
 
     public function resend_activation(Request $request)
     {
@@ -421,7 +442,7 @@ class SessionsController extends Controller
             ]);
         }
 
-        $user->role = 'user';
+        $user->role = 'admin';
         $user->save();
 
         return view('success.user-verified', [

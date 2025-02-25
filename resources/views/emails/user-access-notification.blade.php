@@ -83,7 +83,7 @@
             display: inline-block;
             transition: background-color 0.3s ease;
         " onmouseover="this.style.backgroundColor='#AD88C6'" onmouseout="this.style.backgroundColor='#7469B6'">
-            Review Request
+            Accept Request
         </a>
 
         <!-- Additional Message -->
