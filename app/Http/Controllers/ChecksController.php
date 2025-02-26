@@ -233,6 +233,7 @@ class ChecksController extends Controller
         ]);
 
         return response()->json([
+            'msg' => 'Check Updated Successfully',
             'data' => $check
         ], 200);
     }
