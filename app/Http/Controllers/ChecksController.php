@@ -14,6 +14,7 @@ class ChecksController extends Controller
     public function index(Request $request)
     {
         $validate = Validator::make($request->all(), [
+            'hospital_id' => 'nullable|integer|exists:hospitals,id',
             'nurse_id' => 'nullable|integer|exists:nurses,id',
             'baby_id' => 'nullable|integer|exists:babies,id',
             'incubator_id' => 'nullable|integer|exists:incubators,id',
@@ -51,6 +52,10 @@ class ChecksController extends Controller
         } else if ($user->role == 'super-admin' || $user->role == 'admin') {
             $checks = Check::orderByDesc('id')->with(['nurse.userPerson.person', 'baby_incubator.baby.person']);
 
+            if ($request->hospital_id) {
+                $checks->where('nurse.hospital_id', $request->hospital_id);
+            }
+
             if ($request->nurse_id) {
                 $checks->where('nurse_id', $request->nurse_id);
             }
@@ -76,10 +81,14 @@ class ChecksController extends Controller
             ], 404);
         }
 
-        $data = $checks->map(function ($check) {
+        $data = $checks->map(function ($check) use ($user) {
             $nurse = $check->nurse;
             $nursePerson = $nurse ? $nurse->userPerson->person : null;
-            $nurseFullName = $nursePerson ? $nursePerson->name . ' ' . $nursePerson->last_name_1 . ' ' . $nursePerson->last_name_2 : null;
+
+            $nurseFullName = null;
+            if ($user->role != 'nurse') {
+                $nurseFullName = $nursePerson ? $nursePerson->name . ' ' . $nursePerson->last_name_1 . ' ' . $nursePerson->last_name_2 : null;
+            }
 
             $babyIncubator = $check->baby_incubator;
             $baby = $babyIncubator ? $babyIncubator->baby : null;
