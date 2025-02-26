@@ -13,8 +13,10 @@ class Relative extends Model
     protected $table = 'relatives';
 
     protected $fillable = [
+        'person_id',
+        'baby_id',
         'phone_number',
-        'contact'
+        'email',
     ];
 
     public function person()

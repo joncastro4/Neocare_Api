@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
 use App\Models\BabyIncubator;
 use App\Models\Incubator;
+use App\Models\UserPerson;
+use App\Models\Nurse;
 
 class BabiesController extends Controller
 {
@@ -198,11 +200,17 @@ class BabiesController extends Controller
         ], 200);
     }
 
+    // Listo
     public function assignBabyToIncubator(Request $request)
     {
+
+        $user = auth()->user();
+
         $validate = Validator::make($request->all(), [
             'baby_id' => ' required|exists:babies,id',
             'incubator_id' => 'required|exists:incubators,id',
+            'hospital_id' => 'required|exists:hospitals,id',
+            'nurse_id' => 'nullable|exists:nurses,id'
         ]);
 
         if ($validate->fails()) {
@@ -211,14 +219,30 @@ class BabiesController extends Controller
             ], 422);
         }
 
-        $babyIncubator = new BabyIncubator();
+        if ($user->role != 'nurse-admin' && $user->role != 'nurse') {
+            if (!$request->nurse_id) {
+                return response()->json([
+                    'errors' => 'Nurse id is required'
+                ], 422);
+            }
+            $nurse_id = $request->nurse_id;
+        } else {
+            $userPerson = UserPerson::where('user_id', $user->id)->first();
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
+            $nurse_id = $nurse->id;
+        }
 
-        $babyIncubator->baby_id = $request->baby_id;
-        $babyIncubator->incubator_id = $request->incubator_id;
 
-        $babyIncubator->save();
 
-        $incubator = Incubator::find($request->incubator_id);
+        $babyIncubator = BabyIncubator::create([
+            'baby_id' => $request->baby_id,
+            'incubator_id' => $request->incubator_id,
+            'hospital_id' => $request->hospital_id,
+            'nurse_id' => $nurse_id
+        ]);
+
+        $incubator = Incubator::find($babyIncubator->incubator_id);
+
         if ($incubator) {
             $incubator->state = 'active';
             $incubator->save();

@@ -3,12 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\Baby;
 use Illuminate\Http\Request;
 use App\Models\Relative;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
-use App\Models\User;
 
 class RelativesController extends Controller
 {
@@ -35,7 +33,7 @@ class RelativesController extends Controller
             'last_name_2' => 'nullable|string|max:255',
             'baby_id' => 'required|integer|exists:babies,id',
             'phone_number' => 'required|string|min:10|max:10',
-            'contact' => 'nullable|string|max:255',
+            'email' => 'required|email|max:255|unique:relatives,email',
         ]);
 
         if ($validate->fails()) {
@@ -44,11 +42,11 @@ class RelativesController extends Controller
             ], 422);
         }
 
-        $person = new Person();
-        $person->name = $request->name;
-        $person->last_name_1 = $request->last_name_1;
-        $person->last_name_2 = $request->last_name_2;
-        $person->save();
+        $person = Person::create([
+            'name' => $request->name,
+            'last_name_1' => $request->last_name_1,
+            'last_name_2' => $request->last_name_2,
+        ]);
 
         if (!$person) {
             return response()->json([
@@ -56,13 +54,12 @@ class RelativesController extends Controller
             ], 400);
         }
 
-        $relative = new Relative();
-
-        $relative->person_id = $person->id;
-        $relative->baby_id = $request->baby_id;
-        $relative->phone_number = $request->phone_number;
-        $relative->contact = $request->contact;
-        $relative->save();
+        $relative = Relative::create([
+            'person_id' => $person->id,
+            'baby_id' => $request->baby_id,
+            'phone_number' => $request->phone_number,
+            'email' => $request->email,
+        ]);
 
         if (!$relative) {
             return response()->json([
@@ -72,17 +69,16 @@ class RelativesController extends Controller
 
         return response()->json([
             'msg' => 'Relative registered Successfully',
-            'person' => $person,
-            'relative' => $relative
         ], 201);
     }
+    // Listo
     public function show($id)
     {
         if (!is_numeric($id)) {
             abort(404);
         }
 
-        $relative = Relative::find($id);
+        $relative = Relative::with('person')->find($id);
 
         if (!$relative) {
             return response()->json([
@@ -98,38 +94,24 @@ class RelativesController extends Controller
             ], 404);
         }
 
-        $relativeData = $person->relative->map(function ($relative) {
-            return [
-                'name' => $relative->contact,
-                'phone_number' => $relative->phone_number,
-                'contact' => $relative->contact,
-            ];
-        })->first();
 
         return response()->json([
             'msg' => 'Relative Found Successfully',
-            'person' => [
-                'id' => $person->id,
-                'name' => $person->name,
-                'last_name_1' => $person->last_name_1,
-                'last_name_2' => $person->last_name_2,
-                'phone_number' => $relative->phone_number,
-                'contact' => $relative->contact,
-            ]
+            'relative' => $relative
         ], 200);
     }
+    // Listo
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {
             abort(404);
         }
         $validate = Validator::make($request->all(), [
-            'name' => 'string|max:255|nullable',
-            'last_name_1' => 'string|max:255|nullable',
-            'last_name_2' => 'string|max:255|nullable',
-            'baby_id' => 'integer|exists:babies,id|nullable',
-            'phone_number' => 'string|min:10|max:10|nullable',
-            'contact' => 'string|nullable',
+            'name' => 'string|max:255|required',
+            'last_name_1' => 'string|max:255|required',
+            'last_name_2' => 'string|max:255|required',
+            'phone_number' => 'string|min:10|max:10|required',
+            'email' => 'email|max:255|required|unique:relatives,email,' . $id,
         ]);
 
         if ($validate->fails()) {
@@ -154,22 +136,22 @@ class RelativesController extends Controller
             ], 404);
         }
 
-        $person->name = $request->name ?? $person->name;
-        $person->last_name_1 = $request->last_name_1 ?? $person->last_name_1;
-        $person->last_name_2 = $request->last_name_2 ?? $person->last_name_2;
-        $person->save();
+        $person->update([
+            'name' => $request->name,
+            'last_name_1' => $request->last_name_1,
+            'last_name_2' => $request->last_name_2
+        ]);
 
-        $relative->baby_id = $request->baby_id ?? $relative->baby_id;
-        $relative->phone_number = $request->phone_number ?? $relative->phone_number;
-        $relative->contact = $request->contact ?? $relative->contact;
-        $relative->save();
+        $relative->update([
+            'phone_number' => $request->phone_number,
+            'email' => $request->email
+        ]);
 
         return response()->json([
             'msg' => 'Relative Updated Successfully',
-            'person' => $person,
-            'relative' => $relative
         ], 200);
     }
+    // Listo
     public function destroy($id)
     {
         if (!is_numeric($id)) {
@@ -199,56 +181,5 @@ class RelativesController extends Controller
         return response()->json([
             'msg' => 'Data Deleted'
         ], 200);
-    }
-
-    public function addPersonRelative (Request $request, $baby_id)
-    {
-        $validate = Validator::make($request->all(), [
-            'name' => 'string|max:255|required',
-            'last_name_1' => 'string|max:255|required',
-            'last_name_2' => 'string|max:255|nullable',
-            'phone_number' => 'string|min:10|max:10|required',
-            'contact' => 'string|nullable',
-        ]);
-
-        if ($validate->fails()) 
-        {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
-        }
-
-        if (Relative::where('phone_number', $request->phone_number)->first()) 
-        {
-            return response()->json([
-                'msg' => 'Phone Number Already Registered'
-            ], 400);
-        }
-
-        if (Baby::find($baby_id) == null) 
-        {
-            return response()->json([
-                'msg' => 'Baby Not Found'
-            ], 404);
-        }
-
-        $person = new Person();
-        $person->name = $request->name;
-        $person->last_name_1 = $request->last_name_1;
-        $person->last_name_2 = $request->last_name_2;
-        $person->save();
-
-        $relative = new Relative();
-        $relative->person_id = $person->id;
-        $relative->baby_id = $baby_id;
-        $relative->phone_number = $request->phone_number;
-        $relative->contact = $request->contact;
-        $relative->save();
-
-        return response()->json([
-            'msg' => 'Relative Added Successfully',
-            'person' => $person,
-            'relative' => $relative
-        ], 201);
     }
 }

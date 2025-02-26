@@ -16,6 +16,7 @@ class BabyIncubator extends Model
         'baby_id',
         'incubator_id',
         'nurse_id',
+        'egress_date',
     ];
 
     public function baby()

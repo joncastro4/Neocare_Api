@@ -17,7 +17,7 @@ return new class extends Migration {
             $table->foreignId('baby_id')->constrained('babies')->onDelete('cascade');
             $table->foreignId('incubator_id')->constrained('incubators')->onDelete('cascade');
             $table->foreignId('nurse_id')->constrained('nurses')->onDelete('cascade');
-            $table->timestamp('egress_date');
+            $table->timestamp('egress_date')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

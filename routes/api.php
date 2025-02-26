@@ -33,22 +33,18 @@ Route::prefix('v1')->group(function () {
         Route::middleware('roleguest')->group(function () {
             Route::apiResource('checks', ChecksController::class);
             Route::apiResource('rooms', RoomsController::class);
+            Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
             Route::middleware('superadmin')->group(function () {
                 Route::middleware('nurseadmin')->group(function () {
                     Route::apiResource('incubators', IncubatorsController::class);
                     Route::apiResource('babies', BabiesController::class);
                     Route::apiResource('babies-data', BabiesDataController::class);
                     Route::apiResource('relatives', RelativesController::class);
-                    Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
                 });
                 Route::apiResource('addresses', AddressesController::class);
                 Route::apiResource('hospitals', HospitalsController::class);
-                Route::post('add-person-relative/{baby_id}', [RelativesController::class, 'addPersonRelative']);
                 Route::apiResource('baby-incubators', BabyIncubatorsController::class);
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
-                Route::apiResource('nurses', NursesController::class);
-                Route::apiResource('people', PeopleController::class);
-
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
                 Route::get('sessions/role', [SessionsController::class, 'userRole']);
                 Route::post('sessions/logout', [SessionsController::class, 'logout']);
