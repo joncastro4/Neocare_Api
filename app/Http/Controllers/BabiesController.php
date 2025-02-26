@@ -8,19 +8,54 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
 use App\Models\BabyIncubator;
-use DB;
-use DateTime;
-use Carbon\Carbon;
 use App\Models\Incubator;
 
 class BabiesController extends Controller
 {
+    // Listo
     public function index(Request $request)
     {
-        $babies = Baby::with('person', 'hospital')->orderBy('created_at', 'desc')->get();
 
-        if ($babies->isEmpty()) {
-            return response()->json(['msg' => "No Babies Found"], 204);
+        $validate = Validator::make($request->all(), [
+            'hospital_id' => 'nullable|integer|exists:hospitals,id',
+            'incubator_id' => 'nullable|integer|exists:incubators,id',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
+        $babies = Baby::with([
+            'person',
+            'hospital',
+            'baby_incubator' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }
+        ])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($baby) {
+                $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
+                return $baby;
+            });
+
+
+        if ($request->hospital_id) {
+            $babies = $babies->where('hospital_id', $request->hospital_id);
+        }
+
+        if ($request->incubator_id) {
+            $babies = $babies->whereHas('baby_incubator', function ($query) use ($request) {
+                $query->where('incubator_id', $request->incubator_id);
+            });
+        }
+
+        if ($babies->isEmpty() || !$babies) {
+            return response()->json([
+                'msg' => 'No Babies Found'
+            ], 404);
         }
 
         return response()->json([
@@ -28,6 +63,7 @@ class BabiesController extends Controller
         ], 200);
     }
 
+    // Listo
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -36,7 +72,6 @@ class BabiesController extends Controller
             'last_name_1' => 'required|string|max:255',
             'last_name_2' => 'nullable|string|max:255',
             'date_of_birth' => 'required|date|before_or_equal:today',
-            'egress_date' => 'nullable|date|after:date_of_birth',
         ]);
 
         if ($validate->fails()) {
@@ -54,20 +89,20 @@ class BabiesController extends Controller
         Baby::create([
             'hospital_id' => $request->hospital_id,
             'person_id' => $person->id,
-            'date_of_birth' => $request->date_of_birth,
-            'egress_date' => $request->egress_date
+            'date_of_birth' => $request->date_of_birth
         ]);
 
         return response()->json([
-            'message' => 'Baby registered Successfully',
+            'msg' => 'Baby registered Successfully',
         ], 201);
     }
+    // Listo
     public function show($id)
     {
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby = Baby::with('person', 'hospital')->find($id);
+        $baby = Baby::with('person', 'hospital', 'baby_incubator.incubator', 'relative')->find($id);
 
         if (!$baby) {
             return response()->json([
@@ -75,11 +110,16 @@ class BabiesController extends Controller
             ], 404);
         }
 
+        $incubator = $baby->baby_incubator->first()->incubator ?? null;
+        $incubatorInfo = $incubator ? $incubator->id : "Not assigned";
+
         return response()->json([
             'msg' => "Baby found",
-            'baby' => $baby
+            'baby' => $baby,
+            'incubator' => $incubatorInfo
         ], 200);
     }
+    // Listo
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {
@@ -89,9 +129,8 @@ class BabiesController extends Controller
         $validate = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'last_name_1' => 'required|string|max:255',
-            'last_name_2' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
             'date_of_birth' => 'required|date|before_or_equal:today',
-            'egress_date' => 'nullable|date|after:date_of_birth',
         ]);
 
         if ($validate->fails()) {
@@ -115,21 +154,21 @@ class BabiesController extends Controller
                 'msg' => "Person not found"
             ], 404);
         }
-        $person->name = $request->name ?? $person->name;
-        $person->last_name_1 = $request->last_name_1 ?? $person->last_name_1;
-        $person->last_name_2 = $request->last_name_2 ?? $person->last_name_2;
-        $person->save();
+        $person->update([
+            'name' => $request->name,
+            'last_name_1' => $request->last_name_1,
+            'last_name_2' => $request->last_name_2
+        ]);
 
-        $baby->date_of_birth = $request->date_of_birth ?? $baby->date_of_birth;
-        $baby->egress_date = $request->egress_date ?? $baby->egress_date;
-        $baby->save();
+        $baby->update([
+            'date_of_birth' => $request->date_of_birth
+        ]);
 
         return response()->json([
             'msg' => "Baby updated successfully",
-            'person' => $person,
-            'baby' => $baby
         ], 200);
     }
+    // Listo
     public function destroy($id)
     {
         if (!is_numeric($id)) {

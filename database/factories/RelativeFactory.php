@@ -16,7 +16,7 @@ class RelativeFactory extends Factory
             'person_id' => Person::factory(),
             'baby_id' => Baby::factory(),
             'phone_number' => substr($this->faker->phoneNumber, 0, 10),
-            'correo' => $this->faker->email,
+            'email' => $this->faker->email,
         ];
     }
 }
