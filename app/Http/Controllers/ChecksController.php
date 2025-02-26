@@ -53,7 +53,8 @@ class ChecksController extends Controller
             $checks = Check::orderByDesc('id')->with(['nurse.userPerson.person', 'baby_incubator.baby.person']);
 
             if ($request->hospital_id) {
-                $checks->where('nurse.hospital_id', $request->hospital_id);
+                $nurses = Nurse::where('hospital_id', $request->hospital_id)->pluck('id');
+                $checks->whereIn('nurse_id', $nurses);
             }
 
             if ($request->nurse_id) {
@@ -94,13 +95,14 @@ class ChecksController extends Controller
             $baby = $babyIncubator ? $babyIncubator->baby : null;
             $babyPerson = $baby ? $baby->person : null;
             $babyFullName = $babyPerson ? $babyPerson->name . ' ' . $babyPerson->last_name_1 . ' ' . $babyPerson->last_name_2 : null;
-
+            $incubator = $babyIncubator ? $babyIncubator->incubator->id : null;
             return [
                 'check_id' => $check->id,
                 'title' => $check->title,
                 'description' => $check->description,
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
+                'incubator' => $incubator,
                 'created_at' => $check->created_at
             ];
         });
@@ -127,7 +129,15 @@ class ChecksController extends Controller
 
         $user_id = $user->id;
 
-        $nurse = Nurse::where('user_id', $user_id)->first();
+        $userPerson = UserPerson::where('user_id', $user_id)->first();
+
+        if (!$userPerson) {
+            return response()->json([
+                'msg' => 'Unauthorized'
+            ], 403);
+        }
+
+        $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
 
         if (!$nurse) {
             return response()->json([
@@ -135,16 +145,9 @@ class ChecksController extends Controller
             ], 403);
         }
 
-        $nurse_id = $nurse->id;
-
-        if (!$nurse_id) {
-            return response()->json([
-                'msg' => 'No Nurse Found'
-            ], 404);
-        }
-
         $validate = Validator::make($request->all(), [
             'baby_incubator_id' => 'required|integer|exists:babies_incubators,id',
+            'title' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
 
@@ -155,8 +158,9 @@ class ChecksController extends Controller
         }
 
         $check = Check::create([
-            'nurse_id' => $nurse_id,
+            'nurse_id' => $nurse->id,
             'baby_incubator_id' => $request->baby_incubator_id,
+            'title' => $request->title,
             'description' => $request->description
         ]);
 
@@ -176,7 +180,7 @@ class ChecksController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $check = Check::find($id);
+        $check = Check::with(['nurse.userPerson.person', 'baby_incubator.baby.person'])->find($id);
 
         if (!$check) {
             return response()->json([
@@ -184,8 +188,19 @@ class ChecksController extends Controller
             ], 404);
         }
 
+        $data = [
+            'check_id' => $check->id,
+            'title' => $check->title,
+            'description' => $check->description,
+            'nurse' => $check->nurse->userPerson->person->name . ' ' . $check->nurse->userPerson->person->last_name_1 . ' ' . $check->nurse->userPerson->person->last_name_2,
+            'baby' => $check->baby_incubator->baby->person->name . ' ' . $check->baby_incubator->baby->person->last_name_1 . ' ' . $check->baby_incubator->baby->person->last_name_2,
+            'incubator' => $check->baby_incubator->incubator->id,
+            'created_at' => $check->created_at
+        ];
+
+
         return response()->json([
-            'data' => $check
+            'data' => $data
         ]);
     }
     public function update(Request $request, $id)
@@ -194,7 +209,8 @@ class ChecksController extends Controller
             abort(404);
         }
         $validate = Validator::make($request->all(), [
-            'description' => 'nullable|string',
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
         ]);
 
         if ($validate->fails()) {
@@ -211,8 +227,10 @@ class ChecksController extends Controller
             ], 404);
         }
 
-        $check->description = $request->description;
-        $check->save();
+        $check->update([
+            'title' => $request->title,
+            'description' => $request->description
+        ]);
 
         return response()->json([
             'data' => $check
@@ -227,72 +245,14 @@ class ChecksController extends Controller
 
         if (!$check) {
             return response()->json([
-                'msg' => 'No Data Found'
+                'msg' => 'No Check Found'
             ], 404);
         }
 
         $check->delete();
 
         return response()->json([
-            'msg' => 'Data Deleted'
-        ], 200);
-    }
-
-    public function checksByNurse()
-    {
-        $user = auth()->user();
-
-        if (!$user) {
-            return response()->json([
-                'msg' => 'unauthorized'
-            ], 403);
-        }
-
-        // Verificar si el usuario es admin
-        if ($user->role === 'admin') {
-            // Si es admin, obtener todos los chequeos
-            $checks = Check::with(['baby_incubator.baby.person'])
-                ->orderByDesc('created_at') // Orden descendente
-                ->get();
-        } else {
-            // Obtener las IDs de las enfermeras asociadas al usuario
-            $nurseIds = Nurse::where('user_id', $user->id)->orderByDesc('created_at')->pluck('id');
-
-            if ($nurseIds->isEmpty()) {
-                return response()->json([
-                    'msg' => 'unauthorized'
-                ], 403);
-            }
-
-            // Obtener los chequeos asociados a las enfermeras del usuario
-            $checks = Check::whereIn('nurse_id', $nurseIds)
-                ->with(['baby_incubator.baby.person'])
-                ->orderByDesc('created_at') // Orden descendente
-                ->get();
-        }
-
-        // Mapear los resultados
-        $data = $checks->map(function ($check) {
-            $babyIncubator = $check->baby_incubator;
-            $baby = $babyIncubator ? $babyIncubator->baby : null;
-            $person = $baby ? $baby->person : null;
-
-            $createdAt = $check->created_at;
-            $date = $createdAt->format('Y-m-d');
-            $time = $createdAt->format('H:i:s');
-
-            return [
-                'check_id' => $check->id,
-                'description' => $check->description,
-                'date' => $date,
-                'time' => $time,
-                'baby' => $person ? $person->name . ' ' . $person->last_name_1 . ' ' . $person->last_name_2 : null
-            ];
-        });
-
-        // Retornar los chequeos
-        return response()->json([
-            'checks' => $data
+            'msg' => 'Check Deleted'
         ], 200);
     }
 }

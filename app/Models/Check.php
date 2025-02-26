@@ -15,6 +15,7 @@ class Check extends Model
     protected $fillable = [
         'nurse_id',
         'baby_incubator_id',
+        'title',
         'description'
     ];
 
