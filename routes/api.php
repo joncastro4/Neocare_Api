@@ -32,9 +32,9 @@ Route::prefix('v1')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('roleguest')->group(function () {
             Route::apiResource('checks', ChecksController::class);
+            Route::apiResource('rooms', RoomsController::class);
             Route::middleware('superadmin')->group(function () {
                 Route::middleware('nurseadmin')->group(function () {
-                    Route::apiResource('rooms', RoomsController::class);
                     Route::apiResource('incubators', IncubatorsController::class);
                     Route::apiResource('babies', BabiesController::class);
                     Route::apiResource('babies-data', BabiesDataController::class);

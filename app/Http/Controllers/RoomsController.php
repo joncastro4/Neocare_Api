@@ -5,12 +5,35 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Room;
 use Illuminate\Support\Facades\Validator;
+use App\Models\BabyIncubator;
+use App\Models\Incubator;
 class RoomsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $user = auth()->user();
+
+        $validate = Validator::make($request->all(), [
+            'hospital_id' => 'nullable|integer|exists:hospitals,id',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 400);
+        }
+
         $rooms = Room::with('hospital')->get();
-        if (!$rooms) {
+
+        if ($request->hospital_id) {
+            $rooms = Room::with('hospital')->where('hospital_id', $request->hospital_id)->get();
+        }
+
+        if ($user->role == 'nurse-admin' || $user->role == 'nurse') {
+            $rooms = Room::with('hospital')->where('hospital_id', $user->nurse->hospital_id)->get();
+        }
+
+        if (!$rooms || $rooms->isEmpty()) {
             return response()->json([
                 'message' => 'No rooms found'
             ], 404);
@@ -25,7 +48,18 @@ class RoomsController extends Controller
                 'message' => 'Room not found'
             ], 404);
         }
-        return response()->json($room, 200);
+
+        $babies = BabyIncubator::whereHas('incubator', function ($query) use ($id) {
+            $query->where('room_id', $id);
+        })->get();
+        $incubators = Incubator::where('room_id', $id)->get();
+
+        return response()->json([
+            'room' => $room,
+            'total_babies' => $babies->count(),
+            'total_incubators' => $incubators->count(),
+            'incubators' => $incubators
+        ], 200);
     }
     public function store(Request $request)
     {
