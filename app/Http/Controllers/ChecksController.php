@@ -21,6 +21,13 @@ class ChecksController extends Controller
             'date1' => 'nullable|date|before_or_equal:date2|before_or_equal:today',
             'date2' => 'nullable|date|after_or_equal:date1|before_or_equal:today',
         ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
         $user = auth()->user();
 
         if ($user->role == 'nurse' || $user->role == 'nurse-admin') {
@@ -62,7 +69,9 @@ class ChecksController extends Controller
             }
 
             if ($request->baby_id) {
-                $checks->where('baby_incubator.baby_id', $request->baby_id);
+                $checks->whereHas('baby_incubator.baby', function ($query) use ($request) {
+                    $query->where('id', $request->baby_id);
+                });
             }
 
             if ($request->incubator_id) {
