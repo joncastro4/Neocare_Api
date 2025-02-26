@@ -7,41 +7,103 @@ use Illuminate\Http\Request;
 use App\Models\Check;
 use App\Models\Nurse;
 use Illuminate\Support\Facades\Validator;
+use App\Models\UserPerson;
 
 class ChecksController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $validate = Validator::make($request->all(), [
+            'nurse_id' => 'nullable|integer|exists:nurses,id',
+            'baby_id' => 'nullable|integer|exists:babies,id',
+            'incubator_id' => 'nullable|integer|exists:incubators,id',
+            'date1' => 'nullable|date|before_or_equal:date2|before_or_equal:today',
+            'date2' => 'nullable|date|after_or_equal:date1|before_or_equal:today',
+        ]);
         $user = auth()->user();
 
-        if (!$user) {
-            return response()->json([
-                'msg' => 'Unauthorized'
-            ]);
-        }
+        if ($user->role == 'nurse' || $user->role == 'nurse-admin') {
+            $userPerson = UserPerson::where('user_id', $user->id)->first();
 
-
-        // Si el usuario no es admin, obtenemos los BabyNurses asociados
-        if ($user->role != 'admin') {
-            $checks = Check::where('nurse_id', $user->id)->get();
-
-            if ($checks->isEmpty()) {
+            if (!$userPerson) {
                 return response()->json([
-                    'msg' => 'No hay chequeos para esta enfermera'
+                    'message' => 'UserPerson not found'
                 ], 404);
             }
 
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
 
+            if (!$nurse) {
+                return response()->json([
+                    'message' => 'Nurse not found'
+                ], 404);
+            }
+
+            $hospital = $nurse->hospital;
+
+            if ($user->role == 'nurse-admin') {
+                $nurses = Nurse::where('hospital_id', $hospital->id)->pluck('id');
+                $checks = Check::whereIn('nurse_id', $nurses)->orderByDesc('id')->with(['nurse.userPerson.person', 'baby_incubator.baby.person'])->get();
+            } else {
+                $checks = Check::where('nurse_id', $nurse->id)->orderByDesc('id')->with(['nurse.userPerson.person', 'baby_incubator.baby.person'])->get();
+            }
+
+        } else if ($user->role == 'super-admin' || $user->role == 'admin') {
+            $checks = Check::orderByDesc('id')->with(['nurse.userPerson.person', 'baby_incubator.baby.person']);
+
+            if ($request->nurse_id) {
+                $checks->where('nurse_id', $request->nurse_id);
+            }
+
+            if ($request->baby_id) {
+                $checks->where('baby_incubator.baby_id', $request->baby_id);
+            }
+
+            if ($request->incubator_id) {
+                $checks->where('baby_incubator_id', $request->incubator_id);
+            }
+
+            if ($request->date1 && $request->date2) {
+                $checks->whereBetween('created_at', [$request->date1, $request->date2]);
+            }
+
+            $checks = $checks->get();
+        }
+
+        if ($checks->isEmpty()) {
             return response()->json([
-                'data' => $checks
-            ]);
-        } else {
-            // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
-            $checks = Check::all();
+                'message' => 'No checks found'
+            ], 404);
+        }
+
+        $data = $checks->map(function ($check) {
+            $nurse = $check->nurse;
+            $nursePerson = $nurse ? $nurse->userPerson->person : null;
+            $nurseFullName = $nursePerson ? $nursePerson->name . ' ' . $nursePerson->last_name_1 . ' ' . $nursePerson->last_name_2 : null;
+
+            $babyIncubator = $check->baby_incubator;
+            $baby = $babyIncubator ? $babyIncubator->baby : null;
+            $babyPerson = $baby ? $baby->person : null;
+            $babyFullName = $babyPerson ? $babyPerson->name . ' ' . $babyPerson->last_name_1 . ' ' . $babyPerson->last_name_2 : null;
+
+            return [
+                'check_id' => $check->id,
+                'title' => $check->title,
+                'description' => $check->description,
+                'nurse' => $nurseFullName,
+                'baby' => $babyFullName,
+                'created_at' => $check->created_at
+            ];
+        });
+
+        if (!$checks) {
+            return response()->json([
+                'msg' => 'No Data Found'
+            ], 404);
         }
 
         return response()->json([
-            'data' => $checks
+            'data' => $data
         ], 200);
     }
     public function store(Request $request)

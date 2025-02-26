@@ -31,6 +31,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::middleware('roleguest')->group(function () {
+            Route::apiResource('checks', ChecksController::class);
             Route::middleware('superadmin')->group(function () {
                 Route::middleware('nurseadmin')->group(function () {
                     Route::apiResource('rooms', RoomsController::class);
@@ -39,7 +40,6 @@ Route::prefix('v1')->group(function () {
                     Route::apiResource('babies-data', BabiesDataController::class);
                     Route::apiResource('relatives', RelativesController::class);
                     Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
-                    Route::get('nurse-checks', [ChecksController::class, 'checksByNurse']);
                 });
                 Route::apiResource('addresses', AddressesController::class);
                 Route::apiResource('hospitals', HospitalsController::class);
@@ -48,7 +48,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
                 Route::apiResource('nurses', NursesController::class);
                 Route::apiResource('people', PeopleController::class);
-                Route::apiResource('checks', ChecksController::class);
+
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
                 Route::get('sessions/role', [SessionsController::class, 'userRole']);
                 Route::post('sessions/logout', [SessionsController::class, 'logout']);
