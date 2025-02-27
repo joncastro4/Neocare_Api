@@ -15,6 +15,7 @@ class IncubatorsController extends Controller
 {
     public $incubatorNotFound = 'No Incubator Found';
 
+    // Listo
     public function index(Request $request)
     {
         $user = auth()->user();
@@ -75,119 +76,13 @@ class IncubatorsController extends Controller
             'incubators' => $data
         ], 200);
     }
-    public function incubatorNurse()
+
+    // Listo
+    public function store(Request $request)
     {
-        $user = auth()->user();
-
-        if (!$user) {
-            return response()->json([
-                'msg' => 'No user found'
-            ], 404);
-        }
-
-        // Si el usuario no es admin, obtenemos todas las incubadoras sin importar la relación con la enfermera
-        if ($user->role != 'admin') {
-            $incubators = Incubator::orderByDesc('created_at')->get();
-
-            if ($incubators->isEmpty()) {
-                return response()->json([
-                    'msg' => 'No incubators found'
-                ], 404);
-            }
-
-            // Agrega el estado de cada incubadora al arreglo
-            $incubatorsWithState = $incubators->map(function ($incubator) {
-                $incubatorDetails = Incubator::find($incubator->id);
-                $incubator->state = $incubatorDetails ? $incubatorDetails->state : 'Unknown';
-                return $incubator;
-            });
-
-            return response()->json([
-                'data' => $incubatorsWithState
-            ], 200);
-        }
-
-        // Si el usuario es admin, obtenemos todas las incubadoras sin filtro
-        $incubators = Incubator::orderByDesc('created_at')->get();
-
-        if ($incubators->isEmpty()) {
-            return response()->json([
-                'msg' => 'No incubators found'
-            ], 204);
-        }
-
-        // Agrega el estado de cada incubadora al arreglo
-        $incubatorsWithState = $incubators->map(function ($incubator) {
-            $incubatorDetails = Incubator::find($incubator->id);
-            $incubator->state = $incubatorDetails ? $incubatorDetails->state : 'Unknown';
-            return $incubator;
-        });
-
-        return response()->json([
-            'data' => $incubatorsWithState
-        ], 200);
-    }
-
-
-    public function store()
-    {
-        $incubator = new Incubator();
-        $incubator->save();
-
-        $groupName = 'incubator' . $incubator->id;
-        $groupData = [
-            'name' => $groupName,
-            'description' => 'Incubator ' . $incubator->id,
-        ];
-
-        try {
-            $response = Http::withHeaders([
-                'X-AIO-Key' => "aio_nBRg95EbrYiAnrK6jxq89C2bTHXH",
-            ])->post("https://io.adafruit.com/api/v2/Tunas/groups", $groupData);
-
-            if (!$response->successful()) {
-                return response()->json([
-                    'message' => 'Error al crear el grupo.',
-                    'error' => $response->json(),
-                ], $response->status());
-            }
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'No se pudo crear el grupo.',
-                'error' => $e->getMessage(),
-            ], 500);
-        }
-
-        return response()->json([
-            'msg' => 'Incubadora Agregada Correctamente',
-            'data' => $incubator
-        ], 201);
-    }
-    public function show($id)
-    {
-        if (!is_numeric($id)) {
-            abort(404);
-        }
-        $incubator = Incubator::find($id);
-
-        if (!$incubator) {
-            return response()->json([
-                'msg' => $this->incubatorNotFound
-            ], 404);
-        }
-
-        return response()->json([
-            'data' => $incubator
-        ], 200);
-    }
-    public function update(Request $request, $id)
-    {
-        if (!is_numeric($id)) {
-            abort(404);
-        }
 
         $validate = Validator::make($request->all(), [
-            'state' => 'required|string|in:active,available,inactive',
+            'room_id' => 'required|integer|exists:rooms,id',
         ]);
 
         if ($validate->fails()) {
@@ -196,15 +91,24 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        $BabyIncubator = BabyIncubator::find($id);
+        Incubator::create([
+            'room_id' => $request->room_id
+        ]);
 
-        if (!$BabyIncubator) {
-            return response()->json([
-                'msg' => 'No se encontraron los datos'
-            ], 404);
+        return response()->json([
+            'msg' => 'Incubator Created Successfully',
+        ], 201);
+    }
+
+    public function show($id)
+    {
+        if (!is_numeric($id)) {
+            abort(404);
         }
 
-        $incubator = Incubator::find($BabyIncubator->incubator_id);
+        $user = auth()->user();
+
+        $incubator = Incubator::with('room.hospital', 'baby_incubator.baby.person', 'baby_incubator.nurse.userPerson.person')->find($id);
 
         if (!$incubator) {
             return response()->json([
@@ -212,13 +116,79 @@ class IncubatorsController extends Controller
             ], 404);
         }
 
-        $incubator->state = $request->state;
-        $incubator->save();
+        $nurse = null;
+
+        if (!($user->role == 'nurse')) {
+            $nurse = $incubator->baby_incubator->first()->nurse->userPerson->person->name . ' ' . $incubator->baby_incubator->first()->nurse->userPerson->person->last_name_1 . ' ' . $incubator->baby_incubator->first()->nurse->userPerson->person->last_name_2 ?? null;
+        }
+
+        $baby = $incubator->baby_incubator->first()->baby->person->name . ' ' . $incubator->baby_incubator->first()->baby->person->last_name_1 . ' ' . $incubator->baby_incubator->first()->baby->person->last_name_2 ?? null;
+
+        $data = [
+            'id' => $incubator->id,
+            'state' => $incubator->state,
+            'room_number' => $incubator->room->number,
+            'nurse' => $nurse,
+            'baby' => $baby,
+            'created_at' => $incubator->created_at
+        ];
 
         return response()->json([
-            'data' => $incubator
+            'incubator' => $data
         ], 200);
     }
+    // Listo
+    public function update(Request $request, $id)
+    {
+        if (!is_numeric($id)) {
+            abort(404);
+        }
+
+        $validate = Validator::make($request->all(), [
+            'state' => 'required|string|in:active,available',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
+        $BabyIncubator = BabyIncubator::where('incubator_id', $id)->orderBy('created_at', 'desc')->first();
+
+        if (!$BabyIncubator) {
+            return response()->json([
+                'msg' => 'BabyIncubator not found'
+            ], 404);
+        }
+
+        $incubator = Incubator::find($id);
+
+        if (!$incubator) {
+            return response()->json([
+                'msg' => $this->incubatorNotFound
+            ], 404);
+        }
+
+        if ($incubator->state == $request->state) {
+            return response()->json([
+                'msg' => 'The state is the same'
+            ], 404);
+        }
+
+        $incubator->update([
+            'state' => $request->state,
+        ]);
+
+        $BabyIncubator->update([
+            'egress_date' => now(),
+        ]);
+
+        return response()->json([
+            'msg' => 'Incubator Updated Successfully'
+        ], 200);
+    }
+    // Listo
     public function destroy($id)
     {
         if (!is_numeric($id)) {

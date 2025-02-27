@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BabiesController;
 use App\Http\Controllers\BabiesDataController;
 use App\Http\Controllers\IncubatorsController;
@@ -88,4 +88,13 @@ Route::get('/operaciones', function () {
             'division'
         ]
     ]);
+});
+
+Route::get('/test-mongo', function () {
+    try {
+        DB::connection('mongodb')->getMongoClient()->listDatabases();
+        return "Conexión a MongoDB exitosa!";
+    } catch (\Exception $e) {
+        return "Error al conectar a MongoDB: " . $e->getMessage();
+    }
 });
