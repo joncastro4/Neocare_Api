@@ -4,10 +4,8 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\BabiesController;
 use App\Http\Controllers\BabiesDataController;
-use App\Http\Controllers\BabyIncubatorsController;
 use App\Http\Controllers\IncubatorsController;
 use App\Http\Controllers\NursesController;
-use App\Http\Controllers\PeopleController;
 use App\Http\Controllers\RelativesController;
 use App\Http\Controllers\ChecksController;
 use App\Http\Controllers\SessionsController;
@@ -33,17 +31,16 @@ Route::prefix('v1')->group(function () {
         Route::middleware('roleguest')->group(function () {
             Route::apiResource('checks', ChecksController::class);
             Route::apiResource('rooms', RoomsController::class);
+            Route::apiResource('incubators', IncubatorsController::class);
             Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
             Route::middleware('superadmin')->group(function () {
                 Route::middleware('nurseadmin')->group(function () {
-                    Route::apiResource('incubators', IncubatorsController::class);
                     Route::apiResource('babies', BabiesController::class);
                     Route::apiResource('babies-data', BabiesDataController::class);
                     Route::apiResource('relatives', RelativesController::class);
                 });
                 Route::apiResource('addresses', AddressesController::class);
                 Route::apiResource('hospitals', HospitalsController::class);
-                Route::apiResource('baby-incubators', BabyIncubatorsController::class);
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
                 Route::get('sessions/role', [SessionsController::class, 'userRole']);

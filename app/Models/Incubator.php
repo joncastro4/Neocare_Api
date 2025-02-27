@@ -13,11 +13,16 @@ class Incubator extends Model
     protected $table = 'incubators';
 
     protected $fillable = [
-        'state'
+        'state',
+        'room_id'
     ];
 
     public function baby_incubator()
     {
         return $this->hasMany(BabyIncubator::class);
+    }
+    public function room()
+    {
+        return $this->belongsTo(Room::class, 'room_id');
     }
 }
