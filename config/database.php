@@ -93,18 +93,7 @@ return [
         'mongodb' => [
             'driver' => 'mongodb',
             'dsn' => env('DB_URI'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', 27017),
-            'database' => env('DB_DATABASE', 'sample_mflix'),
-            'username' => env('DB_USERNAME', ''),
-            'password' => env('DB_PASSWORD', ''),
-            'options' => [
-                'maxPoolSize' => 20, // Tamaño máximo del pool de conexiones
-                'w' => 'majority', // Nivel de escritura
-            ],
-            'driver_options' => [
-                'serverApi' => 1, // Versión de la API del servidor
-            ],
+            'database' => 'neocare',
         ],
 
     ],
