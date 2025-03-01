@@ -5,19 +5,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Jenssegers\Mongodb\Eloquent\Model;
 
-class MongoRoom extends Model
+class MongoSensor extends Model
 {
     use HasFactory;
 
     protected $connection = 'mongodb';
-    protected $collection = 'rooms';
+    protected $collection = 'sensors';
 
     protected $fillable = [
-        'name',
-        'number',
-        'hospital_id',
+        'type',
+        'unit',
+        'current_value',
+        'min_value',
+        'max_value',
+        'reading_date',
         'created_at',
-        'updated_at',
-        'deleted_at'
+        'updated_at'
     ];
 }
