@@ -37,7 +37,7 @@ class BabiesController extends Controller
             }
         ])
             ->orderBy('created_at', 'desc')
-            ->get()
+            ->paginate(9)
             ->map(function ($baby) {
                 $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
                 return $baby;

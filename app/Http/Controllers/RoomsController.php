@@ -23,7 +23,7 @@ class RoomsController extends Controller
             ], 400);
         }
 
-        $rooms = Room::with('hospital')->get();
+        $rooms = Room::with('hospital')->paginate(9);
 
         if ($request->hospital_id) {
             $rooms = Room::with('hospital')->where('hospital_id', $request->hospital_id)->get();

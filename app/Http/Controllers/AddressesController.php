@@ -15,7 +15,7 @@ class AddressesController extends Controller
      */
     public function index()
     {
-        $addresses = Address::orderByDesc('created_at')->get();
+        $addresses = Address::orderByDesc('created_at')->paginate(9);
 
         if ($addresses->isEmpty()) {
             return response()->json([

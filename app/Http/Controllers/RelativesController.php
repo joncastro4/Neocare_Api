@@ -12,7 +12,7 @@ class RelativesController extends Controller
 {
     public function index()
     {
-        $relatives = Relative::with('person')->get();
+        $relatives = Relative::with('person')->paginate(9);
 
         if ($relatives->isEmpty()) {
             return response()->json([

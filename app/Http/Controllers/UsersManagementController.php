@@ -12,7 +12,7 @@ class UsersManagementController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::paginate(9);
         if (!$users) {
             return response()->json([
                 'message' => 'No users found'

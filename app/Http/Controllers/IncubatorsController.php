@@ -48,7 +48,7 @@ class IncubatorsController extends Controller
             });
         }
 
-        $incubators = $incubators->orderByDesc('created_at')->get();
+        $incubators = $incubators->orderByDesc('created_at')->paginate(9);
 
         if ($incubators->isEmpty()) {
             return response()->json([
