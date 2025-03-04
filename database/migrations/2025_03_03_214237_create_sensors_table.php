@@ -12,11 +12,13 @@ return new class extends Migration {
      */
     public function up()
     {
-        Schema::create('sensores', function (Blueprint $table) {
+        Schema::create('sensors', function (Blueprint $table) {
             $table->id();
-            $table->string('tipo_sensor')->unique();
-            $table->string('nombre_amigable');
-            $table->string('unidad');
+            $table->foreignId('incubator_id')->constrained('incubators')->onDelete('cascade');
+            $table->string('type');
+            $table->string('unit');
+            $table->integer('send_time')->default(15);
+            $table->integer('request_time')->default(15);
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration {
      */
     public function down()
     {
-        Schema::dropIfExists('sensores');
+        Schema::dropIfExists('sensors');
     }
 };

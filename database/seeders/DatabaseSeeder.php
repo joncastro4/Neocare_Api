@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 use Illuminate\Database\Seeder;
-use Database\Seeders\SensoresTableSeeder;
 use Database\Seeders\UserSeeder;
 use Database\Seeders\PersonSeeder;
 use Database\Seeders\BabySeeder;
@@ -20,7 +19,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            CheckSeeder::class
+            CheckSeeder::class,
         ]);
     }
 }
