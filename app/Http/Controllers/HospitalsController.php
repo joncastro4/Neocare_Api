@@ -98,7 +98,7 @@ class HospitalsController extends Controller
             ], 404);
         }
 
-        $total_incubators = Incubator::whereHas('room', function ($query) use ($id) {
+        $hospital->total_incubators = Incubator::whereHas('room', function ($query) use ($id) {
             $query->where('hospital_id', $id);
         })->count();
 
@@ -107,6 +107,7 @@ class HospitalsController extends Controller
         $hospital->total_nurses = Nurse::where('hospital_id', $id)->count();
 
         $hospital->total_rooms = Room::where('hospital_id', $id)->count();
+
 
 
         return response()->json([
