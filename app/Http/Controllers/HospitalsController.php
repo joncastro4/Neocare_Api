@@ -17,6 +17,18 @@ class HospitalsController extends Controller
     {
         $hospitals = Hospital::with('address')->orderByDesc('created_at')->paginate(9);
 
+
+        $hospitals = $hospitals->map(function ($hospital) {
+            $hospital->address_id = $hospital->address->id;
+            return [
+                'id' => $hospital->id,
+                'name' => $hospital->name,
+                'phone_number' => $hospital->phone_number,
+                'city' => $hospital->address->city,
+                'created_at' => $hospital->created_at
+            ];
+        });
+
         if ($hospitals->isEmpty()) {
             return response()->json([
                 'msg' => "No hospitals found"
