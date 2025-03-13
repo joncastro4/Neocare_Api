@@ -25,7 +25,7 @@ class HospitalsController extends Controller
                 'name' => $hospital->name,
                 'phone_number' => $hospital->phone_number,
                 'city' => $hospital->address->city,
-                'created_at' => $hospital->created_at
+                'created_at' => $hospital->created_at->format('Y-m-d'),
             ];
         });
 
