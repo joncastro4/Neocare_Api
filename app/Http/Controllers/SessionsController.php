@@ -240,9 +240,7 @@ class SessionsController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
+            return response()->json($validate->errors(), 422);
         }
 
         $user = User::where('email', $request->email)->first();

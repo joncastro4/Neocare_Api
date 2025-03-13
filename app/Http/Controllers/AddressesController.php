@@ -46,9 +46,7 @@ class AddressesController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 400);
+            return response()->json($validate->errors(), 400);
         }
 
         $address = new Address();
@@ -115,9 +113,7 @@ class AddressesController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 400);
+            return response()->json($validate->errors(), 400);
         }
 
         $address->update($request->all());

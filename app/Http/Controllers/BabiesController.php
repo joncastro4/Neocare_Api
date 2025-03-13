@@ -77,9 +77,7 @@ class BabiesController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
+            return response()->json($validate->errors(), 422);
         }
 
         $person = Person::create([
@@ -136,9 +134,7 @@ class BabiesController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
+            return response()->json($validate->errors(), 422);
         }
 
         $baby = Baby::find($id);

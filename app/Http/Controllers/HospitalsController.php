@@ -15,7 +15,7 @@ class HospitalsController extends Controller
      */
     public function index()
     {
-        $hospitals = Hospital::orderByDesc('created_at')->paginate(9);
+        $hospitals = Hospital::with('address')->orderByDesc('created_at')->paginate(9);
 
         if ($hospitals->isEmpty()) {
             return response()->json([

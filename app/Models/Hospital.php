@@ -14,7 +14,7 @@ class Hospital extends Model
         'phone_number'
     ];
 
-    public function addresses()
+    public function address()
     {
         return $this->belongsTo(Address::class, 'address_id');
     }

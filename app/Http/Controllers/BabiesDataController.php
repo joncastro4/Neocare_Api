@@ -37,9 +37,7 @@ class BabiesDataController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
+            return response()->json($validate->errors(), 422);
         }
 
         $data = BabyData::create($request->all());
@@ -100,9 +98,7 @@ class BabiesDataController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
+            return response()->json($validate->errors(), 422);
         }
 
         $data = BabyData::find($id);
