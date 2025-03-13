@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hospital;
+use App\Models\Incubator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Baby;
+use App\Models\Nurse;
+use App\Models\Room;
 
 class HospitalsController extends Controller
 {
@@ -29,12 +33,12 @@ class HospitalsController extends Controller
 
         if ($hospitals->isEmpty()) {
             return response()->json([
-                'msg' => "No hospitals found"
+                'message' => "No hospitals found"
             ], 404);
         }
 
         return response()->json([
-            'msg' => "Hospitals found",
+            'message' => "Hospitals found",
             'hospitals' => $hospitals
         ]);
     }
@@ -68,12 +72,12 @@ class HospitalsController extends Controller
 
         if (!$hospital) {
             return response()->json([
-                'msg' => 'Hospital not registered'
+                'message' => 'Hospital not registered'
             ], 400);
         }
 
         return response()->json([
-            'msg' => 'Hospital registered successfully',
+            'message' => 'Hospital registered successfully',
             'hospital' => $hospital
         ], 201);
     }
@@ -86,16 +90,27 @@ class HospitalsController extends Controller
      */
     public function show($id)
     {
-        $hospital = Hospital::find($id);
+        $hospital = Hospital::with('address')->find($id);
 
         if (!$hospital) {
             return response()->json([
-                'msg' => 'Hospital not found'
+                'message' => 'Hospital not found'
             ], 404);
         }
 
+        $total_incubators = Incubator::whereHas('room', function ($query) use ($id) {
+            $query->where('hospital_id', $id);
+        })->count();
+
+        $hospital->total_babies = Baby::where('hospital_id', $id)->count();
+
+        $hospital->total_nurses = Nurse::where('hospital_id', $id)->count();
+
+        $hospital->total_rooms = Room::where('hospital_id', $id)->count();
+
+
         return response()->json([
-            'hospital' => $hospital
+            'hospital' => $hospital,
         ]);
     }
 
@@ -112,7 +127,7 @@ class HospitalsController extends Controller
 
         if (!$hospital) {
             return response()->json([
-                'msg' => 'Hospital not found'
+                'message' => 'Hospital not found'
             ], 404);
         }
 
@@ -123,15 +138,13 @@ class HospitalsController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'error' => $validate->errors()
-            ], 400);
+            return response()->json($validate->errors(), 400);
         }
 
         $hospital->update($request->all());
 
         return response()->json([
-            'msg' => 'Hospital updated successfully',
+            'message' => 'Hospital updated successfully',
             'hospital' => $hospital
         ]);
     }
@@ -148,14 +161,14 @@ class HospitalsController extends Controller
 
         if (!$hospital) {
             return response()->json([
-                'msg' => 'Hospital not found'
+                'message' => 'Hospital not found'
             ], 404);
         }
 
         $hospital->delete();
 
         return response()->json([
-            'msg' => 'Hospital deleted successfully'
+            'message' => 'Hospital deleted successfully'
         ]);
     }
 }
