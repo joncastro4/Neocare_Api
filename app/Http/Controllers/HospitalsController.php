@@ -17,9 +17,7 @@ class HospitalsController extends Controller
     {
         $hospitals = Hospital::with('address')->orderByDesc('created_at')->paginate(8);
 
-
-        $hospitals = $hospitals->map(function ($hospital) {
-            $hospital->address_id = $hospital->address->id;
+        $hospitals->getCollection()->transform(function ($hospital) {
             return [
                 'id' => $hospital->id,
                 'name' => $hospital->name,
