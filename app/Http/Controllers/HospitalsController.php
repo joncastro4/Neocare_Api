@@ -15,7 +15,7 @@ class HospitalsController extends Controller
      */
     public function index()
     {
-        $hospitals = Hospital::with('address')->orderByDesc('created_at')->paginate(9);
+        $hospitals = Hospital::with('address')->orderByDesc('created_at')->paginate(8);
 
 
         $hospitals = $hospitals->map(function ($hospital) {
