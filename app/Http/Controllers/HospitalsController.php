@@ -111,7 +111,17 @@ class HospitalsController extends Controller
 
 
         return response()->json([
-            'hospital' => $hospital,
+            'hospital' => [
+                'id' => $hospital->id,
+                'name' => $hospital->name,
+                'phone_number' => $hospital->phone_number,
+                'created_at' => $hospital->created_at->format('Y-m-d'),
+                'total_incubators' => $hospital->total_incubators,
+                'total_babies' => $hospital->total_babies,
+                'total_nurses' => $hospital->total_nurses,
+                'total_rooms' => $hospital->total_rooms,
+                'address' => $hospital->address
+            ],
         ]);
     }
 
