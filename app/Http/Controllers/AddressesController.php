@@ -8,11 +8,6 @@ use Illuminate\Support\Facades\Validator;
 
 class AddressesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         $addresses = Address::orderByDesc('created_at')->paginate(9);
@@ -29,7 +24,7 @@ class AddressesController extends Controller
     }
     public function indexNoPaginate()
     {
-        $addresses = Address::orderByDesc('created_at');
+        $addresses = Address::orderByDesc('created_at')->get();
 
         if ($addresses->isEmpty()) {
             return response()->json([
@@ -41,13 +36,6 @@ class AddressesController extends Controller
             'addresses' => $addresses
         ]);
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -78,13 +66,6 @@ class AddressesController extends Controller
             'address' => $address
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $address = Address::find($id);
@@ -99,14 +80,6 @@ class AddressesController extends Controller
             'address' => $address
         ]);
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $address = Address::find($id);
@@ -137,13 +110,6 @@ class AddressesController extends Controller
             'address' => $address
         ]);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $address = Address::find($id);
