@@ -40,6 +40,7 @@ Route::prefix('v1')->group(function () {
                     Route::apiResource('relatives', RelativesController::class);
                 });
                 Route::apiResource('addresses', AddressesController::class);
+                Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
                 Route::apiResource('hospitals', HospitalsController::class);
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);

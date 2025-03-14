@@ -27,6 +27,20 @@ class AddressesController extends Controller
             'addresses' => $addresses
         ]);
     }
+    public function indexNoPaginate()
+    {
+        $addresses = Address::orderByDesc('created_at');
+
+        if ($addresses->isEmpty()) {
+            return response()->json([
+                'msg' => 'No addresses found'
+            ], 404);
+        }
+
+        return response()->json([
+            'addresses' => $addresses
+        ]);
+    }
 
     /**
      * Store a newly created resource in storage.
