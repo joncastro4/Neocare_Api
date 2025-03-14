@@ -14,7 +14,7 @@ class AddressesController extends Controller
 
         if ($addresses->isEmpty()) {
             return response()->json([
-                'msg' => 'No addresses found'
+                'message' => 'No addresses found'
             ], 404);
         }
 
@@ -28,7 +28,7 @@ class AddressesController extends Controller
 
         if ($addresses->isEmpty()) {
             return response()->json([
-                'msg' => 'No addresses found'
+                'message' => 'No addresses found'
             ], 404);
         }
 
@@ -62,7 +62,7 @@ class AddressesController extends Controller
         $address->save();
 
         return response()->json([
-            'msg' => 'Address registered successfully',
+            'message' => 'Address registered successfully',
             'address' => $address
         ], 201);
     }
@@ -72,7 +72,7 @@ class AddressesController extends Controller
 
         if (!$address) {
             return response()->json([
-                'msg' => 'Address not found'
+                'message' => 'Address not found'
             ], 404);
         }
 
@@ -86,7 +86,7 @@ class AddressesController extends Controller
 
         if (!$address) {
             return response()->json([
-                'msg' => 'Address not found'
+                'message' => 'Address not found'
             ], 404);
         }
 
@@ -106,7 +106,7 @@ class AddressesController extends Controller
         $address->update($request->all());
 
         return response()->json([
-            'msg' => 'Address updated successfully',
+            'message' => 'Address updated successfully',
             'address' => $address
         ]);
     }
@@ -116,14 +116,14 @@ class AddressesController extends Controller
 
         if (!$address) {
             return response()->json([
-                'msg' => 'Address not found'
+                'message' => 'Address not found'
             ], 404);
         }
 
         $address->delete();
 
         return response()->json([
-            'msg' => 'Address deleted successfully'
+            'message' => 'Address deleted successfully'
         ]);
     }
 }
