@@ -58,9 +58,7 @@ class HospitalsController extends Controller
         ]);
 
         if ($validate->fails()) {
-            return response()->json([
-                'error' => $validate->errors()
-            ], 400);
+            return response()->json($validate->errors(), 400);
         }
 
         $hospital = new Hospital();
