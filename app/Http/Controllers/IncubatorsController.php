@@ -43,6 +43,12 @@ class IncubatorsController extends Controller
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
 
+            if (!$nurse) {
+                return response()->json([
+                    'msg' => 'No Nurse Found'
+                ], 404);
+            }
+
             $incubators->whereHas('baby_incubator', function ($query) use ($nurse) {
                 $query->where('nurse_id', $nurse->id);
             });

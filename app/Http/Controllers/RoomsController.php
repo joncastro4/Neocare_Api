@@ -40,6 +40,7 @@ class RoomsController extends Controller
         }
         return response()->json($rooms, 200);
     }
+    
     public function show($id)
     {
         $room = Room::with('hospital')->find($id);
