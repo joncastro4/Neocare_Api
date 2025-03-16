@@ -15,8 +15,4 @@ class Data extends Model
         'value',
         'reading_date',
     ];
-    
-    protected $casts = [
-        'sensor' => 'array',
-    ];
 }
