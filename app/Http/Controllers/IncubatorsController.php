@@ -64,8 +64,13 @@ class IncubatorsController extends Controller
 
         $data = $incubators->map(function ($incubator) use ($user) {
             $nurseFullName = null;
-            if (!($user->role == 'nurse')) {
-                $nurseFullName = $incubator->baby_incubator->first()->nurse->userPerson->person->name . ' ' . $incubator->baby_incubator->first()->nurse->userPerson->person->last_name_1 . ' ' . $incubator->baby_incubator->first()->nurse->userPerson->person->last_name_2 ?? 'No Nurse';
+            if (!($user->role == 'nurse') && $incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
+                $nurse = $incubator->baby_incubator->first()->nurse;
+                $nurseFullName = $nurse->userPerson->person->name . ' ' . 
+                                 $nurse->userPerson->person->last_name_1 . ' ' . 
+                                 ($nurse->userPerson->person->last_name_2 ?? '');
+            } else {
+                $nurseFullName = 'No Nurse';
             }
             $babyFullName = $incubator->baby_incubator->first()->baby->person->name . ' ' . $incubator->baby_incubator->first()->baby->person->last_name_1 . ' ' . $incubator->baby_incubator->first()->baby->person->last_name_2 ?? 'No Baby';
             return [
@@ -122,10 +127,14 @@ class IncubatorsController extends Controller
             ], 404);
         }
 
-        $nurse = null;
-
-        if (!($user->role == 'nurse')) {
-            $nurse = $incubator->baby_incubator->first()->nurse->userPerson->person->name . ' ' . $incubator->baby_incubator->first()->nurse->userPerson->person->last_name_1 . ' ' . $incubator->baby_incubator->first()->nurse->userPerson->person->last_name_2 ?? null;
+        $nurseFullName = null;
+        if (!($user->role == 'nurse') && $incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
+            $nurse = $incubator->baby_incubator->first()->nurse;
+            $nurseFullName = $nurse->userPerson->person->name . ' ' . 
+                             $nurse->userPerson->person->last_name_1 . ' ' . 
+                             ($nurse->userPerson->person->last_name_2 ?? '');
+        } else {
+            $nurseFullName = 'No Nurse';
         }
 
         $baby = $incubator->baby_incubator->first()->baby->person->name . ' ' . $incubator->baby_incubator->first()->baby->person->last_name_1 . ' ' . $incubator->baby_incubator->first()->baby->person->last_name_2 ?? null;
@@ -134,7 +143,7 @@ class IncubatorsController extends Controller
             'id' => $incubator->id,
             'state' => $incubator->state,
             'room_number' => $incubator->room->number,
-            'nurse' => $nurse,
+            'nurse' => $nurseFullName,
             'baby' => $baby,
             'created_at' => $incubator->created_at
         ];
