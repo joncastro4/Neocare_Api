@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\DataController;
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\BabiesController;
@@ -79,6 +81,11 @@ Route::prefix('v1')->group(function () {
     Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
 });
 
+Route::prefix('v2')->group(function () {
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::apiResource('data-sensors', DataController::class);    
+    });
+});
 
 Route::get('/operaciones', function () {
     return response()->json([
