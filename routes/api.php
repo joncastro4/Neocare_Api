@@ -83,7 +83,8 @@ Route::prefix('v1')->group(function () {
 
 Route::prefix('v2')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('data-sensors', DataController::class);    
+        Route::apiResource('data-sensors', DataController::class); 
+        Route::get('data-sensors-by-type/{type}', [DataController::class, 'getByType']);   
     });
 });
 
