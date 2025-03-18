@@ -56,7 +56,7 @@ class SessionsController extends Controller
 
         // Devolver respuesta
         return response()->json([
-            'message' => 'User created successfully',
+            'message' => '¡User registered successfully, please verify your email!',
             'user' => $user
         ], 201);
     }
