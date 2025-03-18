@@ -89,6 +89,12 @@ class IncubatorsController extends Controller
                                 $baby->person->last_name_1 . ' ' . 
                                 ($baby->person->last_name_2 ?? '');
             }
+
+            $babyId = null;
+            if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->baby) {
+                $baby = $incubator->baby_incubator->first()->baby;
+                $babyId = $baby->id;
+            }
         
             return [
                 'id' => $incubator->id,
@@ -98,6 +104,7 @@ class IncubatorsController extends Controller
                 'nurse_id' => $nurseId,
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
+                'baby_id' => $babyId,
                 'created_at' => $incubator->created_at
             ];
         });
@@ -176,6 +183,12 @@ class IncubatorsController extends Controller
                             ($baby->person->last_name_2 ?? '');
         }
 
+        $babyId = null;
+        if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->baby) {
+            $baby = $incubator->baby_incubator->first()->baby;
+            $babyId = $baby->id;
+        }
+
         $data = [
             'id' => $incubator->id,
             'state' => $incubator->state,
@@ -184,6 +197,7 @@ class IncubatorsController extends Controller
             'nurse_id' => $nurseId,
             'nurse' => $nurseFullName,
             'baby' => $babyFullName,
+            'baby_id' => $babyId,
             'created_at' => $incubator->created_at
         ];
 
