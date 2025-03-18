@@ -207,6 +207,7 @@ class IncubatorsController extends Controller
 
         $validate = Validator::make($request->all(), [
             'state' => 'required|string|in:active,available',
+            'room_id' => 'required|integer|exists:rooms,id',
         ]);
 
         if ($validate->fails()) {
