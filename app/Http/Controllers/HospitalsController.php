@@ -106,8 +106,6 @@ class HospitalsController extends Controller
 
         $hospital->total_rooms = Room::where('hospital_id', $id)->count();
 
-
-
         return response()->json([
             'hospital' => [
                 'id' => $hospital->id,

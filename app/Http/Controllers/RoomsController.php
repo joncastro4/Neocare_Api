@@ -23,24 +23,28 @@ class RoomsController extends Controller
             ], 400);
         }
 
-        $rooms = Room::with('hospital')->paginate(9);
+        $query = Room::with('hospital');
 
         if ($request->hospital_id) {
-            $rooms = Room::with('hospital')->where('hospital_id', $request->hospital_id)->get();
+            $query->where('hospital_id', $request->hospital_id);
         }
 
         if ($user->role == 'nurse-admin' || $user->role == 'nurse') {
-            $rooms = Room::with('hospital')->where('hospital_id', $user->nurse->hospital_id)->get();
+            $query->where('hospital_id', $user->nurse->hospital_id);
         }
+
+        $rooms = $query->paginate(9);
 
         if (!$rooms || $rooms->isEmpty()) {
             return response()->json([
                 'message' => 'No rooms found'
             ], 404);
         }
-        return response()->json($rooms, 200);
+        return response()->json([
+            'rooms' => $rooms
+        ], 200);
     }
-    
+
     public function show($id)
     {
         $room = Room::with('hospital')->find($id);
