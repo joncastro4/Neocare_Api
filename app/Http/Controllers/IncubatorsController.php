@@ -234,6 +234,7 @@ class IncubatorsController extends Controller
 
         $incubator->update([
             'state' => $request->state,
+            'room_id' => $request->room_id
         ]);
 
         $BabyIncubator->update([
