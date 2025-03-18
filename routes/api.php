@@ -39,6 +39,7 @@ Route::prefix('v1')->group(function () {
             Route::middleware('superadmin')->group(function () {
                 Route::middleware('nurseadmin')->group(function () {
                     Route::apiResource('babies', BabiesController::class);
+                    Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
                     Route::apiResource('babies-data', BabiesDataController::class);
                     Route::apiResource('relatives', RelativesController::class);
                 });
