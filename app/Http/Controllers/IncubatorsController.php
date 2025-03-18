@@ -63,14 +63,12 @@ class IncubatorsController extends Controller
         }
 
         $data = $incubators->map(function ($incubator) use ($user) {
-            $nurseFullName = null;
+            $nurseId = null;
             if (!($user->role == 'nurse') && $incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
                 $nurse = $incubator->baby_incubator->first()->nurse;
-                $nurseFullName = $nurse->userPerson->person->name . ' ' . 
-                                 $nurse->userPerson->person->last_name_1 . ' ' . 
-                                 ($nurse->userPerson->person->last_name_2 ?? '');
+                $nurseId = $nurse->id;
             } else {
-                $nurseFullName = 'No Nurse';
+                $nurseId = 'No Nurse';
             }
             
             $babyFullName = 'No Baby';
@@ -87,7 +85,7 @@ class IncubatorsController extends Controller
                 'state' => $incubator->state,
                 'room_number' => $incubator->room->number,
                 'room_id' => $incubator->room->id,
-                'nurse' => $nurseFullName,
+                'nurse_id' => $nurseId,
                 'baby' => $babyFullName,
                 'created_at' => $incubator->created_at
             ];
@@ -141,14 +139,12 @@ class IncubatorsController extends Controller
             ], 404);
         }
 
-        $nurseFullName = null;
+        $nurseId = null;
         if (!($user->role == 'nurse') && $incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
             $nurse = $incubator->baby_incubator->first()->nurse;
-            $nurseFullName = $nurse->userPerson->person->name . ' ' . 
-                             $nurse->userPerson->person->last_name_1 . ' ' . 
-                             ($nurse->userPerson->person->last_name_2 ?? '');
+            $nurseId = $nurse->id;
         } else {
-            $nurseFullName = 'No Nurse';
+            $nurseId = 'No Nurse';
         }
 
         $babyFullName = 'No Baby';
@@ -164,7 +160,7 @@ class IncubatorsController extends Controller
             'state' => $incubator->state,
             'room_number' => $incubator->room->number,
             'room_id' => $incubator->room->id,
-            'nurse' => $nurseFullName,
+            'nurse_id' => $nurseId,
             'baby' => $babyFullName,
             'created_at' => $incubator->created_at
         ];
