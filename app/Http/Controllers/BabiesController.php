@@ -250,49 +250,45 @@ class BabiesController extends Controller
     }
 
     public function indexNoPaginate(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'hospital_id' => 'nullable|integer|exists:hospitals,id',
-            'incubator_id' => 'nullable|integer|exists:incubators,id',
-        ]);
+{
+    $validate = Validator::make($request->all(), [
+        'hospital_id' => 'nullable|integer|exists:hospitals,id',
+        'incubator_id' => 'nullable|integer|exists:incubators,id',
+    ]);
 
-        if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
-        }
-
-        $query = Baby::with([
-            'person',
-            'hospital',
-            'baby_incubator' => function ($query) {
-                $query->orderBy('created_at', 'desc');
-            }
-        ])->orderBy('created_at', 'desc');
-
-        if ($request->hospital_id) {
-            $query->where('hospital_id', $request->hospital_id);
-        }
-
-        if ($request->incubator_id) {
-            $query->whereHas('baby_incubator', function ($query) use ($request) {
-                $query->where('incubator_id', $request->incubator_id);
-            });
-        }
-
-        $babies = $query->get()->map(function ($baby) {
-            $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
-            return $baby;
-        });
-
-        if ($babies->isEmpty()) {
-            return response()->json([
-                'msg' => 'No Babies Found'
-            ], 404);
-        }
-
+    if ($validate->fails()) {
         return response()->json([
-            'babies' => $babies
-        ], 200);
+            'errors' => $validate->errors()
+        ], 422);
     }
+
+    $query = Baby::with('person')->orderBy('created_at', 'desc');
+
+    if ($request->hospital_id) {
+        $query->where('hospital_id', $request->hospital_id);
+    }
+
+    if ($request->incubator_id) {
+        $query->whereHas('baby_incubator', function ($query) use ($request) {
+            $query->where('incubator_id', $request->incubator_id);
+        });
+    }
+
+    $babies = $query->get()->map(function ($baby) {
+        return [
+            'id' => $baby->id,
+            'full_name' => $baby->person->full_name ?? 'No Name',
+        ];
+    });
+
+    if ($babies->isEmpty()) {
+        return response()->json([
+            'msg' => 'No Babies Found'
+        ], 404);
+    }
+
+    return response()->json([
+        'babies' => $babies
+    ], 200);
+}
 }
