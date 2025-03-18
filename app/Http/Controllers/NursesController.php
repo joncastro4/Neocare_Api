@@ -26,15 +26,15 @@ class NursesController extends Controller
     
         if ($nurses->isEmpty()) {
             return response()->json([
-                'msg' => 'No Nurses Found for this hospital'
-            ], 204);
+                'msg' => 'No Nurses Found for this hospital',
+                'hospital_id' => $hospitalId
+            ], 200);
         }
     
         return response()->json([
             'data' => $nurses
         ], 200);
     }
-
 
     public function store(Request $request)
     {
