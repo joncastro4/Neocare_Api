@@ -239,12 +239,6 @@ class IncubatorsController extends Controller
             ], 404);
         }
 
-        if ($incubator->state == $request->state) {
-            return response()->json([
-                'msg' => 'The state is the same'
-            ], 404);
-        }
-
         $incubator->update([
             'state' => $request->state,
         ]);
