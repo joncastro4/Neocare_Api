@@ -75,8 +75,8 @@ class IncubatorsController extends Controller
                 'room_number' => $incubator->room->number,
                 'room_id' => $incubator->room->id,
                 'nurse_id' => $latestBabyIncubator->nurse_id ?? null,
-                'nurse' => optional($latestBabyIncubator->nurse->userPerson->person)->full_name ?? 'No Nurse',
-                'baby' => optional($latestBabyIncubator->baby->person)->full_name ?? 'No Baby',
+                'nurse' => $latestBabyIncubator->nurse->userPerson->person->full_name ?? 'No Nurse',
+                'baby' => $latestBabyIncubator->baby->person->full_name ?? 'No Baby',
                 'baby_id' => $latestBabyIncubator->baby_id ?? null,
                 'created_at' => $latestBabyIncubator->created_at ?? null,
             ];
