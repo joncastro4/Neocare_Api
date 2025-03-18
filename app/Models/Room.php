@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use DateTimeInterface;
 class Room extends Model
 {
     use HasFactory;
@@ -18,5 +18,10 @@ class Room extends Model
     public function hospital()
     {
         return $this->belongsTo(Hospital::class, 'hospital_id');
+    }
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d');
     }
 }
