@@ -106,16 +106,6 @@ class RoomsController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $validate = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
-            'number' => 'required|integer|min:1|unique:rooms,number,' . $id,
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
-        }
 
         $room = Room::find($id);
         if (!$room) {
@@ -124,9 +114,29 @@ class RoomsController extends Controller
             ], 404);
         }
 
+        $validate = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'number' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('rooms')
+                    ->where('hospital_id', $room->hospital_id)
+                    ->ignore($room->id),
+            ],
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
         $room->update($request->all());
 
-        return response()->json($room, 200);
+        return response()->json([
+            'message' => 'Room updated successfully'
+        ], 200);
     }
     public function destroy($id)
     {
