@@ -83,7 +83,7 @@ class RoomsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $room = Room::create($request->all());
@@ -92,7 +92,7 @@ class RoomsController extends Controller
                 'message' => 'Room not created'
             ], 404);
         }
-        return response()->json($room, 200);
+        return response()->json('Room created successfully', 201);
     }
     public function update(Request $request, $id)
     {
@@ -104,7 +104,7 @@ class RoomsController extends Controller
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
-            ], 400);
+            ], 422);
         }
 
         $room = Room::find($id);
