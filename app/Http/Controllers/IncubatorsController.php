@@ -19,19 +19,19 @@ class IncubatorsController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-    
+
         // Validación de la solicitud
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'required|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
         ]);
-    
+
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
         }
-    
+
         // Construcción de la consulta base
         $incubatorsQuery = Incubator::with([
             'room.hospital',
@@ -43,55 +43,58 @@ class IncubatorsController extends Controller
                 $query->where('id', $request->room_id);
             }
         });
-    
+
         // Filtrar por enfermera si el usuario es nurse
         if ($user->role === 'nurse') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
-    
+
             if (!$nurse) {
                 return response()->json(['msg' => 'No Nurse Found'], 404);
             }
-    
+
             $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
                 $query->where('nurse_id', $nurse->id);
             });
         }
-    
+
         // Paginación
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
-    
+
         if ($incubators->isEmpty()) {
             return response()->json(['msg' => 'No Incubators Found'], 404);
         }
-    
+
         // Transformación de datos
         $data = $incubators->map(function ($incubator) use ($user) {
             $babyFullName = 'No Baby';
             $babyId = null;
             $nurseFullName = 'No Nurse';
             $nurseId = null;
-    
-            if ($incubator->baby_incubator->isNotEmpty()) {
-                $babyIncubator = $incubator->baby_incubator->first();
-    
-                if ($babyIncubator->baby) {
-                    $baby = $babyIncubator->baby;
+
+            // Obtener el último registro de baby_incubator
+            $lastBabyIncubator = $incubator->baby_incubator->sortByDesc('created_at')->first();
+
+            if ($lastBabyIncubator) {
+                // Extraer datos del bebé
+                if ($lastBabyIncubator->baby) {
+                    $baby = $lastBabyIncubator->baby;
                     $babyFullName = $baby->person->name . ' ' .
                         $baby->person->last_name_1 . ' ' .
                         ($baby->person->last_name_2 ?? '');
                     $babyId = $baby->id;
                 }
-    
-                if ($babyIncubator->nurse) {
-                    $nurse = $babyIncubator->nurse;
+
+                // Extraer datos de la enfermera
+                if ($lastBabyIncubator->nurse) {
+                    $nurse = $lastBabyIncubator->nurse;
                     $nurseFullName = $nurse->userPerson->person->name . ' ' .
                         $nurse->userPerson->person->last_name_1 . ' ' .
                         ($nurse->userPerson->person->last_name_2 ?? '');
                     $nurseId = $nurse->id;
                 }
             }
-    
+
             return [
                 'id' => $incubator->id,
                 'state' => $incubator->state,
@@ -104,16 +107,14 @@ class IncubatorsController extends Controller
                 'created_at' => $incubator->created_at
             ];
         });
-    
+
         // Respuesta JSON con datos y paginación
         return response()->json([
             'incubators' => $data,
-            'pagination' => [
-                'total' => $incubators->total(),
-                'per_page' => $incubators->perPage(),
-                'current_page' => $incubators->currentPage(),
-                'last_page' => $incubators->lastPage(),
-            ]
+            'total' => $incubators->total(),
+            'per_page' => $incubators->perPage(),
+            'current_page' => $incubators->currentPage(),
+            'last_page' => $incubators->lastPage(),
         ], 200);
     }
 
