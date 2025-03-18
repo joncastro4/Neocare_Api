@@ -70,6 +70,16 @@ class IncubatorsController extends Controller
             } else {
                 $nurseId = 'No Nurse';
             }
+
+            $nurseFullName = 'No Nurse';
+            if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
+                $nurse = $incubator->baby_incubator->first()->nurse;
+                $nurseFullName = $nurse->userPerson->person->name . ' ' . 
+                                $nurse->userPerson->person->last_name_1 . ' ' . 
+                                ($nurse->userPerson->person->last_name_2 ?? '');
+            } else {
+                $nurseFullName = 'No Nurse';
+            }
             
             $babyFullName = 'No Baby';
 
@@ -86,6 +96,7 @@ class IncubatorsController extends Controller
                 'room_number' => $incubator->room->number,
                 'room_id' => $incubator->room->id,
                 'nurse_id' => $nurseId,
+                'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'created_at' => $incubator->created_at
             ];
@@ -147,6 +158,16 @@ class IncubatorsController extends Controller
             $nurseId = 'No Nurse';
         }
 
+        $nurseFullName = 'No Nurse';
+        if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
+            $nurse = $incubator->baby_incubator->first()->nurse;
+            $nurseFullName = $nurse->userPerson->person->name . ' ' . 
+                            $nurse->userPerson->person->last_name_1 . ' ' . 
+                            ($nurse->userPerson->person->last_name_2 ?? '');
+        } else {
+            $nurseFullName = 'No Nurse';
+        }
+
         $babyFullName = 'No Baby';
         if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->baby) {
             $baby = $incubator->baby_incubator->first()->baby;
@@ -161,6 +182,7 @@ class IncubatorsController extends Controller
             'room_number' => $incubator->room->number,
             'room_id' => $incubator->room->id,
             'nurse_id' => $nurseId,
+            'nurse' => $nurseFullName,
             'baby' => $babyFullName,
             'created_at' => $incubator->created_at
         ];
@@ -169,6 +191,7 @@ class IncubatorsController extends Controller
             'incubator' => $data
         ], 200);
     }
+
     // Listo
     public function update(Request $request, $id)
     {
