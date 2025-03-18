@@ -34,7 +34,7 @@ class RoomsController extends Controller
             $query->where('hospital_id', $user->nurse->hospital_id);
         }
 
-        $rooms = $query->paginate(9);
+        $rooms = $query->paginate(10);
 
         if (!$rooms || $rooms->isEmpty()) {
             return response()->json([
