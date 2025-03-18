@@ -12,16 +12,24 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class NursesController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $nurses = Nurse::all();
-
+        $hospitalId = $request->query('hospital_id');
+    
+        if (!$hospitalId) {
+            return response()->json([
+                'msg' => 'hospital_id is required'
+            ], 400);
+        }
+    
+        $nurses = Nurse::where('hospital_id', $hospitalId)->get();
+    
         if ($nurses->isEmpty()) {
             return response()->json([
-                'msg' => 'No Nurses Found'
+                'msg' => 'No Nurses Found for this hospital'
             ], 204);
         }
-
+    
         return response()->json([
             'data' => $nurses
         ], 200);
