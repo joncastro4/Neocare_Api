@@ -26,7 +26,8 @@ class NursesController extends Controller
             'data' => $nurses
         ], 200);
     }
-    //Posiblemente no se utilize para la aplicación
+
+    
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
