@@ -16,8 +16,9 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('hospital_id')->constrained('hospitals')->onDelete('cascade');
             $table->string('name');
-            $table->integer('number')->unique();
+            $table->integer('number');
             $table->timestamps();
+            $table->unique(['hospital_id', 'number']);
         });
     }
 

@@ -12,7 +12,7 @@ class NurseFactory extends Factory
     public function definition()
     {
         return [
-            'hospital_id' => 1,
+            'hospital_id' => Hospital::factory(),
             'user_person_id' => UserPerson::factory(),
             'rfc' => $this->faker->regexify('[A-Z]{4}[0-9]{6}[A-Z0-9]{3}'),
             'image_path' => $this->faker->imageUrl

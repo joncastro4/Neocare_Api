@@ -11,13 +11,12 @@ use App\Models\BabyIncubator;
 use App\Models\Incubator;
 use App\Models\UserPerson;
 use App\Models\Nurse;
-
+use Carbon\Carbon;
 class BabiesController extends Controller
 {
     // Listo
     public function index(Request $request)
     {
-
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'nullable|integer|exists:hospitals,id',
             'incubator_id' => 'nullable|integer|exists:incubators,id',
@@ -29,41 +28,41 @@ class BabiesController extends Controller
             ], 422);
         }
 
-        $babies = Baby::with([
+        
+        $query = Baby::with([
             'person',
             'hospital',
             'baby_incubator' => function ($query) {
                 $query->orderBy('created_at', 'desc');
             }
-        ])
-            ->orderBy('created_at', 'desc')
-            ->paginate(9)
-            ->map(function ($baby) {
-                $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
-                return $baby;
-            });
-
+        ])->orderBy('created_at', 'desc');
 
         if ($request->hospital_id) {
-            $babies = $babies->where('hospital_id', $request->hospital_id);
+            $query->where('hospital_id', $request->hospital_id);
         }
 
         if ($request->incubator_id) {
-            $babies = $babies->whereHas('baby_incubator', function ($query) use ($request) {
-                $query->where('incubator_id', $request->incubator_id);
+            $query->whereHas('baby_incubator', function ($q) use ($request) {
+                $q->where('incubator_id', $request->incubator_id);
             });
         }
 
-        if ($babies->isEmpty() || !$babies) {
+       
+        $babies = $query->paginate(10)->through(function ($baby) {
+            $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
+            $baby->created_at_formatted = Carbon::parse($baby->created_at)->format('Y-m-d');
+            return $baby;
+        });
+
+        if ($babies->isEmpty()) {
             return response()->json([
                 'msg' => 'No Babies Found'
             ], 404);
         }
 
-        return response()->json([
-            'babies' => $babies
-        ], 200);
+        return response()->json($babies, 200);
     }
+
 
     // Listo
     public function store(Request $request)
