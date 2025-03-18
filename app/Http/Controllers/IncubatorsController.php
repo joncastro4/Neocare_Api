@@ -86,6 +86,7 @@ class IncubatorsController extends Controller
                 'id' => $incubator->id,
                 'state' => $incubator->state,
                 'room_number' => $incubator->room->number,
+                'room_id' => $incubator->room->id,
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'created_at' => $incubator->created_at
@@ -162,6 +163,7 @@ class IncubatorsController extends Controller
             'id' => $incubator->id,
             'state' => $incubator->state,
             'room_number' => $incubator->room->number,
+            'room_id' => $incubator->room->id,
             'nurse' => $nurseFullName,
             'baby' => $babyFullName,
             'created_at' => $incubator->created_at
