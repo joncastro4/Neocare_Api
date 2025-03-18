@@ -149,7 +149,7 @@ class IncubatorsController extends Controller
 
         $user = auth()->user();
 
-        $incubator = Incubator::with('room.hospital', 'baby_incubator.baby.person', 'baby_incubator.nurse.userPerson.person')->find($id);
+        $incubator = Incubator::with('room.hospital', 'baby_incubator.baby.person', 'baby_incubator.nurse.userPerson.person')->find($id)->orderByDesc('created_at');
 
         if (!$incubator) {
             return response()->json([
