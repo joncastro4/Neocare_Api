@@ -38,9 +38,11 @@ class RoomsController extends Controller
                 'message' => 'No rooms found'
             ], 404);
         }
-        return response()->json($rooms, 200);
+        return response()->json([
+            'rooms' => $rooms
+        ], 200);
     }
-    
+
     public function show($id)
     {
         $room = Room::with('hospital')->find($id);
