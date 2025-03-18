@@ -42,13 +42,21 @@ class HospitalsController extends Controller
             'hospitals' => $hospitals
         ]);
     }
+    public function indexNoPaginate()
+    {
+        $hospitals = Hospital::with('address')->orderByDesc('created_at')->get();
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+        if ($hospitals->isEmpty()) {
+            return response()->json([
+                'message' => "No hospitals found"
+            ], 404);
+        }
+
+        return response()->json([
+            'message' => "Hospitals found",
+            'hospitals' => $hospitals
+        ]);
+    }
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
@@ -79,13 +87,6 @@ class HospitalsController extends Controller
             'hospital' => $hospital
         ], 201);
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $hospital = Hospital::with('address')->find($id);
@@ -121,13 +122,6 @@ class HospitalsController extends Controller
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
         $hospital = Hospital::find($id);
@@ -156,12 +150,6 @@ class HospitalsController extends Controller
         ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $hospital = Hospital::find($id);
