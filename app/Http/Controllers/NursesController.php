@@ -14,7 +14,7 @@ class NursesController extends Controller
 {
     public function index()
     {
-        $nurses = Nurse::with('person')->get();
+        $nurses = Nurse::with('person');
 
         if ($nurses->isEmpty()) {
             return response()->json([
@@ -27,7 +27,7 @@ class NursesController extends Controller
         ], 200);
     }
 
-    
+
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [
