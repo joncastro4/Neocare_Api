@@ -48,7 +48,7 @@ class BabiesController extends Controller
         }
 
        
-        $babies = $query->paginate(9)->through(function ($baby) {
+        $babies = $query->paginate(10)->through(function ($baby) {
             $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
             $baby->created_at_formatted = Carbon::parse($baby->created_at)->format('Y-m-d');
             return $baby;
