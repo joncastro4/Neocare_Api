@@ -74,22 +74,27 @@ class NursesController extends Controller
     }
     public function show($id)
     {
-        if (!is_numeric($id)) {
-            abort(404);
-        }
-        $nurse = Nurse::with('person')->find($id);
-
+        $nurse = Nurse::with('userPerson.person')->find($id);
+    
         if (!$nurse) {
             return response()->json([
-                'msg' => 'No Nurse Found'
+                'msg' => 'Nurse not found'
             ], 404);
         }
-
+    
+        $person = $nurse->userPerson->person;
+    
+        $data = [
+            'id' => $nurse->id,
+            'full_name' => "{$person->name} {$person->last_name_1} " . ($person->last_name_2 ?? ''),
+            'hospital_id' => $nurse->hospital_id
+        ];
+    
         return response()->json([
-            'msg' => 'Nurse Found Successfully',
-            'data' => $nurse
-        ]);
+            'data' => $data
+        ], 200);
     }
+    
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {
