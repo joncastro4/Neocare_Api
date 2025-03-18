@@ -74,20 +74,20 @@ class IncubatorsController extends Controller
             $nurseFullName = 'No Nurse';
             if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
                 $nurse = $incubator->baby_incubator->first()->nurse;
-                $nurseFullName = $nurse->userPerson->person->name . ' ' . 
-                                $nurse->userPerson->person->last_name_1 . ' ' . 
-                                ($nurse->userPerson->person->last_name_2 ?? '');
+                $nurseFullName = $nurse->userPerson->person->name . ' ' .
+                    $nurse->userPerson->person->last_name_1 . ' ' .
+                    ($nurse->userPerson->person->last_name_2 ?? '');
             } else {
                 $nurseFullName = 'No Nurse';
             }
-            
+
             $babyFullName = 'No Baby';
 
             if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->baby) {
                 $baby = $incubator->baby_incubator->first()->baby;
-                $babyFullName = $baby->person->name . ' ' . 
-                                $baby->person->last_name_1 . ' ' . 
-                                ($baby->person->last_name_2 ?? '');
+                $babyFullName = $baby->person->name . ' ' .
+                    $baby->person->last_name_1 . ' ' .
+                    ($baby->person->last_name_2 ?? '');
             }
 
             $babyId = null;
@@ -95,7 +95,7 @@ class IncubatorsController extends Controller
                 $baby = $incubator->baby_incubator->first()->baby;
                 $babyId = $baby->id;
             }
-        
+
             return [
                 'id' => $incubator->id,
                 'state' => $incubator->state,
@@ -149,7 +149,16 @@ class IncubatorsController extends Controller
 
         $user = auth()->user();
 
-        $incubator = Incubator::with('room.hospital', 'baby_incubator.baby.person', 'baby_incubator.nurse.userPerson.person')->find($id)->orderByDesc('created_at');
+        $incubator = Incubator::with('room.hospital')
+            ->find($id);
+
+        $latestBabyIncubator = BabyIncubator::where('incubator_id', $id)
+            ->latest() 
+            ->first();
+
+        if ($latestBabyIncubator) {
+            $latestBabyIncubator->load('baby.person', 'nurse.userPerson.person');
+        }
 
         if (!$incubator) {
             return response()->json([
@@ -168,9 +177,9 @@ class IncubatorsController extends Controller
         $nurseFullName = 'No Nurse';
         if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->nurse) {
             $nurse = $incubator->baby_incubator->first()->nurse;
-            $nurseFullName = $nurse->userPerson->person->name . ' ' . 
-                            $nurse->userPerson->person->last_name_1 . ' ' . 
-                            ($nurse->userPerson->person->last_name_2 ?? '');
+            $nurseFullName = $nurse->userPerson->person->name . ' ' .
+                $nurse->userPerson->person->last_name_1 . ' ' .
+                ($nurse->userPerson->person->last_name_2 ?? '');
         } else {
             $nurseFullName = 'No Nurse';
         }
@@ -178,9 +187,9 @@ class IncubatorsController extends Controller
         $babyFullName = 'No Baby';
         if ($incubator->baby_incubator->isNotEmpty() && $incubator->baby_incubator->first()->baby) {
             $baby = $incubator->baby_incubator->first()->baby;
-            $babyFullName = $baby->person->name . ' ' . 
-                            $baby->person->last_name_1 . ' ' . 
-                            ($baby->person->last_name_2 ?? '');
+            $babyFullName = $baby->person->name . ' ' .
+                $baby->person->last_name_1 . ' ' .
+                ($baby->person->last_name_2 ?? '');
         }
 
         $babyId = null;
