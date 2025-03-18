@@ -46,6 +46,7 @@ Route::prefix('v1')->group(function () {
                 Route::apiResource('addresses', AddressesController::class);
                 Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
                 Route::apiResource('hospitals', HospitalsController::class);
+                Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
                 Route::get('sessions/role', [SessionsController::class, 'userRole']);
@@ -85,8 +86,8 @@ Route::prefix('v1')->group(function () {
 
 Route::prefix('v2')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
-        Route::apiResource('data-sensors', DataController::class); 
-        Route::get('data-sensors-by-type/{type}', [DataController::class, 'getByType']);   
+        Route::apiResource('data-sensors', DataController::class);
+        Route::get('data-sensors-by-type/{type}', [DataController::class, 'getByType']);
     });
 });
 
