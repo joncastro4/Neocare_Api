@@ -20,7 +20,6 @@ class IncubatorsController extends Controller
     {
         $user = auth()->user();
 
-        // Validación de la solicitud
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'required|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
@@ -32,7 +31,6 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        // Construcción de la consulta base
         $incubatorsQuery = Incubator::with([
             'room.hospital',
             'baby_incubator.baby.person',
@@ -44,7 +42,6 @@ class IncubatorsController extends Controller
             }
         });
 
-        // Filtrar por enfermera si el usuario es nurse
         if ($user->role === 'nurse') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
@@ -58,25 +55,21 @@ class IncubatorsController extends Controller
             });
         }
 
-        // Paginación
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
 
         if ($incubators->isEmpty()) {
             return response()->json(['msg' => 'No Incubators Found'], 404);
         }
 
-        // Transformación de datos
         $data = $incubators->map(function ($incubator) use ($user) {
             $babyFullName = 'No Baby';
             $babyId = null;
             $nurseFullName = 'No Nurse';
             $nurseId = null;
 
-            // Obtener el último registro de baby_incubator
             $lastBabyIncubator = $incubator->baby_incubator->sortByDesc('created_at')->first();
 
             if ($lastBabyIncubator) {
-                // Extraer datos del bebé
                 if ($lastBabyIncubator->baby) {
                     $baby = $lastBabyIncubator->baby;
                     $babyFullName = $baby->person->name . ' ' .
@@ -85,7 +78,6 @@ class IncubatorsController extends Controller
                     $babyId = $baby->id;
                 }
 
-                // Extraer datos de la enfermera
                 if ($lastBabyIncubator->nurse) {
                     $nurse = $lastBabyIncubator->nurse;
                     $nurseFullName = $nurse->userPerson->person->name . ' ' .
@@ -104,11 +96,10 @@ class IncubatorsController extends Controller
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'baby_id' => $babyId,
-                'created_at' => $incubator->created_at
+                'created_at' => $incubator->created_at->format('Y-d-m') // Formato YYYY-DD-MM
             ];
         });
 
-        // Respuesta JSON con datos y paginación
         return response()->json([
             'incubators' => $data,
             'total' => $incubators->total(),
