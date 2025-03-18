@@ -14,7 +14,7 @@ class NursesController extends Controller
 {
     public function index()
     {
-        $nurses = Nurse::with('person');
+        $nurses = Nurse::all();
 
         if ($nurses->isEmpty()) {
             return response()->json([
