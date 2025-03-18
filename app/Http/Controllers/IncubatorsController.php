@@ -149,11 +149,10 @@ class IncubatorsController extends Controller
 
         $user = auth()->user();
 
-        $incubator = Incubator::with('room.hospital')
-            ->find($id);
+        $incubator = Incubator::with('room.hospital')->find($id);
 
         $latestBabyIncubator = BabyIncubator::where('incubator_id', $id)
-            ->latest() 
+            ->orderByDesc('created_at') 
             ->first();
 
         if ($latestBabyIncubator) {
@@ -203,11 +202,11 @@ class IncubatorsController extends Controller
             'state' => $incubator->state,
             'room_number' => $incubator->room->number,
             'room_id' => $incubator->room->id,
-            'nurse_id' => $nurseId,
-            'nurse' => $nurseFullName,
-            'baby' => $babyFullName,
-            'baby_id' => $babyId,
-            'created_at' => $incubator->created_at
+            'nurse_id' => $latestBabyIncubator->nurse_id ?? null,
+            'nurse' => $latestBabyIncubator->nurse->userPerson->person->full_name ?? null,
+            'baby' => $latestBabyIncubator->baby->person->full_name ?? null,
+            'baby_id' => $latestBabyIncubator->baby_id ?? null,
+            'created_at' => $latestBabyIncubator->created_at ?? null,
         ];
 
         return response()->json([
