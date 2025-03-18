@@ -15,12 +15,10 @@ class IncubatorsController extends Controller
 {
     public $incubatorNotFound = 'No Incubator Found';
 
-    // Listo
     public function index(Request $request)
     {
         $user = auth()->user();
 
-        // Validar la solicitud
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'required|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
@@ -32,12 +30,10 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        // Obtener incubadoras con las relaciones necesarias
         $incubatorsQuery = Incubator::with([
             'room',
-            'baby_incubator' => function ($query) {
-                $query->latest()->with(['baby.person', 'nurse.userPerson.person']);
-            }
+            'baby_incubator.baby.person',
+            'baby_incubator.nurse.userPerson.person'
         ])->whereHas('room', function ($query) use ($request) {
             $query->where('hospital_id', $request->hospital_id);
             if ($request->room_id) {
@@ -45,7 +41,6 @@ class IncubatorsController extends Controller
             }
         });
 
-        // Si el usuario es enfermero, filtrar por sus asignaciones
         if ($user->role === 'nurse') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
@@ -65,20 +60,27 @@ class IncubatorsController extends Controller
             return response()->json(['msg' => 'No Incubators Found'], 404);
         }
 
-        // Mapear resultados
         $data = $incubators->map(function ($incubator) {
-            $latestBabyIncubator = $incubator->baby_incubator->first();
+            $babyIncubator = $incubator->baby_incubator->first();
+
+            $baby = optional($babyIncubator->baby);
+            $babyPerson = optional($baby->person);
+            $babyFullName = trim("{$babyPerson->name} {$babyPerson->last_name_1} {$babyPerson->last_name_2}") ?: 'No Baby';
+
+            $nurse = optional($babyIncubator->nurse);
+            $nursePerson = optional($nurse->userPerson->person);
+            $nurseFullName = trim("{$nursePerson->name} {$nursePerson->last_name_1} {$nursePerson->last_name_2}") ?: 'No Nurse';
 
             return [
                 'id' => $incubator->id,
                 'state' => $incubator->state,
                 'room_number' => $incubator->room->number,
                 'room_id' => $incubator->room->id,
-                'nurse_id' => $latestBabyIncubator->nurse_id ?? null,
-                'nurse' => $latestBabyIncubator->nurse->userPerson->person->name->last_name_1->last_name_2 ?? 'No Nurse',
-                'baby' => $latestBabyIncubator->baby->person->name->last_name_1->last_name_2 ?? 'No Baby',
-                'baby_id' => $latestBabyIncubator->baby_id ?? null,
-                'created_at' => $latestBabyIncubator->created_at ?? null,
+                'nurse_id' => $nurse->id ?? null,
+                'nurse' => $nurseFullName,
+                'baby' => $babyFullName,
+                'baby_id' => $baby->id ?? null,
+                'created_at' => $incubator->created_at
             ];
         });
 
@@ -91,7 +93,6 @@ class IncubatorsController extends Controller
         ], 200);
     }
 
-    // Listo
     public function store(Request $request)
     {
 
@@ -122,7 +123,6 @@ class IncubatorsController extends Controller
 
         $user = auth()->user();
 
-        // Buscar la incubadora con su habitación y hospital
         $incubator = Incubator::with('room.hospital')->find($id);
 
         if (!$incubator) {
@@ -180,7 +180,6 @@ class IncubatorsController extends Controller
         ], 200);
     }
 
-    // Listo
     public function update(Request $request, $id)
     {
         if (!is_numeric($id)) {
@@ -225,7 +224,6 @@ class IncubatorsController extends Controller
             'msg' => 'Incubator Updated Successfully'
         ], 200);
     }
-    // Listo
     public function destroy($id)
     {
         if (!is_numeric($id)) {
