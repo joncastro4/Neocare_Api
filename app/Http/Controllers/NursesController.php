@@ -12,10 +12,9 @@ use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
 class NursesController extends Controller
 {
-    // Posiblemente no se utilize para la aplicación
     public function index()
     {
-        $nurses = Nurse::with('person')->get();
+        $nurses = Nurse::with('person', 'hospital_id')->get();
 
         if ($nurses->isEmpty()) {
             return response()->json([

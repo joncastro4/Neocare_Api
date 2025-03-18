@@ -34,6 +34,7 @@ Route::prefix('v1')->group(function () {
             Route::apiResource('checks', ChecksController::class);
             Route::apiResource('rooms', RoomsController::class);
             Route::apiResource('incubators', IncubatorsController::class);
+            Route::apiResource('nurses', NursesController::class);
             Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
             Route::middleware('superadmin')->group(function () {
                 Route::middleware('nurseadmin')->group(function () {
