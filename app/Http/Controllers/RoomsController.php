@@ -7,6 +7,7 @@ use App\Models\Room;
 use Illuminate\Support\Facades\Validator;
 use App\Models\BabyIncubator;
 use App\Models\Incubator;
+use Illuminate\Validation\Rule;
 class RoomsController extends Controller
 {
     public function index(Request $request)
@@ -77,7 +78,14 @@ class RoomsController extends Controller
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'required|integer|exists:hospitals,id',
             'name' => 'required|string|max:255',
-            'number' => 'required|integer|min:1|unique:rooms,number',
+            'number' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('rooms')->where(function ($query) use ($request) {
+                    return $query->where('hospital_id', $request->hospital_id);
+                }),
+            ],
         ]);
 
         if ($validate->fails()) {
@@ -92,7 +100,9 @@ class RoomsController extends Controller
                 'message' => 'Room not created'
             ], 404);
         }
-        return response()->json('Room created successfully', 201);
+        return response()->json([
+            'message' => 'Room created successfully',
+        ], 201);
     }
     public function update(Request $request, $id)
     {

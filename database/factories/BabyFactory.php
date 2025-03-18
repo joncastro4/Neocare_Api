@@ -13,7 +13,7 @@ class BabyFactory extends Factory
     public function definition()
     {
         return [
-            'hospital_id' => 1,
+            'hospital_id' => Hospital::factory(),
             'person_id' => Person::factory(),
             'date_of_birth' => $this->faker->date(),
         ];
