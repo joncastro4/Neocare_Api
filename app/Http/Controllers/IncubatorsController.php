@@ -20,7 +20,7 @@ class IncubatorsController extends Controller
     {
         $user = auth()->user();
     
-        // Validación
+        // Validación de la solicitud
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'required|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
@@ -32,19 +32,19 @@ class IncubatorsController extends Controller
             ], 422);
         }
     
-        // Query base con relaciones necesarias
+        // Construcción de la consulta base
         $incubatorsQuery = Incubator::with([
-            'room',
+            'room.hospital',
             'baby_incubator.baby.person',
             'baby_incubator.nurse.userPerson.person'
         ])->whereHas('room', function ($query) use ($request) {
+            $query->where('hospital_id', $request->hospital_id);
             if ($request->room_id) {
                 $query->where('id', $request->room_id);
             }
-            $query->where('hospital_id', $request->hospital_id);
         });
     
-        // Si el usuario es enfermero, filtrar por sus asignaciones
+        // Filtrar por enfermera si el usuario es nurse
         if ($user->role === 'nurse') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
@@ -58,46 +58,62 @@ class IncubatorsController extends Controller
             });
         }
     
+        // Paginación
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
     
         if ($incubators->isEmpty()) {
             return response()->json(['msg' => 'No Incubators Found'], 404);
         }
     
-        // Mapeo de datos
+        // Transformación de datos
         $data = $incubators->map(function ($incubator) use ($user) {
-            // Obtener el último `baby_incubator`
-            $lastBabyIncubator = $incubator->baby_incubator->sortByDesc('created_at')->last();
+            $babyFullName = 'No Baby';
+            $babyId = null;
+            $nurseFullName = 'No Nurse';
+            $nurseId = null;
     
-            // Datos del bebé
-            $baby = optional($lastBabyIncubator)->baby;
-            $babyPerson = optional($baby)->person;
-            $babyFullName = trim("{$babyPerson->name} {$babyPerson->last_name_1} {$babyPerson->last_name_2}") ?: 'No Baby';
+            if ($incubator->baby_incubator->isNotEmpty()) {
+                $babyIncubator = $incubator->baby_incubator->first();
     
-            // Datos de la enfermera
-            $nurse = optional($lastBabyIncubator)->nurse;
-            $nursePerson = optional($nurse->userPerson)->person;
-            $nurseFullName = trim("{$nursePerson->name} {$nursePerson->last_name_1} {$nursePerson->last_name_2}") ?: 'No Nurse';
+                if ($babyIncubator->baby) {
+                    $baby = $babyIncubator->baby;
+                    $babyFullName = $baby->person->name . ' ' .
+                        $baby->person->last_name_1 . ' ' .
+                        ($baby->person->last_name_2 ?? '');
+                    $babyId = $baby->id;
+                }
+    
+                if ($babyIncubator->nurse) {
+                    $nurse = $babyIncubator->nurse;
+                    $nurseFullName = $nurse->userPerson->person->name . ' ' .
+                        $nurse->userPerson->person->last_name_1 . ' ' .
+                        ($nurse->userPerson->person->last_name_2 ?? '');
+                    $nurseId = $nurse->id;
+                }
+            }
     
             return [
                 'id' => $incubator->id,
                 'state' => $incubator->state,
                 'room_number' => $incubator->room->number,
                 'room_id' => $incubator->room->id,
-                'nurse_id' => $nurse->id ?? null,
+                'nurse_id' => $nurseId,
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
-                'baby_id' => $baby->id ?? null,
+                'baby_id' => $babyId,
                 'created_at' => $incubator->created_at
             ];
         });
     
+        // Respuesta JSON con datos y paginación
         return response()->json([
             'incubators' => $data,
-            'total' => $incubators->total(),
-            'per_page' => $incubators->perPage(),
-            'current_page' => $incubators->currentPage(),
-            'last_page' => $incubators->lastPage()
+            'pagination' => [
+                'total' => $incubators->total(),
+                'per_page' => $incubators->perPage(),
+                'current_page' => $incubators->currentPage(),
+                'last_page' => $incubators->lastPage(),
+            ]
         ], 200);
     }
 
