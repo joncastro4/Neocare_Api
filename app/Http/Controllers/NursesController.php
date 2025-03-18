@@ -22,7 +22,9 @@ class NursesController extends Controller
             ], 400);
         }
     
-        $nurses = Nurse::where('hospital_id', $hospitalId)->get();
+        $nurses = Nurse::with('userPerson.person')
+            ->where('hospital_id', $hospitalId)
+            ->get();
     
         if ($nurses->isEmpty()) {
             return response()->json([
@@ -31,8 +33,18 @@ class NursesController extends Controller
             ], 200);
         }
     
+        $data = $nurses->map(function ($nurse) {
+            $person = $nurse->userPerson->person;
+    
+            return [
+                'id' => $nurse->id,
+                'full_name' => "{$person->name} {$person->last_name_1} " . ($person->last_name_2 ?? ''),
+                'hospital_id' => $nurse->hospital_id
+            ];
+        });
+    
         return response()->json([
-            'data' => $nurses
+            'data' => $data
         ], 200);
     }
 
