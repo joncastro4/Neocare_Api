@@ -64,13 +64,42 @@ class RoomsController extends Controller
         $babies = BabyIncubator::whereHas('incubator', function ($query) use ($id) {
             $query->where('room_id', $id);
         })->get();
-        $incubators = Incubator::where('room_id', $id)->get();
+
+        $incubators = Incubator::with('baby_incubator.baby.person', 'baby_incubator.nurse.userPerson.person')->where('room_id', $id)->get();
+
+        $formattedIncubators = $incubators->map(function ($incubator) {
+            $babyIncubator = $incubator->baby_incubator->first();
+
+            $babyFullName = $babyIncubator?->baby?->person
+                ? trim(
+                    $babyIncubator->baby->person->name . ' ' .
+                    $babyIncubator->baby->person->last_name_1 . ' ' .
+                    ($babyIncubator->baby->person->last_name_2 ?? '')
+                )
+                : null;
+
+            $nurseFullName = $babyIncubator?->nurse?->userPerson?->person
+                ? trim(
+                    $babyIncubator->nurse->userPerson->person->name . ' ' .
+                    $babyIncubator->nurse->userPerson->person->last_name_1 . ' ' .
+                    ($babyIncubator->nurse->userPerson->person->last_name_2 ?? '')
+                )
+                : null;
+
+            return [
+                'id' => $incubator->id,
+                'state' => $incubator->state,
+                'created_at' => $incubator->created_at->format('Y-m-d'),
+                'baby_full_name' => $babyFullName,
+                'nurse_full_name' => $nurseFullName
+            ];
+        });
 
         return response()->json([
             'room' => $room,
             'total_babies' => $babies->count(),
             'total_incubators' => $incubators->count(),
-            'incubators' => $incubators
+            'incubators' => $formattedIncubators
         ], 200);
     }
     public function store(Request $request)
