@@ -76,7 +76,7 @@ class RoomsController extends Controller
                     $babyIncubator->baby->person->last_name_1 . ' ' .
                     ($babyIncubator->baby->person->last_name_2 ?? '')
                 )
-                : null;
+                : 'No baby assigned';
 
             $nurseFullName = $babyIncubator?->nurse?->userPerson?->person
                 ? trim(
@@ -84,7 +84,7 @@ class RoomsController extends Controller
                     $babyIncubator->nurse->userPerson->person->last_name_1 . ' ' .
                     ($babyIncubator->nurse->userPerson->person->last_name_2 ?? '')
                 )
-                : null;
+                : 'No nurse assigned';
 
             return [
                 'id' => $incubator->id,
