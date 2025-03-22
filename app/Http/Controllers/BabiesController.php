@@ -101,7 +101,7 @@ class BabiesController extends Controller
         if (!is_numeric($id)) {
             abort(404);
         }
-        $baby = Baby::with('person', 'hospital', 'baby_incubator.incubator', 'relative')->find($id);
+        $baby = Baby::with('person', 'hospital', 'baby_incubator.incubator', 'relative.person')->find($id);
 
         if (!$baby) {
             return response()->json([
