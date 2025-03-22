@@ -10,6 +10,24 @@ use App\Models\Person;
 
 class RelativesController extends Controller
 {
+    public function indexWithBaby($baby_id)
+    {
+        $relatives = Relative::with('person')
+            ->where('baby_id', $baby_id)
+            ->paginate(9);
+
+        if ($relatives->isEmpty()) {
+            return response()->json([
+                'msg' => 'No Relatives Found for this Baby'
+            ], 204);
+        }
+
+        return response()->json([
+            'msg' => 'Relatives Found Successfully',
+            'relatives' => $relatives
+        ]);
+    }
+
     public function index()
     {
         $relatives = Relative::with('person')->paginate(9);
@@ -25,6 +43,7 @@ class RelativesController extends Controller
             'relatives' => $relatives
         ]);
     }
+
     public function store(Request $request)
     {
         $validate = Validator::make($request->all(), [

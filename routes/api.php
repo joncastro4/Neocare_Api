@@ -42,6 +42,8 @@ Route::prefix('v1')->group(function () {
                     Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
                     Route::apiResource('babies-data', BabiesDataController::class);
                     Route::apiResource('relatives', RelativesController::class);
+                    Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);
+
                 });
                 Route::apiResource('addresses', AddressesController::class);
                 Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
