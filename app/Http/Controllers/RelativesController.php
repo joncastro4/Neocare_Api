@@ -14,7 +14,7 @@ class RelativesController extends Controller
     {
         $relatives = Relative::with('person')
             ->where('baby_id', $baby_id)
-            ->paginate(9);
+            ->paginate(4);
 
         if ($relatives->isEmpty()) {
             return response()->json([
