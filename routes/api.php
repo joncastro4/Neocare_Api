@@ -31,60 +31,58 @@ Route::prefix('v1')->group(function () {
     });
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('sessions/role', [SessionsController::class, 'userRole']);
-        Route::middleware('roleguest')->group(function () {
-            Route::apiResource('checks', ChecksController::class);
-            Route::apiResource('rooms', RoomsController::class);
-            Route::apiResource('incubators', IncubatorsController::class);
-            Route::apiResource('nurses', NursesController::class);
-            Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
-            Route::middleware('superadmin')->group(function () {
-                Route::middleware('nurseadmin')->group(function () {
-                    Route::apiResource('babies', BabiesController::class);
-                    Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
-                    Route::apiResource('babies-data', BabiesDataController::class);
-                    Route::apiResource('relatives', RelativesController::class);
-                    Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);
+        Route::apiResource('checks', ChecksController::class);
+        Route::apiResource('rooms', RoomsController::class);
+        Route::apiResource('incubators', IncubatorsController::class);
+        Route::apiResource('nurses', NursesController::class);
+        Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
+        Route::middleware('superadmin')->group(function () {
+            Route::middleware('nurseadmin')->group(function () {
+                Route::apiResource('babies', BabiesController::class);
+                Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
+                Route::apiResource('babies-data', BabiesDataController::class);
+                Route::apiResource('relatives', RelativesController::class);
+                Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);
 
-                });
-                Route::apiResource('addresses', AddressesController::class);
-                Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
-                Route::apiResource('hospitals', HospitalsController::class);
-                Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
-                Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
-                Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
-                Route::post('sessions/logout', [SessionsController::class, 'logout']);
-                Route::post('crear-grupo', [AdafruitController::class, 'crearGrupo']);
-                Route::prefix('users')->group(function () {
-                    Route::put('role-management', [UsersManagementController::class, 'roleManagement']);
-                    Route::get('/', [UsersManagementController::class, 'index']);
-                    Route::get('/{id}', [UsersManagementController::class, 'show']);
-                });
             });
-            Route::prefix('profile')->group(function () {
-                Route::get('me', [ProfileController::class, 'me']);
-                Route::put('/', [ProfileController::class, 'update']);
-                Route::delete('/', [ProfileController::class, 'destroy']);
-                Route::post('upload-image', [NursesController::class, 'uploadImage']);
-                Route::get('view-image', [NursesController::class, 'viewImage']);
+            Route::apiResource('addresses', AddressesController::class);
+            Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
+            Route::apiResource('hospitals', HospitalsController::class);
+            Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
+            Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
+            Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
+            Route::post('sessions/logout', [SessionsController::class, 'logout']);
+            Route::post('crear-grupo', [AdafruitController::class, 'crearGrupo']);
+            Route::prefix('users')->group(function () {
+                Route::put('role-management', [UsersManagementController::class, 'roleManagement']);
+                Route::get('/', [UsersManagementController::class, 'index']);
+                Route::get('/{id}', [UsersManagementController::class, 'show']);
             });
         });
+        Route::prefix('profile')->group(function () {
+            Route::get('me', [ProfileController::class, 'me']);
+            Route::put('/', [ProfileController::class, 'update']);
+            Route::delete('/', [ProfileController::class, 'destroy']);
+            Route::post('upload-image', [NursesController::class, 'uploadImage']);
+            Route::get('view-image', [NursesController::class, 'viewImage']);
+        });
     });
-
-    Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
-    Route::get('user-activate/{id}', [SessionsController::class, 'activateUser'])->name('user-activate')->where('id', '[0-9]+');
-
-    Route::get('/bpm', [AdafruitController::class, 'bpm']);
-    Route::get('/fotoresistencia', [AdafruitController::class, 'fotoresistencia']);
-    Route::get('/humedad', [AdafruitController::class, 'humedad']);
-    Route::get('/oxigeno', [AdafruitController::class, 'oxigeno']);
-    Route::get('/rgb', [AdafruitController::class, 'rgb']);
-    Route::get('/temperaturacorporal', [AdafruitController::class, 'temperaturacorporal']);
-    Route::get('/temperaturambiental', [AdafruitController::class, 'temperaturambiental']);
-    Route::get('/vibraciones', [AdafruitController::class, 'vibraciones']);
-    // Ruta para obtener todos los sensores
-    Route::get('/', [AdafruitController::class, 'obtenerTodosLosSensores']);
-    Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
 });
+
+Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');
+Route::get('user-activate/{id}', [SessionsController::class, 'activateUser'])->name('user-activate')->where('id', '[0-9]+');
+
+Route::get('/bpm', [AdafruitController::class, 'bpm']);
+Route::get('/fotoresistencia', [AdafruitController::class, 'fotoresistencia']);
+Route::get('/humedad', [AdafruitController::class, 'humedad']);
+Route::get('/oxigeno', [AdafruitController::class, 'oxigeno']);
+Route::get('/rgb', [AdafruitController::class, 'rgb']);
+Route::get('/temperaturacorporal', [AdafruitController::class, 'temperaturacorporal']);
+Route::get('/temperaturambiental', [AdafruitController::class, 'temperaturambiental']);
+Route::get('/vibraciones', [AdafruitController::class, 'vibraciones']);
+// Ruta para obtener todos los sensores
+Route::get('/', [AdafruitController::class, 'obtenerTodosLosSensores']);
+Route::get('/sensores', [AdafruitController::class, 'obtenerTodosLosSensores']);
 
 Route::prefix('v2')->group(function () {
     Route::middleware('auth:sanctum')->group(function () {
