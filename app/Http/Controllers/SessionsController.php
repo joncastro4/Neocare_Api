@@ -293,7 +293,7 @@ class SessionsController extends Controller
         if ($user->email_verified_at) {
             return response()->json([
                 'message' => 'Email already verified'
-            ], 400);
+            ], 200);
         }
 
         $this->sendVerificationEmail($user, $user->name, $user->email);
