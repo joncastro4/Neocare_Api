@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('sessions/role', [SessionsController::class, 'userRole']);
         Route::middleware('roleguest')->group(function () {
             Route::apiResource('checks', ChecksController::class);
             Route::apiResource('rooms', RoomsController::class);
@@ -51,7 +52,6 @@ Route::prefix('v1')->group(function () {
                 Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
                 Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
                 Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
-                Route::get('sessions/role', [SessionsController::class, 'userRole']);
                 Route::post('sessions/logout', [SessionsController::class, 'logout']);
                 Route::post('crear-grupo', [AdafruitController::class, 'crearGrupo']);
                 Route::prefix('users')->group(function () {
