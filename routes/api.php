@@ -36,14 +36,12 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('incubators', IncubatorsController::class);
         Route::apiResource('nurses', NursesController::class);
         Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
-        Route::middleware('nurseadmin')->group(function () {
-            Route::apiResource('babies', BabiesController::class);
-            Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
-            Route::apiResource('babies-data', BabiesDataController::class);
-            Route::apiResource('relatives', RelativesController::class);
-            Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);
+        Route::apiResource('babies', BabiesController::class);
+        Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
+        Route::apiResource('babies-data', BabiesDataController::class);
+        Route::apiResource('relatives', RelativesController::class);
+        Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);
 
-        });
         Route::apiResource('addresses', AddressesController::class);
         Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
         Route::apiResource('hospitals', HospitalsController::class);
