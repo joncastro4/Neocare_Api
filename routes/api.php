@@ -23,8 +23,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('sessions')->group(function () {
         Route::post('register-app', [SessionsController::class, 'registerApp']);
         Route::post('register-web', [SessionsController::class, 'registerWeb']);
-        Route::post('login/app', [SessionsController::class, 'loginApp']);
-        Route::post('login/web', [SessionsController::class, 'loginWeb']);
+        Route::post('login', [SessionsController::class, 'login']);
         Route::get('verify-email-web', [SessionsController::class, 'verifyEmailWeb'])->name('verify-email-web');
         Route::get('verify-email-app', [SessionsController::class, 'verifyEmailApp'])->name('verify-email-app');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);

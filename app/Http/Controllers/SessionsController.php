@@ -232,10 +232,10 @@ class SessionsController extends Controller
         return $user;
     }
 
-    public function login(Request $request, $isWeb = false)
+    public function login(Request $request)
     {
         $validate = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required|string|email',
             'password' => 'required',
         ]);
 
@@ -263,12 +263,6 @@ class SessionsController extends Controller
             ], 401);
         }
 
-        if ($isWeb && !in_array($user->role, ['super-admin', 'admin'])) {
-            return response()->json([
-                'message' => 'Forbidden'
-            ], 403);
-        }
-
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
@@ -277,15 +271,6 @@ class SessionsController extends Controller
             'role' => $user->role
         ], 200);
     }
-    public function loginApp(Request $request)
-    {
-        return $this->login($request);
-    }
-    public function loginWeb(Request $request)
-    {
-        return $this->login($request, True);
-    }
-
 
     public function resend_activation(Request $request)
     {
