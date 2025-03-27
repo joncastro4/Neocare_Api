@@ -82,7 +82,7 @@ class ChecksController extends Controller
                 $checks->whereBetween('created_at', [$request->date1, $request->date2]);
             }
 
-            $checks = $checks->paginate(6);
+            $checks = $checks->paginate(9);
         }
 
         if ($checks->isEmpty()) {
@@ -112,7 +112,7 @@ class ChecksController extends Controller
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'incubator' => $incubator,
-                'created_at' => $check->created_at->format('Y-m-d H:i:s')
+                'created_at' => $check->created_at
             ];
         });
 
