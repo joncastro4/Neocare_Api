@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function () {
         Route::get('verify-email-app', [SessionsController::class, 'verifyEmailApp'])->name('verify-email-app');
         Route::post('resend-activation', [SessionsController::class, 'resend_activation']);
     });
+    Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('sessions/role', [SessionsController::class, 'userRole']);
         Route::apiResource('checks', ChecksController::class);
@@ -46,7 +47,6 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('addresses', AddressesController::class);
         Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);
         Route::apiResource('hospitals', HospitalsController::class);
-        Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
         Route::get('incubators-nurses', [IncubatorsController::class, 'incubatorNurse']);
         Route::delete('profile-image-nurses', [NursesController::class, 'destroyImage']);
         Route::post('sessions/logout', [SessionsController::class, 'logout']);
