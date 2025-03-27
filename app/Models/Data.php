@@ -9,10 +9,5 @@ class Data extends Model
 {
     use HasFactory;
     protected $connection = 'mongodb';
-    protected $collection = 'data';
-    protected $fillable = [
-        'sensor',
-        'value',
-        'reading_date',
-    ];
+    protected $collection = 'prueba';
 }

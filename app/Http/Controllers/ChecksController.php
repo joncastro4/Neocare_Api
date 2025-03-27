@@ -112,7 +112,7 @@ class ChecksController extends Controller
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'incubator' => $incubator,
-                'created_at' => $check->created_at
+                'created_at' => $check->created_at->format('Y-m-d')
             ];
         });
 
