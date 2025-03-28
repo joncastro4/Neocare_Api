@@ -99,7 +99,7 @@ class SessionsController extends Controller
         $this->sendVerificationEmail($user, $request->name, $request->email, true);
 
         return response()->json([
-            'message' => 'User created successfully',
+            'message' => 'Registration successful! Please verify your email to activate your account.',
             'user' => $user
         ], 201);
     }
