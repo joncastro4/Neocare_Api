@@ -210,7 +210,7 @@ class ChecksController extends Controller
             'nurse' => $check->nurse->userPerson->person->name . ' ' . $check->nurse->userPerson->person->last_name_1 . ' ' . $check->nurse->userPerson->person->last_name_2,
             'baby' => $check->baby_incubator->baby->person->name . ' ' . $check->baby_incubator->baby->person->last_name_1 . ' ' . $check->baby_incubator->baby->person->last_name_2,
             'incubator' => $check->baby_incubator->incubator->id,
-            'created_at' => $check->created_at
+            'created_at' => $check->created_at->format('Y-m-d H:i:s')
         ];
 
 
