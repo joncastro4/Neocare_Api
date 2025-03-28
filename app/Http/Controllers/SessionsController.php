@@ -257,10 +257,20 @@ class SessionsController extends Controller
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
+        $userPerson = UserPerson::where('user_id', $user->id)->first();
+
+        $hospitalId = null;
+
+        if ($userPerson) {
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
+            $hospitalId = $nurse ? $nurse->hospital_id : null;
+        }
+
         return response()->json([
             'message' => 'Login successful',
             'token' => $token,
-            'role' => $user->role
+            'role' => $user->role,
+            'hospital_id' => $hospitalId
         ], 200);
     }
 

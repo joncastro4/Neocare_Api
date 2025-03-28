@@ -36,12 +36,6 @@ class RoomsController extends Controller
 
         $rooms = $query->paginate(10);
 
-        if (!$rooms || $rooms->isEmpty()) {
-            return response()->json([
-                'message' => 'No rooms found'
-            ], 404);
-        }
-
         $rooms->getCollection()->transform(function ($room) {
             $room->created_at = $room->created_at->format('Y-m-d');
             return $room;
