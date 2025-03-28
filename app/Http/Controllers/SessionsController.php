@@ -243,15 +243,9 @@ class SessionsController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (!$user || !Hash::check($request->password, $user->password) || !$user->email_verified_at) {
             return response()->json([
                 'message' => 'Invalid credentials, or email not verified'
-            ], 401);
-        }
-
-        if (!$user->email_verified_at) {
-            return response()->json([
-                'message' => 'Email not verified'
             ], 401);
         }
 
