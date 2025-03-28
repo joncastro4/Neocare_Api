@@ -46,12 +46,6 @@ class HospitalsController extends Controller
     {
         $hospitals = Hospital::with('address')->orderByDesc('created_at')->get();
 
-        if ($hospitals->isEmpty()) {
-            return response()->json([
-                'message' => "No hospitals found"
-            ], 404);
-        }
-
         return response()->json([
             'message' => "Hospitals found",
             'hospitals' => $hospitals
