@@ -46,6 +46,42 @@ class RoomsController extends Controller
         ], 200);
     }
 
+    public function indexNoPaginate(Request $request)
+    {
+        $user = auth()->user();
+
+        $validate = Validator::make($request->all(), [
+            'hospital_id' => 'nullable|integer|exists:hospitals,id',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 400);
+        }
+
+        $query = Room::with('hospital');
+
+        if ($request->hospital_id) {
+            $query->where('hospital_id', $request->hospital_id);
+        }
+
+        if ($user->role == 'nurse-admin' || $user->role == 'nurse') {
+            $query->where('hospital_id', $user->nurse->hospital_id);
+        }
+
+        $rooms = $query->get();
+
+        $rooms->transform(function ($room) {
+            $room->created_at = $room->created_at->format('Y-m-d');
+            return $room;
+        });
+
+        return response()->json([
+            'rooms' => $rooms
+        ], 200);
+    }
+
     public function show($id)
     {
         $room = Room::with('hospital')->find($id);

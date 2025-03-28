@@ -8,6 +8,9 @@ use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Person;
 use App\Models\UserPerson;
+use App\Models\Hospital;
+use App\Models\Nurse;
+use App\Models\Address;
 
 class UserSeeder extends Seeder
 {
@@ -47,7 +50,7 @@ class UserSeeder extends Seeder
             'role' => 'nurse-admin',
         ]);
 
-        $person = Person::create([
+        $personNurse = Person::create([
             'name' => 'nurseAdmin',
             'last_name_1' => 'nurseAdmin',
             'last_name_2' => 'nurseAdmin',
@@ -55,7 +58,27 @@ class UserSeeder extends Seeder
 
         UserPerson::create([
             'user_id' => $user->id,
-            'person_id' => $person->id,
+            'person_id' => $personNurse->id,
+        ]);
+
+        $address = Address::create([
+            'number' => '123',
+            'street' => 'Street 1',
+            'neighborhood' => 'Neighborhood 1',
+            'city' => 'City 1',
+            'state' => 'State 1',
+            'zip_code' => '12345',
+        ]);
+
+        $hospital = Hospital::create([
+            'name' => 'Hospital 1',
+            'phone_number' => '123456789',
+            'address_id' => $address->id,
+        ]);
+
+        $nurse = Nurse::create([
+            'user_person_id' => $personNurse->id,
+            'hospital_id' => $hospital->id,
         ]);
     }
 }

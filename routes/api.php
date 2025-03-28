@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
         Route::get('sessions/role', [SessionsController::class, 'userRole']);
         Route::apiResource('checks', ChecksController::class);
         Route::apiResource('rooms', RoomsController::class);
+        Route::get('roomsNoPaginate', [RoomsController::class, 'indexNoPaginate']);
         Route::get('/sensor-data/{incubator_id}', [DataController::class, 'getByIncubatorId']);
         Route::get('/latest-sensor-data/{incubator_id}', [DataController::class, 'getLatestByIncubatorId']);
         Route::apiResource('incubators', IncubatorsController::class);
