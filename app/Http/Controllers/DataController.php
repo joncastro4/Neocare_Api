@@ -11,7 +11,52 @@ class DataController extends Controller
 {
     public function index()
     {
-        return response()->json(Data::all(), 200);
+        $allData = Data::all();
+        $keys = ['HAM', 'LDR', 'PRE', 'SON', 'TAM', 'TBB', 'VRB'];
+        $accumulators = [];
+    
+        foreach ($allData as $data) {
+            foreach ($keys as $key) {
+                if (!isset($data->$key)) {
+                    continue;
+                }
+                
+                $valueData = $data->$key;
+                
+                if (!isset($valueData['value'])) {
+                    continue;
+                }
+                
+                $value = (float)$valueData['value'];
+                
+                if (!isset($accumulators[$key])) {
+                    $accumulators[$key] = [];
+                }
+                
+                $accumulators[$key][] = $value;
+            }
+        }
+    
+        $result = [];
+        
+        foreach ($accumulators as $key => $values) {
+            $count = count($values);
+            
+            if ($count === 0) {
+                continue;
+            }
+            
+            $sum = array_sum($values);
+            $average = $sum / $count;
+            
+            $result[$key] = [
+                'promedio' => round($average, 2),
+                'maximo' => max($values),
+                'minimo' => min($values),
+            ];
+        }
+    
+        return response()->json($result, 200);
     }
 
     // Mostrar un cliente por ID
