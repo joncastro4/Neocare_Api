@@ -83,15 +83,47 @@ class DataController extends Controller
 
     public function getByIncubatorId($incubator_id)
     {
-        // Buscar el documento donde el incubator_id coincida
-        $documento = Data::where('incubator_id', (int) $incubator_id)->first();
-
-        // Verificar si se encontró el documento
-        if (!$documento) {
-            return response()->json(['message' => 'No se encontró el documento'], 404);
+        $documentos = Data::where('incubator_id', (int) $incubator_id)->get();
+    
+        if ($documentos->isEmpty()) {
+            return response()->json(['message' => 'No se encontraron documentos'], 404);
         }
-
-        return response()->json($documento);
+    
+        $keys = ['HAM', 'LDR', 'PRE', 'SON', 'TAM', 'TBB', 'VRB'];
+        $acumuladores = [];
+    
+        foreach ($documentos as $doc) {
+            foreach ($keys as $key) {
+                if (!isset($doc->$key)) continue;
+                
+                $valorData = $doc->$key;
+                if (!isset($valorData['value'])) continue;
+                
+                $valor = (float)$valorData['value'];
+                
+                if (!isset($acumuladores[$key])) {
+                    $acumuladores[$key] = [];
+                }
+                
+                $acumuladores[$key][] = $valor;
+            }
+        }
+    
+        $resultado = [];
+        
+        foreach ($acumuladores as $key => $valores) {
+            $total = count($valores);
+            if ($total === 0) continue;
+            
+            $suma = array_sum($valores);
+            $resultado[$key] = [
+                'promedio' => round($suma / $total, 2),
+                'maximo' => max($valores),
+                'minimo' => min($valores)
+            ];
+        }
+    
+        return response()->json($resultado, 200);
     }
 
     public function getLatestByIncubatorId(Request $request, $incubator_id)
