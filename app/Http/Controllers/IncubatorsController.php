@@ -124,7 +124,7 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        $incubator =Incubator::create([
+        $incubator = Incubator::create([
             'room_id' => $request->room_id
         ]);
 
@@ -134,6 +134,7 @@ class IncubatorsController extends Controller
 
         return response()->json([
             'msg' => 'Incubator Created Successfully',
+            'incubator' => $incubator
         ], 201);
     }
 
