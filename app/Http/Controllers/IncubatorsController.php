@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\BabyIncubator;
+use App\Models\Data;
 use Illuminate\Http\Request;
 use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
@@ -123,8 +124,12 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        Incubator::create([
+        $incubator =Incubator::create([
             'room_id' => $request->room_id
+        ]);
+
+        Data::create([
+            'incubator_id' => $incubator->id
         ]);
 
         return response()->json([
