@@ -235,7 +235,7 @@ class ChecksController extends Controller
             $babyPerson = $baby ? $baby->person : null;
             $babyFullName = $babyPerson ? $babyPerson->name . ' ' . $babyPerson->last_name_1 . ' ' . $babyPerson->last_name_2 : null;
             $incubator = $babyIncubator ? $babyIncubator->incubator->id : null;
-
+            $dateOfBirth = $baby ? $baby->date_of_birth : null;
             return [
                 'check_id' => $check->id,
                 'title' => $check->title,
@@ -243,6 +243,7 @@ class ChecksController extends Controller
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'incubator' => $incubator,
+                'baby_date_of_birth' => $dateOfBirth ? date('Y-m-d', strtotime($dateOfBirth)) : null,
                 'created_at' => $check->created_at->format('Y-m-d'),
             ];
         });
