@@ -83,21 +83,30 @@ class DataController extends Controller
 
     public function getByIncubatorId($incubator_id)
     {
-    
+        // Buscar el documento donde el incubator_id coincida
         $documento = Data::where('incubator_id', (int) $incubator_id)->first();
     
+        // Verificar si se encontró el documento
         if (!$documento) {
             return response()->json(['message' => 'No se encontró el documento'], 404);
         }
     
+        // Convertir los valores a un array estándar de PHP
+        $valuesArray = $documento->getAttributes()['values'] ?? [];
+        if (is_object($valuesArray)) {
+            $valuesArray = json_decode(json_encode($valuesArray), true);
+        }
+    
+        // Procesar los datos para obtener estadísticas
         $sensorStats = [];
-        $sensors = ['HAM', 'LDR', 'PRE', 'SON', 'TAM', 'TBB', 'VRB'];
+        $sensors = ['HAM', 'LDR', 'PRE', 'SON', 'TAM', 'TBB', 'VRB']; // Lista de sensores
     
         foreach ($sensors as $sensor) {
             $values = [];
             $dates = [];
-        
-            foreach ($documento->values as $entry) {
+            
+            // Recoger todos los valores y fechas para este sensor
+            foreach ($valuesArray as $entry) {
                 if (isset($entry[$sensor])) {
                     $values[] = floatval($entry[$sensor]['value']);
                     $dates[] = $entry[$sensor]['date'];
@@ -105,7 +114,7 @@ class DataController extends Controller
             }
     
             if (!empty($values)) {
-            
+                // Calcular estadísticas
                 $sensorStats[$sensor] = [
                     'average' => round(array_sum($values) / count($values), 2),
                     'min' => round(min($values), 2),
@@ -123,26 +132,27 @@ class DataController extends Controller
             }
         }
     
+        // Respuesta con los datos originales y las estadísticas
         return response()->json([
             'incubator_id' => $documento->incubator_id,
-            'total_readings' => count($documento->values),
-            'first_reading_time' => $documento->values[0]['HAM']['date'],
-            'last_reading_time' => end($documento->values)['HAM']['date'],
+            'total_readings' => count($valuesArray),
+            'first_reading_time' => $valuesArray[0]['HAM']['date'] ?? null,
+            'last_reading_time' => end($valuesArray)['HAM']['date'] ?? null,
             'sensor_statistics' => $sensorStats,
-            'raw_data' => $documento
+            // 'raw_data' => $documento // Opcional: comentado para evitar posibles problemas
         ]);
     }
     
     private function getSensorUnit($sensor)
     {
         $units = [
-            'HAM' => '%',   
-            'TAM' => '°C',   
-            'TBB' => '°C',   
-            'LDR' => 'lux',  
-            'SON' => 'Hz',   
-            'PRE' => 'Pa',    
-            'VRB' => 'm/s'   
+            'HAM' => '%',    // Humedad relativa
+            'TAM' => '°C',    // Temperatura ambiente
+            'TBB' => '°C',    // Temperatura bebé
+            'LDR' => 'lux',   // Intensidad luminosa
+            'SON' => 'Hz',    // Sonido
+            'PRE' => 'Pa',     // Presión
+            'VRB' => 'm/s'    // Vibración
         ];
         
         return $units[$sensor] ?? 'unidad desconocida';
