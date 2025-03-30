@@ -16,7 +16,7 @@ class RoomFactory extends Factory
     public function definition()
     {
         return [
-            'hospital_id' => Hospital::factory(),
+            'hospital_id' => 1,
             'name' => $this->faker->name(),
             'number' => $this->faker->unique()->buildingNumber(),
         ];
