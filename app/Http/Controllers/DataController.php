@@ -59,7 +59,7 @@ class DataController extends Controller
         return response()->json($result, 200);
     }
 
-    // Mostrar un cliente por ID
+
     public function show($id)
     {
         $cliente = Data::find($id);
@@ -71,7 +71,7 @@ class DataController extends Controller
 
     public function getByType(Request $request, $type)
     {
-        // Busca los sensores con el tipo especificado
+    
         $sensors = Data::where('sensor.type', $type)->get();
 
         if ($sensors->isEmpty()) {
@@ -83,15 +83,69 @@ class DataController extends Controller
 
     public function getByIncubatorId($incubator_id)
     {
-        // Buscar el documento donde el incubator_id coincida
+    
         $documento = Data::where('incubator_id', (int) $incubator_id)->first();
-
-        // Verificar si se encontró el documento
+    
         if (!$documento) {
             return response()->json(['message' => 'No se encontró el documento'], 404);
         }
-
-        return response()->json($documento);
+    
+        $sensorStats = [];
+        $sensors = ['HAM', 'LDR', 'PRE', 'SON', 'TAM', 'TBB', 'VRB'];
+    
+        foreach ($sensors as $sensor) {
+            $values = [];
+            $dates = [];
+        
+            foreach ($documento->values as $entry) {
+                if (isset($entry[$sensor])) {
+                    $values[] = floatval($entry[$sensor]['value']);
+                    $dates[] = $entry[$sensor]['date'];
+                }
+            }
+    
+            if (!empty($values)) {
+            
+                $sensorStats[$sensor] = [
+                    'average' => round(array_sum($values) / count($values), 2),
+                    'min' => round(min($values), 2),
+                    'max' => round(max($values), 2),
+                    'count' => count($values),
+                    'first_reading' => $dates[0],
+                    'last_reading' => end($dates),
+                    'range' => round(max($values) - min($values), 2),
+                    'unit' => $this->getSensorUnit($sensor)
+                ];
+            } else {
+                $sensorStats[$sensor] = [
+                    'message' => 'No hay datos para este sensor'
+                ];
+            }
+        }
+    
+        return response()->json([
+            'incubator_id' => $documento->incubator_id,
+            'total_readings' => count($documento->values),
+            'first_reading_time' => $documento->values[0]['HAM']['date'],
+            'last_reading_time' => end($documento->values)['HAM']['date'],
+            'sensor_statistics' => $sensorStats,
+            'raw_data' => $documento
+        ]);
+    }
+    
+    private function getSensorUnit($sensor)
+    {
+        $units = [
+            'HAM' => '%',   
+            'TAM' => '°C',   
+            'TBB' => '°C',   
+            'LDR' => 'lux',  
+            'SON' => 'Hz',   
+            'PRE' => 'Pa',    
+            'VRB' => 'm/s'   
+        ];
+        
+        return $units[$sensor] ?? 'unidad desconocida';
     }
 
     public function getLatestByIncubatorId(Request $request, $incubator_id)
