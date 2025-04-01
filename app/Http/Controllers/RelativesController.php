@@ -19,12 +19,28 @@ class RelativesController extends Controller
         if ($relatives->isEmpty()) {
             return response()->json([
                 'msg' => 'No Relatives Found for this Baby'
-            ], 204);
+            ], 404);
         }
 
         return response()->json([
             'msg' => 'Relatives Found Successfully',
             'relatives' => $relatives
+        ]);
+    }
+
+    public function indexNoPaginate($baby_id){
+        $relatives = Relative::with('person')
+            ->where('baby_id', $baby_id)
+            ->get();
+
+        if ($relatives->isEmpty()) {
+            return response()->json([
+                'msg' => 'No Relatives Found for this Baby'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $relatives
         ]);
     }
 
