@@ -32,15 +32,27 @@ class RelativesController extends Controller
         $relatives = Relative::with('person')
             ->where('baby_id', $baby_id)
             ->get();
-
+    
         if ($relatives->isEmpty()) {
             return response()->json([
                 'msg' => 'No Relatives Found for this Baby'
             ], 404);
         }
-
+    
+        $transformedRelatives = $relatives->map(function ($relative) {
+            return [
+                'full_name' => trim(
+                    $relative->person->name . ' ' . 
+                    $relative->person->last_name_1 . ' ' . 
+                    ($relative->person->last_name_2 ?? '')
+                ),
+                'phone_number' => $relative->phone_number,
+                'email' => $relative->email
+            ];
+        });
+    
         return response()->json([
-            'data' => $relatives
+            'data' => $transformedRelatives
         ]);
     }
 
