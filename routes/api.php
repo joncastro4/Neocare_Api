@@ -17,6 +17,7 @@ use App\Http\Controllers\HospitalsController;
 use App\Http\Controllers\UsersManagementController;
 use App\Http\Controllers\RoomsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BabyIncubatorController;
 
 Route::prefix('v1')->group(function () {
 
@@ -30,6 +31,7 @@ Route::prefix('v1')->group(function () {
     });
     Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('babyIncubators', [BabyIncubatorController::class, 'index']);
         Route::get('sessions/role', [SessionsController::class, 'userRole']);
         Route::apiResource('checks', ChecksController::class);
         Route::get('checksNoPaginate', [ChecksController::class, 'indexNoPaginate']);
