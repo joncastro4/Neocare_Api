@@ -139,7 +139,7 @@ class IncubatorsController extends Controller
         }
 
         return response()->json([
-            'data' => $incubators
+            'data' => $incubators->id
         ], 200);
     }
     // Listo
