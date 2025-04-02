@@ -31,6 +31,7 @@ class RelativesController extends Controller
     public function indexNoPaginate($baby_id){
         $relatives = Relative::with('person')
             ->where('baby_id', $baby_id)
+            ->orderBy('created_at','desc')
             ->get();
     
         if ($relatives->isEmpty()) {
