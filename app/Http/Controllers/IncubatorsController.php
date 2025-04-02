@@ -25,7 +25,6 @@ class IncubatorsController extends Controller
         // Validación modificada para nurse
         $validate = Validator::make($request->all(), [
             'hospital_id' => $user->role === 'nurse' ? 'sometimes' : 'required|integer|exists:hospitals,id',
-            'room_id' => 'nullable|integer|exists:rooms,id'
         ]);
     
         if ($validate->fails()) {
@@ -77,11 +76,7 @@ class IncubatorsController extends Controller
     
         if ($incubators->isEmpty()) {
             return response()->json([
-                'incubators' => [],
-                'total' => 0,
-                'per_page' => 6,
-                'current_page' => 1,
-                'last_page' => 1,
+                'message' => $this->incubatorNotFound
             ]);
         }
     
