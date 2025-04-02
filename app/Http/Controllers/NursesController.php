@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Nurse;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Person;
+use App\Models\Hospital;
 use Storage;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 
@@ -31,6 +32,40 @@ class NursesController extends Controller
                 'msg' => 'No Nurses Found for this hospital',
                 'hospital_id' => $hospitalId
             ], 200);
+        }
+    
+        $data = $nurses->map(function ($nurse) {
+            $person = $nurse->userPerson->person;
+    
+            return [
+                'id' => $nurse->id,
+                'full_name' => "{$person->name} {$person->last_name_1} " . ($person->last_name_2 ?? ''),
+                'hospital_id' => $nurse->hospital_id
+            ];
+        });
+    
+        return response()->json([
+            'data' => $data
+        ], 200);
+    }
+
+    public function indexHospital(Hospital $hospital)
+    {
+        if (!$hospital) {
+            return response()->json([
+                'msg' => 'hospital_id is required'
+            ], 400);
+        }
+    
+        $nurses = Nurse::with('userPerson.person')
+            ->where('hospital_id', $hospital)
+            ->get();
+    
+        if ($nurses->isEmpty()) {
+            return response()->json([
+                'message' => 'No Nurses Found for this hospital',
+                'hospital_id' => $hospital
+            ], 404);
         }
     
         $data = $nurses->map(function ($nurse) {
