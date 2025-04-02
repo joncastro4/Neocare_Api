@@ -346,7 +346,7 @@ class BabiesController extends Controller
         }
 
         return response()->json([
-            'msg' => 'Baby assigned to incubator successfully'
+            'message' => 'Baby assigned to incubator successfully'
         ], 200);
     }
 
