@@ -58,7 +58,7 @@ class NursesController extends Controller
         }
     
         $nurses = Nurse::with('userPerson.person')
-            ->where('hospital_id', $hospital)
+            ->where('hospital_id', $hospital->id)
             ->get();
     
         if ($nurses->isEmpty()) {
