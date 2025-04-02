@@ -275,6 +275,12 @@ class ChecksController extends Controller
 
         $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
 
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'Cannot add check'
+            ], 403);
+        }
+
         $validate = Validator::make($request->all(), [
             'baby_incubator_id' => 'required|integer|exists:babies_incubators,id',
             'title' => 'required|string|max:255',
