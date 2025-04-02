@@ -34,8 +34,6 @@ class IncubatorsController extends Controller
 
         $incubatorsQuery = Incubator::with([
             'room.hospital',
-            'baby_incubator.baby.person',
-            'baby_incubator.nurse.userPerson.person'
         ])->whereHas('room', function ($query) use ($request) {
             $query->where('hospital_id', $request->hospital_id);
             if ($request->room_id) {
