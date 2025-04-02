@@ -34,7 +34,7 @@ class UsersManagementController extends Controller
     {
         $validate = Validator::make($request->all(), [
             'user' => 'required|integer|exists:users,id',
-            'role' => 'required|string|in:super-admin,nurse-admin,nurse,user',
+            'role' => 'required|string|in:super-admin,nurse-admin,nurse,admin',
             'hospital_id' => 'required_if:role,nurse,nurse-admin|integer|exists:hospitals,id'
         ]);
 
