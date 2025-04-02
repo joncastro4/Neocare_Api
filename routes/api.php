@@ -17,6 +17,7 @@ use App\Http\Controllers\HospitalsController;
 use App\Http\Controllers\UsersManagementController;
 use App\Http\Controllers\RoomsController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\BabyIncubatorController;
 
 Route::prefix('v1')->group(function () {
 
@@ -30,8 +31,10 @@ Route::prefix('v1')->group(function () {
     });
     Route::get('hospitalsNoPaginate', [HospitalsController::class, 'indexNoPaginate']);
     Route::middleware('auth:sanctum')->group(function () {
+        Route::get('babyIncubators', [BabyIncubatorController::class, 'index']);
         Route::get('sessions/role', [SessionsController::class, 'userRole']);
         Route::apiResource('checks', ChecksController::class);
+        Route::get('checksNoPaginate', [ChecksController::class, 'indexNoPaginate']);
         Route::apiResource('rooms', RoomsController::class);
         Route::get('roomsNoPaginate', [RoomsController::class, 'indexNoPaginate']);
         Route::get('/sensor-data/{incubator_id}', [DataController::class, 'getByIncubatorId']);
@@ -44,6 +47,7 @@ Route::prefix('v1')->group(function () {
         Route::apiResource('babies-data', BabiesDataController::class);
         Route::apiResource('relatives', RelativesController::class);
         Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);
+        Route::get('relativesNoPaginate/{baby_id}', [RelativesController::class, 'indexNoPaginate']);
 
         Route::apiResource('addresses', AddressesController::class);
         Route::get('addressesNoPaginate', [AddressesController::class, 'indexNoPaginate']);

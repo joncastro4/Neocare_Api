@@ -63,6 +63,65 @@ class BabiesController extends Controller
         return response()->json($babies, 200);
     }
 
+    public function indexNoPaginate(Request $request){
+        $validate = Validator::make($request->all(), [
+            'hospital_id' => 'nullable|integer|exists:hospitals,id'
+        ]);
+    
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+    
+        $query = Baby::with([
+            'person',
+            'hospital',
+            'baby_incubator' => function ($query) {
+                $query->orderBy('created_at', 'desc');
+            }
+        ])->orderBy('created_at', 'desc');
+    
+        if ($request->hospital_id) {
+            $query->where('hospital_id', $request->hospital_id);
+        }
+    
+        if ($request->incubator_id) {
+            $query->whereHas('baby_incubator', function ($q) use ($request) {
+                $q->where('incubator_id', $request->incubator_id);
+            });
+        }
+    
+        $babies = $query->get();
+    
+        if ($babies->isEmpty()) {
+            return response()->json([
+                'msg' => 'No Babies Found'
+            ], 404);
+        }
+    
+        $transformedBabies = $babies->map(function ($baby) {
+            $currentIncubatorId = $baby->baby_incubator->isNotEmpty() 
+                ? $baby->baby_incubator->first()->incubator_id 
+                : null;
+    
+            return [
+                'id' => $baby->id,
+                'date_of_birth' => $baby->date_of_birth,
+                'created_at' => $baby->created_at->format('Y-m-d'),
+                'full_name' => $baby->person ? 
+                    trim($baby->person->name . ' ' . $baby->person->last_name_1 . ' ' . $baby->person->last_name_2) : 
+                    null,
+                'incubator_id' => $currentIncubatorId,
+                
+            ];
+        });
+    
+        return response()->json([
+            'data' => $transformedBabies
+        ], 200);
+    }
+
 
     // Listo
     public function store(Request $request)
@@ -204,8 +263,7 @@ class BabiesController extends Controller
         $validate = Validator::make($request->all(), [
             'baby_id' => ' required|exists:babies,id',
             'incubator_id' => 'required|exists:incubators,id',
-            'hospital_id' => 'required|exists:hospitals,id',
-            'nurse_id' => 'nullable|exists:nurses,id'
+            'nurse_id' => 'required|exists:nurses,id'
         ]);
 
         if ($validate->fails()) {
@@ -248,54 +306,4 @@ class BabiesController extends Controller
         ], 200);
     }
 
-    public function indexNoPaginate(Request $request)
-    {
-        $validate = Validator::make($request->all(), [
-            'hospital_id' => 'nullable|integer|exists:hospitals,id',
-            'incubator_id' => 'nullable|integer|exists:incubators,id',
-        ]);
-
-        if ($validate->fails()) {
-            return response()->json([
-                'errors' => $validate->errors()
-            ], 422);
-        }
-
-        $query = Baby::with(['person', 'baby_incubator'])->orderBy('created_at', 'desc');
-
-        if ($request->hospital_id) {
-            $query->where('hospital_id', $request->hospital_id);
-        }
-
-        if ($request->incubator_id) {
-            $query->whereHas('baby_incubator', function ($query) use ($request) {
-                $query->where('incubator_id', $request->incubator_id);
-            });
-        }
-
-        $babies = $query->get()->map(function ($baby) {
-            $babyFullName = 'No Baby';
-
-            if ($baby->person) {
-                $babyFullName = $baby->person->name . ' ' .
-                    $baby->person->last_name_1 . ' ' .
-                    ($baby->person->last_name_2 ?? '');
-            }
-
-            return [
-                'id' => $baby->id,
-                'full_name' => trim($babyFullName),
-            ];
-        });
-
-        if ($babies->isEmpty()) {
-            return response()->json([
-                'msg' => 'No Babies Found'
-            ], 404);
-        }
-
-        return response()->json([
-            'babies' => $babies
-        ], 200);
-    }
 }
