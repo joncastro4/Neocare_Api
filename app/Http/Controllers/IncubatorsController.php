@@ -62,6 +62,8 @@ class IncubatorsController extends Controller
                 $query->where('id', $request->room_id);
             }
         });
+
+        dd($incubatorsQuery);
     
         // Filtro adicional para enfermeras
         if ($user->role === 'nurse') {
