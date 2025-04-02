@@ -197,6 +197,7 @@ class IncubatorsController extends Controller
             'baby' => $babyFullName,
             'baby_id' => $babyId,
             'created_at' => $createdAt,
+            'baby_incubator_id' => $latestBabyIncubator ? $latestBabyIncubator->id : null
         ];
 
         return response()->json([
