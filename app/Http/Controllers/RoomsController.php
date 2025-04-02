@@ -60,7 +60,7 @@ class RoomsController extends Controller
             ], 400);
         }
 
-        $query = Room::with('hospital');
+        $query = Room::with('hospital')->orderByDesc('created_at');
 
         if ($request->hospital_id) {
             $query->where('hospital_id', $request->hospital_id);
