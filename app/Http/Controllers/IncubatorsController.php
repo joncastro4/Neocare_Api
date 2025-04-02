@@ -125,21 +125,19 @@ class IncubatorsController extends Controller
         ], 200);
     }
     
-    public function indexHospital(Hospital $hospital){
-
+    public function indexHospital(Hospital $hospital) {
         $incubators = Incubator::whereHas('room', function($query) use ($hospital) {
-            $query->where('hospital_id', $hospital->id);
-            $query->where('state', 'available');
-        })->get();
-
-        if(!$incubators){
-            return response()->json([
-                'message' => 'No Incubators Found'
-            ], 404);
+                $query->where('hospital_id', $hospital->id)
+                      ->where('state', 'available');
+            })
+            ->get(['id']);
+    
+        if ($incubators->isEmpty()) {
+            return response()->json(['message' => 'No Incubators Found'], 404);
         }
-
+    
         return response()->json([
-            'data' => $incubators->id
+            'data' => $incubators 
         ], 200);
     }
     // Listo
