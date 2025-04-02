@@ -264,7 +264,7 @@ class ChecksController extends Controller
         }
     
         // Verifica si el usuario es Super Admin o Admin
-        $isAdmin = $user->hasRole(['super-admin', 'admin']); // Asegúrate de usar tu sistema de roles
+        $isAdmin = $user->role == 'super-admin' || $user->role == 'admin';
     
         // Si no es admin, verifica que sea enfermera
         if (!$isAdmin) {
