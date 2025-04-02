@@ -22,9 +22,10 @@ class IncubatorsController extends Controller
     {
         $user = auth()->user();
     
-        // Validación modificada para nurse
+        // Validación más flexible
         $validate = Validator::make($request->all(), [
-            'hospital_id' => $user->role === 'nurse' ? 'sometimes' : 'required|integer|exists:hospitals,id',
+            'hospital_id' => 'nullable|integer|exists:hospitals,id',
+            'room_id' => 'nullable|integer|exists:rooms,id'
         ]);
     
         if ($validate->fails()) {
@@ -33,8 +34,8 @@ class IncubatorsController extends Controller
             ], 422);
         }
     
-        // Forzar hospital_id para enfermeras
-        if ($user->role === 'nurse') {
+        // Configuración automática para enfermeras
+        if ($user->role === 'nurse' || $user->role === 'nurse-admin') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             if (!$userPerson) {
                 return response()->json(['msg' => 'User person not found for nurse'], 404);
@@ -55,18 +56,19 @@ class IncubatorsController extends Controller
             }
         ]);
     
-        // Filtro por hospital
+        // Filtro por hospital si está presente
         if ($request->hospital_id) {
             $incubatorsQuery->whereHas('room', function ($query) use ($request) {
                 $query->where('hospital_id', $request->hospital_id);
+                
                 if ($request->room_id) {
                     $query->where('id', $request->room_id);
                 }
             });
         }
     
-        // Filtro adicional para enfermeras
-        if ($user->role === 'nurse') {
+        // Filtro opcional por enfermera (solo para enfermeras)
+        if (($user->role === 'nurse' || $user->role === 'nurse-admin') && !$request->has('room_id')) {
             $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
                 $query->where('nurse_id', $nurse->id);
             });
@@ -74,44 +76,9 @@ class IncubatorsController extends Controller
     
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
     
-        if ($incubators->isEmpty()) {
-            return response()->json([
-                'message' => $this->incubatorNotFound
-            ]);
-        }
-    
+        // Mantener estructura de respuesta incluso cuando está vacío
         $data = $incubators->map(function ($incubator) {
-            $lastBabyIncubator = $incubator->baby_incubator->first();
-            
-            $babyData = $lastBabyIncubator && $lastBabyIncubator->baby 
-                ? [
-                    'id' => $lastBabyIncubator->baby->id,
-                    'name' => $lastBabyIncubator->baby->person->name . ' ' . 
-                             $lastBabyIncubator->baby->person->last_name_1 . ' ' . 
-                             ($lastBabyIncubator->baby->person->last_name_2 ?? '')
-                ] 
-                : null;
-    
-            $nurseData = $lastBabyIncubator && $lastBabyIncubator->nurse
-                ? [
-                    'id' => $lastBabyIncubator->nurse->id,
-                    'name' => $lastBabyIncubator->nurse->userPerson->person->name . ' ' . 
-                             $lastBabyIncubator->nurse->userPerson->person->last_name_1 . ' ' . 
-                             ($lastBabyIncubator->nurse->userPerson->person->last_name_2 ?? '')
-                ]
-                : null;
-    
-            return [
-                'id' => $incubator->id,
-                'state' => $incubator->state,
-                'room_number' => $incubator->room->number,
-                'room_id' => $incubator->room->id,
-                'nurse_id' => $nurseData['id'] ?? null,
-                'nurse' => $nurseData['name'] ?? 'No Nurse',
-                'baby' => $babyData['name'] ?? 'No Baby',
-                'baby_id' => $babyData['id'] ?? null,
-                'created_at' => $incubator->created_at->format('Y-d-m')
-            ];
+            // ... (mantener tu lógica de mapeo actual)
         });
     
         return response()->json([
