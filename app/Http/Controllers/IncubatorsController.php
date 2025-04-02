@@ -129,6 +129,7 @@ class IncubatorsController extends Controller
 
         $incubators = Incubator::whereHas('room', function($query) use ($hospital) {
             $query->where('hospital_id', $hospital->id);
+            $query->where('state', 'available');
         })->get();
 
         if(!$incubators){
