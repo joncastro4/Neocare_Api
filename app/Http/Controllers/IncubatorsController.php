@@ -21,8 +21,6 @@ class IncubatorsController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-
-        dd($user);
     
         // Validación modificada para nurse
         $validate = Validator::make($request->all(), [
