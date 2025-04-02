@@ -51,7 +51,7 @@ class IncubatorsController extends Controller
                 return response()->json(['msg' => 'No Nurse Found'], 404);
             }
 
-            $incubatorsQuery = $incubatorsQuery::where('nurse_id', $nurse->id);
+            $incubatorsQuery = Incubator::where('room_id', $nurse->room_id);
             
         }
 
