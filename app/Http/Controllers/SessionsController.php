@@ -315,14 +315,24 @@ class SessionsController extends Controller
     public function userRole()
     {
         $user = auth()->user();
+
         if (!$user) {
             return response()->json([
                 'message' => 'User not found'
             ], 404);
         }
+
+        $hospitalId = null;
+
+        if ($userPerson) {
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
+            $hospitalId = $nurse ? $nurse->hospital_id : null;
+        }
+
         return response()->json([
             'message' => 'User role',
-            'role' => $user->role
+            'role' => $user->role,
+            'hospital_id' => $hospitalId
         ]);
     }
     public function activateNurse($id)
