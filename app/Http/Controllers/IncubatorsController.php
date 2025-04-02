@@ -20,20 +20,39 @@ class IncubatorsController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-
+    
+        // Validación modificada para ser más flexible con los roles
         $validate = Validator::make($request->all(), [
-            'hospital_id' => 'required|integer|exists:hospitals,id',
+            'hospital_id' => 'required_without:nurse_mode|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
         ]);
-
+    
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
         }
-
+    
+        // Forzar hospital_id para enfermeras
+        if ($user->role === 'nurse') {
+            $userPerson = UserPerson::where('user_id', $user->id)->first();
+            if (!$userPerson) {
+                return response()->json(['msg' => 'User person not found'], 404);
+            }
+    
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
+            if (!$nurse) {
+                return response()->json(['msg' => 'No Nurse Found'], 404);
+            }
+    
+            $request->merge(['hospital_id' => $nurse->hospital_id]);
+        }
+    
         $incubatorsQuery = Incubator::with([
             'room.hospital',
+            'baby_incubator' => function($query) {
+                $query->latest();
+            },
             'baby_incubator.baby.person',
             'baby_incubator.nurse.userPerson.person'
         ])->whereHas('room', function ($query) use ($request) {
@@ -42,34 +61,29 @@ class IncubatorsController extends Controller
                 $query->where('id', $request->room_id);
             }
         });
-
+    
+        // Filtro adicional para enfermeras
         if ($user->role === 'nurse') {
-            $userPerson = UserPerson::where('user_id', $user->id)->first();
-            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
-
-            if (!$nurse) {
-                return response()->json(['msg' => 'No Nurse Found'], 404);
-            }
-
             $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
                 $query->where('nurse_id', $nurse->id);
             });
         }
-
+    
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
-
+    
         if ($incubators->isEmpty()) {
             return response()->json(['msg' => 'No Incubators Found'], 404);
         }
-
-        $data = $incubators->map(function ($incubator) use ($user) {
+    
+        // Manteniendo EXACTAMENTE la misma estructura de respuesta
+        $data = $incubators->map(function ($incubator) {
             $babyFullName = 'No Baby';
             $babyId = null;
             $nurseFullName = 'No Nurse';
             $nurseId = null;
-
-            $lastBabyIncubator = $incubator->baby_incubator->sortByDesc('created_at')->first();
-
+    
+            $lastBabyIncubator = $incubator->baby_incubator->first();
+    
             if ($lastBabyIncubator) {
                 if ($lastBabyIncubator->baby) {
                     $baby = $lastBabyIncubator->baby;
@@ -78,7 +92,7 @@ class IncubatorsController extends Controller
                         ($baby->person->last_name_2 ?? '');
                     $babyId = $baby->id;
                 }
-
+    
                 if ($lastBabyIncubator->nurse) {
                     $nurse = $lastBabyIncubator->nurse;
                     $nurseFullName = $nurse->userPerson->person->name . ' ' .
@@ -87,7 +101,7 @@ class IncubatorsController extends Controller
                     $nurseId = $nurse->id;
                 }
             }
-
+    
             return [
                 'id' => $incubator->id,
                 'state' => $incubator->state,
@@ -97,10 +111,10 @@ class IncubatorsController extends Controller
                 'nurse' => $nurseFullName,
                 'baby' => $babyFullName,
                 'baby_id' => $babyId,
-                'created_at' => $incubator->created_at->format('Y-d-m') // Formato YYYY-DD-MM
+                'created_at' => $incubator->created_at->format('Y-d-m')
             ];
         });
-
+    
         return response()->json([
             'incubators' => $data,
             'total' => $incubators->total(),
@@ -109,7 +123,7 @@ class IncubatorsController extends Controller
             'last_page' => $incubators->lastPage(),
         ], 200);
     }
-
+    
     // Listo
     public function store(Request $request)
     {
