@@ -97,7 +97,7 @@ class RelativesController extends Controller
 
         if (!$person) {
             return response()->json([
-                'msg' => 'Person not registered'
+                'message' => 'Person not registered'
             ], 400);
         }
 
@@ -110,12 +110,12 @@ class RelativesController extends Controller
 
         if (!$relative) {
             return response()->json([
-                'msg' => 'Relative not registered'
+                'message' => 'Relative not registered'
             ], 400);
         }
 
         return response()->json([
-            'msg' => 'Relative registered Successfully',
+            'message' => 'Relative registered Successfully',
         ], 201);
     }
     // Listo
