@@ -193,11 +193,7 @@ class IncubatorsController extends Controller
         });
 
         return response()->json([
-            'incubators' => $data,
-            'total' => $incubators->total(),
-            'per_page' => $incubators->perPage(),
-            'current_page' => $incubators->currentPage(),
-            'last_page' => $incubators->lastPage(),
+            'incubators' => $data
         ], 200);
     }
 
