@@ -273,12 +273,14 @@ class ChecksController extends Controller
             ], 403);
         }
 
-        $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
+        if ($user->role == 'nurse') {
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
 
-        if (!$nurse) {
-            return response()->json([
-                'msg' => 'Cannot add check'
-            ], 403);
+            if (!$nurse) {
+                return response()->json([
+                    'msg' => 'Unauthorized'
+                ], 403);
+            }
         }
 
         $validate = Validator::make($request->all(), [
@@ -311,6 +313,7 @@ class ChecksController extends Controller
             'data' => $check
         ], 201);
     }
+
     public function show($id)
     {
         if (!is_numeric($id)) {
