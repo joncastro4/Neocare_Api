@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\BabyIncubator;
 use App\Models\Data;
+use App\Models\Hospital;
 use Illuminate\Http\Request;
 use App\Models\Incubator;
 use Illuminate\Support\Facades\Validator;
@@ -124,6 +125,22 @@ class IncubatorsController extends Controller
         ], 200);
     }
     
+    public function indexHospital(Hospital $hospital){
+
+        $incubators = Incubator::whereHas('room', function($query) use ($hospital) {
+            $query->where('hospital_id', $hospital->id);
+        })->get();
+
+        if(!$incubators){
+            return response()->json([
+                'message' => 'No Incubators Found'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $incubators
+        ], 200);
+    }
     // Listo
     public function store(Request $request)
     {
