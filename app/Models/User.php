@@ -36,7 +36,13 @@ class User extends Authenticatable
         return $this->hasManyThrough(Person::class, UserPerson::class, 'user_id', 'id', 'id', 'person_id');
     }
     public function nurse()
-    {
+    { 
         return $this->hasOneThrough(Nurse::class, UserPerson::class, 'user_id', 'user_person_id', 'id', 'id');
+    }
+
+    public function nurseHospital()
+    {
+        return $this->hasOne(Nurse::class, 'user_person_id', 'userPerson.id')
+            ->through('userPerson');
     }
 }

@@ -44,6 +44,7 @@ Route::prefix('v1')->group(function () {
         Route::post('baby-to-incubator', [BabiesController::class, 'assignBabyToIncubator']);
         Route::apiResource('babies', BabiesController::class);
         Route::get('babiesNoPaginate', [BabiesController::class, 'indexNoPaginate']);
+        Route::post('babies-hospital', [BabiesController::class, 'storeHospital']);
         Route::apiResource('babies-data', BabiesDataController::class);
         Route::apiResource('relatives', RelativesController::class);
         Route::get('relativesWithBaby/{baby_id}', [RelativesController::class, 'indexWithBaby']);

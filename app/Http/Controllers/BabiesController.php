@@ -28,7 +28,7 @@ class BabiesController extends Controller
             ], 422);
         }
 
-        
+
         $query = Baby::with([
             'person',
             'hospital',
@@ -47,7 +47,7 @@ class BabiesController extends Controller
             });
         }
 
-       
+
         $babies = $query->paginate(10)->through(function ($baby) {
             $baby->incubator_id = $baby->baby_incubator->first()->incubator_id ?? null;
             $baby->created_at_formatted = Carbon::parse($baby->created_at)->format('Y-m-d');
@@ -63,17 +63,18 @@ class BabiesController extends Controller
         return response()->json($babies, 200);
     }
 
-    public function indexNoPaginate(Request $request){
+    public function indexNoPaginate(Request $request)
+    {
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'nullable|integer|exists:hospitals,id'
         ]);
-    
+
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
         }
-    
+
         $query = Baby::with([
             'person',
             'hospital',
@@ -81,42 +82,42 @@ class BabiesController extends Controller
                 $query->orderBy('created_at', 'desc');
             }
         ])->orderBy('created_at', 'desc');
-    
+
         if ($request->hospital_id) {
             $query->where('hospital_id', $request->hospital_id);
         }
-    
+
         if ($request->incubator_id) {
             $query->whereHas('baby_incubator', function ($q) use ($request) {
                 $q->where('incubator_id', $request->incubator_id);
             });
         }
-    
+
         $babies = $query->get();
-    
+
         if ($babies->isEmpty()) {
             return response()->json([
                 'msg' => 'No Babies Found'
             ], 404);
         }
-    
+
         $transformedBabies = $babies->map(function ($baby) {
-            $currentIncubatorId = $baby->baby_incubator->isNotEmpty() 
-                ? $baby->baby_incubator->first()->incubator_id 
+            $currentIncubatorId = $baby->baby_incubator->isNotEmpty()
+                ? $baby->baby_incubator->first()->incubator_id
                 : null;
-    
+
             return [
                 'id' => $baby->id,
                 'date_of_birth' => $baby->date_of_birth,
                 'created_at' => $baby->created_at->format('Y-m-d'),
-                'full_name' => $baby->person ? 
-                    trim($baby->person->name . ' ' . $baby->person->last_name_1 . ' ' . $baby->person->last_name_2) : 
+                'full_name' => $baby->person ?
+                    trim($baby->person->name . ' ' . $baby->person->last_name_1 . ' ' . $baby->person->last_name_2) :
                     null,
                 'incubator_id' => $currentIncubatorId,
-                
+
             ];
         });
-    
+
         return response()->json([
             'data' => $transformedBabies
         ], 200);
@@ -146,6 +147,49 @@ class BabiesController extends Controller
 
         Baby::create([
             'hospital_id' => $request->hospital_id,
+            'person_id' => $person->id,
+            'date_of_birth' => $request->date_of_birth
+        ]);
+
+        return response()->json([
+            'message' => 'Baby registered Successfully',
+        ], 201);
+    }
+
+    public function storeHospital(Request $request)
+    {
+        $validate = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'last_name_1' => 'required|string|max:255',
+            'last_name_2' => 'nullable|string|max:255',
+            'date_of_birth' => 'required|date|before_or_equal:today',
+        ]);
+
+        if ($validate->fails()) {
+            return response()->json([
+                'errors' => $validate->errors()
+            ], 422);
+        }
+
+        $user = auth()->user();
+
+        $nurse = $user->nurseHospital;
+        if (!$nurse) {
+            return response()->json([
+                'msg' => 'User is not associated with a nurse profile',
+            ], 403);
+        }
+
+        $hospital_id = $user->nurseHospital->hospital_id;
+
+        $person = Person::create([
+            'name' => $request->name,
+            'last_name_1' => $request->last_name_1,
+            'last_name_2' => $request->last_name_2
+        ]);
+
+        Baby::create([
+            'hospital_id' => $hospital_id,
             'person_id' => $person->id,
             'date_of_birth' => $request->date_of_birth
         ]);
