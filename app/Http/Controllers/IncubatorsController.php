@@ -21,8 +21,9 @@ class IncubatorsController extends Controller
     {
         $user = auth()->user();
 
+        // Validación modificada para ser más flexible con enfermeras
         $validate = Validator::make($request->all(), [
-            'hospital_id' => 'required|integer|exists:hospitals,id',
+            'hospital_id' => $user->role === 'nurse' ? 'sometimes' : 'required|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
         ]);
 
@@ -32,69 +33,75 @@ class IncubatorsController extends Controller
             ], 422);
         }
 
-        $incubatorsQuery = Incubator::with([
-            'room.hospital',
-        ])->whereHas('room', function ($query) use ($request) {
-            $query->where('hospital_id', $request->hospital_id);
-            if ($request->room_id) {
-                $query->where('id', $request->room_id);
-            }
-        });
-
+        // Configuración automática para enfermeras
         if ($user->role === 'nurse') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
-            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
-
-            if (!$nurse) {
-                return response()->json(['msg' => 'No Nurse Found'], 404);
+            if (!$userPerson) {
+                return response()->json(['msg' => 'User person not found for nurse'], 404);
             }
 
-            $incubatorsQuery = Incubator::where('room_id', $nurse->room_id);
-            
+            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
+            if (!$nurse) {
+                return response()->json(['msg' => 'Nurse profile not found'], 404);
+            }
+
+            // Usar el hospital_id de la enfermera automáticamente
+            $request->merge(['hospital_id' => $nurse->hospital_id]);
+        }
+
+        $incubatorsQuery = Incubator::with([
+            'room.hospital',
+            'baby_incubator' => function ($query) {
+                $query->latest()->with(['baby.person', 'nurse.userPerson.person']);
+            }
+        ]);
+
+        // Filtro por hospital (para todos los roles)
+        if ($request->hospital_id) {
+            $incubatorsQuery->whereHas('room', function ($query) use ($request, $user) {
+                $query->where('hospital_id', $request->hospital_id);
+
+                // Solo aplicar filtro por room_id si no es enfermera
+                if ($request->room_id && $user->role !== 'nurse') {
+                    $query->where('id', $request->room_id);
+                }
+            });
         }
 
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
 
-        if ($incubators->isEmpty()) {
-            return response()->json(['msg' => 'No Incubators Found'], 404);
-        }
+        // Mantener estructura de respuesta incluso cuando está vacío
+        $data = $incubators->map(function ($incubator) {
+            $lastBabyIncubator = $incubator->baby_incubator->first();
 
-        $data = $incubators->map(function ($incubator) use ($user) {
-            $babyFullName = 'No Baby';
-            $babyId = null;
-            $nurseFullName = 'No Nurse';
-            $nurseId = null;
+            $babyData = $lastBabyIncubator && $lastBabyIncubator->baby
+                ? [
+                    'id' => $lastBabyIncubator->baby->id,
+                    'name' => $lastBabyIncubator->baby->person->name . ' ' .
+                        $lastBabyIncubator->baby->person->last_name_1 . ' ' .
+                        ($lastBabyIncubator->baby->person->last_name_2 ?? '')
+                ]
+                : null;
 
-            $lastBabyIncubator = $incubator->baby_incubator->sortByDesc('created_at')->first();
-
-            if ($lastBabyIncubator) {
-                if ($lastBabyIncubator->baby) {
-                    $baby = $lastBabyIncubator->baby;
-                    $babyFullName = $baby->person->name . ' ' .
-                        $baby->person->last_name_1 . ' ' .
-                        ($baby->person->last_name_2 ?? '');
-                    $babyId = $baby->id;
-                }
-
-                if ($lastBabyIncubator->nurse) {
-                    $nurse = $lastBabyIncubator->nurse;
-                    $nurseFullName = $nurse->userPerson->person->name . ' ' .
-                        $nurse->userPerson->person->last_name_1 . ' ' .
-                        ($nurse->userPerson->person->last_name_2 ?? '');
-                    $nurseId = $nurse->id;
-                }
-            }
+            $nurseData = $lastBabyIncubator && $lastBabyIncubator->nurse
+                ? [
+                    'id' => $lastBabyIncubator->nurse->id,
+                    'name' => $lastBabyIncubator->nurse->userPerson->person->name . ' ' .
+                        $lastBabyIncubator->nurse->userPerson->person->last_name_1 . ' ' .
+                        ($lastBabyIncubator->nurse->userPerson->person->last_name_2 ?? '')
+                ]
+                : null;
 
             return [
                 'id' => $incubator->id,
                 'state' => $incubator->state,
                 'room_number' => $incubator->room->number,
                 'room_id' => $incubator->room->id,
-                'nurse_id' => $nurseId,
-                'nurse' => $nurseFullName,
-                'baby' => $babyFullName,
-                'baby_id' => $babyId,
-                'created_at' => $incubator->created_at->format('Y-d-m') // Formato YYYY-DD-MM
+                'nurse_id' => $nurseData['id'] ?? null,
+                'nurse' => $nurseData['name'] ?? 'No Nurse',
+                'baby' => $babyData['name'] ?? 'No Baby',
+                'baby_id' => $babyData['id'] ?? null,
+                'created_at' => $incubator->created_at->format('Y-d-m')
             ];
         });
 
