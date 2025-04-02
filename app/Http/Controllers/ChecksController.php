@@ -256,58 +256,68 @@ class ChecksController extends Controller
     public function store(Request $request)
     {
         $user = auth()->user();
-
+    
         if (!$user) {
             return response()->json([
                 'msg' => 'Unauthorized'
             ], 403);
         }
-
-        $user_id = $user->id;
-
-        $userPerson = UserPerson::where('user_id', $user_id)->first();
-
-        if (!$userPerson) {
-            return response()->json([
-                'msg' => 'Unauthorized'
-            ], 403);
-        }
-
-        if ($user->role == 'nurse') {
+    
+        // Verifica si el usuario es Super Admin o Admin
+        $isAdmin = $user->hasRole(['super-admin', 'admin']); // Asegúrate de usar tu sistema de roles
+    
+        // Si no es admin, verifica que sea enfermera
+        if (!$isAdmin) {
+            $userPerson = UserPerson::where('user_id', $user->id)->first();
+    
+            if (!$userPerson) {
+                return response()->json([
+                    'msg' => 'Unauthorized (UserPerson not found)'
+                ], 403);
+            }
+    
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
-
+    
             if (!$nurse) {
                 return response()->json([
-                    'msg' => 'Unauthorized'
+                    'msg' => 'Unauthorized (Not a nurse)'
                 ], 403);
             }
         }
-
+    
+        // Validación de datos
         $validate = Validator::make($request->all(), [
             'baby_incubator_id' => 'required|integer|exists:babies_incubators,id',
             'title' => 'required|string|max:255',
             'description' => 'required|string',
         ]);
-
+    
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
         }
-
-        $check = Check::create([
-            'nurse_id' => $nurse->id,
+    
+        // Crear el chequeo
+        $checkData = [
             'baby_incubator_id' => $request->baby_incubator_id,
             'title' => $request->title,
-            'description' => $request->description
-        ]);
-
+            'description' => $request->description,
+        ];
+    
+        // Solo asignar nurse_id si no es admin
+        if (!$isAdmin) {
+            $checkData['nurse_id'] = $nurse->id;
+        }
+    
+        $check = Check::create($checkData);
+    
         if (!$check) {
             return response()->json([
                 'msg' => 'Data not registered'
             ], 400);
         }
-
+    
         return response()->json([
             'msg' => 'Check Created Successfully',
             'data' => $check
