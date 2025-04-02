@@ -72,7 +72,7 @@ class IncubatorsController extends Controller
     
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
     
-        if ($incubators.count() === 0) {
+        if (!$incubators) {
             return response()->json(['msg' => 'No Incubators Found'], 404);
         }
     
