@@ -21,66 +21,96 @@ class IncubatorsController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-    
+
         // Validación más flexible
         $validate = Validator::make($request->all(), [
             'hospital_id' => 'nullable|integer|exists:hospitals,id',
             'room_id' => 'nullable|integer|exists:rooms,id'
         ]);
-    
+
         if ($validate->fails()) {
             return response()->json([
                 'errors' => $validate->errors()
             ], 422);
         }
-    
+
         // Configuración automática para enfermeras
         if ($user->role === 'nurse' || $user->role === 'nurse-admin') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             if (!$userPerson) {
                 return response()->json(['msg' => 'User person not found for nurse'], 404);
             }
-    
+
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
             if (!$nurse) {
                 return response()->json(['msg' => 'Nurse profile not found'], 404);
             }
-    
+
             $request->merge(['hospital_id' => $nurse->hospital_id]);
         }
-    
+
         $incubatorsQuery = Incubator::with([
             'room.hospital',
-            'baby_incubator' => function($query) {
+            'baby_incubator' => function ($query) {
                 $query->latest()->with(['baby.person', 'nurse.userPerson.person']);
             }
         ]);
-    
+
         // Filtro por hospital si está presente
         if ($request->hospital_id) {
             $incubatorsQuery->whereHas('room', function ($query) use ($request) {
                 $query->where('hospital_id', $request->hospital_id);
-                
+
                 if ($request->room_id) {
                     $query->where('id', $request->room_id);
                 }
             });
         }
-    
+
         // Filtro opcional por enfermera (solo para enfermeras)
         if (($user->role === 'nurse' || $user->role === 'nurse-admin') && !$request->has('room_id')) {
             $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
                 $query->where('nurse_id', $nurse->id);
             });
         }
-    
+
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
-    
+
         // Mantener estructura de respuesta incluso cuando está vacío
         $data = $incubators->map(function ($incubator) {
-            // ... (mantener tu lógica de mapeo actual)
-        });
+            $lastBabyIncubator = $incubator->baby_incubator->first();
+            
+            $babyData = $lastBabyIncubator && $lastBabyIncubator->baby 
+                ? [
+                    'id' => $lastBabyIncubator->baby->id,
+                    'name' => $lastBabyIncubator->baby->person->name . ' ' . 
+                             $lastBabyIncubator->baby->person->last_name_1 . ' ' . 
+                             ($lastBabyIncubator->baby->person->last_name_2 ?? '')
+                ] 
+                : null;
     
+            $nurseData = $lastBabyIncubator && $lastBabyIncubator->nurse
+                ? [
+                    'id' => $lastBabyIncubator->nurse->id,
+                    'name' => $lastBabyIncubator->nurse->userPerson->person->name . ' ' . 
+                             $lastBabyIncubator->nurse->userPerson->person->last_name_1 . ' ' . 
+                             ($lastBabyIncubator->nurse->userPerson->person->last_name_2 ?? '')
+                ]
+                : null;
+    
+            return [
+                'id' => $incubator->id,
+                'state' => $incubator->state,
+                'room_number' => $incubator->room->number,
+                'room_id' => $incubator->room->id,
+                'nurse_id' => $nurseData['id'] ?? null,
+                'nurse' => $nurseData['name'] ?? 'No Nurse',
+                'baby' => $babyData['name'] ?? 'No Baby',
+                'baby_id' => $babyData['id'] ?? null,
+                'created_at' => $incubator->created_at->format('Y-d-m')
+            ];
+        });
+
         return response()->json([
             'incubators' => $data,
             'total' => $incubators->total(),
@@ -89,20 +119,21 @@ class IncubatorsController extends Controller
             'last_page' => $incubators->lastPage(),
         ], 200);
     }
-    
-    public function indexHospital(Hospital $hospital) {
-        $incubators = Incubator::whereHas('room', function($query) use ($hospital) {
-                $query->where('hospital_id', $hospital->id)
-                      ->where('state', 'available');
-            })
+
+    public function indexHospital(Hospital $hospital)
+    {
+        $incubators = Incubator::whereHas('room', function ($query) use ($hospital) {
+            $query->where('hospital_id', $hospital->id)
+                ->where('state', 'available');
+        })
             ->get(['id']);
-    
+
         if ($incubators->isEmpty()) {
             return response()->json(['message' => 'No Incubators Found'], 404);
         }
-    
+
         return response()->json([
-            'data' => $incubators 
+            'data' => $incubators
         ], 200);
     }
     // Listo
