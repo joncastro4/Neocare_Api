@@ -51,9 +51,8 @@ class IncubatorsController extends Controller
                 return response()->json(['msg' => 'No Nurse Found'], 404);
             }
 
-            $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
-                $query->where('nurse_id', $nurse->id);
-            });
+            $incubatorsQuery = $incubatorsQuery::where('nurse_id', $nurse->id);
+            
         }
 
         $incubators = $incubatorsQuery->orderByDesc('created_at')->paginate(6);
