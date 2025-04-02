@@ -324,7 +324,8 @@ class SessionsController extends Controller
 
         $hospitalId = null;
 
-        if ($userPerson) {
+        if ($user->role == 'nurse') {
+            $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
             $hospitalId = $nurse ? $nurse->hospital_id : null;
         }
