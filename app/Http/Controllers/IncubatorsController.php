@@ -43,8 +43,6 @@ class IncubatorsController extends Controller
             }
         });
 
-        dd($incubatorsQuery);
-
         if ($user->role === 'nurse') {
             $userPerson = UserPerson::where('user_id', $user->id)->first();
             $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
