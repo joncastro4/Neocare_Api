@@ -12,40 +12,41 @@ use Illuminate\Support\Facades\Validator;
 class ProfileController extends Controller
 {
     public function me()
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        if (!$user) {
-            return response()->json([
-                'message' => 'User not found'
-            ], 404);
-        }
-
-        $userperson = UserPerson::where('user_id', $user->id)->first();
-
-        if (!$userperson) {
-            return response()->json([
-                'message' => 'UserPerson not found'
-            ], 404);
-        }
-
-        $person = Person::where('id', $userperson->person_id)->first();
-
-        if (!$person) {
-            return response()->json([
-                'message' => 'Person not found'
-            ], 404);
-        }
-
-        $nurse = Nurse::where('user_person_id', $userperson->id)->first();
-
+    if (!$user) {
         return response()->json([
-            'message' => 'User data',
-            'user' => $user,
-            'person' => $person,
-            'nurse' => $nurse ?? null,
-        ], 200);
+            'message' => 'User not found'
+        ], 404);
     }
+
+    $userperson = UserPerson::where('user_id', $user->id)->first();
+
+    if (!$userperson) {
+        return response()->json([
+            'message' => 'UserPerson not found'
+        ], 404);
+    }
+
+    $person = Person::where('id', $userperson->person_id)->first();
+
+    if (!$person) {
+        return response()->json([
+            'message' => 'Person not found'
+        ], 404);
+    }
+
+    $nurse = Nurse::where('user_person_id', $userperson->id)->first();
+
+    return response()->json([
+        'data' => [
+            'full_name' => trim("{$person->name} {$person->last_name_1} {$person->last_name_2}"),
+            'email' => $user->email,
+            'rfc' => $nurse->rfc ?? null
+        ]
+    ], 200);
+}
     public function update(Request $request)
     {
         $user = auth()->user();

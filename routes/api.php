@@ -66,14 +66,16 @@ Route::prefix('v1')->group(function () {
             Route::get('/', [UsersManagementController::class, 'index']);
             Route::get('/{id}', [UsersManagementController::class, 'show']);
         });
+
+        Route::prefix('profile')->group(function () {
+            Route::get('me', [ProfileController::class, 'me']);
+            Route::put('/', [ProfileController::class, 'update']);
+            Route::delete('/', [ProfileController::class, 'destroy']);
+            Route::post('upload-image', [NursesController::class, 'uploadImage']);
+            Route::get('view-image', [NursesController::class, 'viewImage']);
+        });
     });
-    Route::prefix('profile')->group(function () {
-        Route::get('me', [ProfileController::class, 'me']);
-        Route::put('/', [ProfileController::class, 'update']);
-        Route::delete('/', [ProfileController::class, 'destroy']);
-        Route::post('upload-image', [NursesController::class, 'uploadImage']);
-        Route::get('view-image', [NursesController::class, 'viewImage']);
-    });
+    
 });
 
 Route::get('nurse-activate/{id}', [SessionsController::class, 'activateNurse'])->name('nurse-activate')->where('id', '[0-9]+');

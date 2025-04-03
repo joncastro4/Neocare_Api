@@ -145,6 +145,12 @@ class IncubatorsController extends Controller
             }
         ]);
 
+        if ($user->role === 'nurse') {
+            $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
+                $query->where('nurse_id', $nurse->id);
+            });
+        }
+
         if ($request->hospital_id) {
             $incubatorsQuery->whereHas('room', function ($query) use ($request, $user) {
                 $query->where('hospital_id', $request->hospital_id);
