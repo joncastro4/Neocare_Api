@@ -136,6 +136,14 @@ class IncubatorsController extends Controller
             }
 
             $request->merge(['hospital_id' => $nurse->hospital_id]);
+
+            // Filtrar solo las incubadoras asignadas a la enfermera si es rol nurse
+            if ($user->role === 'nurse') {
+                $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
+                    $query->where('nurse_id', $nurse->id)
+                        ->whereNull('egress_date');
+                });
+            }
         }
 
         $incubatorsQuery = Incubator::with([
