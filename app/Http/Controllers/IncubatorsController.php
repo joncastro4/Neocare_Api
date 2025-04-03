@@ -147,8 +147,7 @@ class IncubatorsController extends Controller
 
         if ($user->role === 'nurse') {
             $incubatorsQuery->whereHas('baby_incubator', function ($query) use ($nurse) {
-                $query->where('nurse_id', $nurse->id)
-                    ->whereNull('egress_date');
+                $query->where('nurse_id', $nurse->id);
             });
         }
 
