@@ -79,7 +79,7 @@ class BabiesController extends Controller
             'person',
             'hospital',
             'baby_incubator' => function ($query) {
-                $query->orderBy('created_at', 'desc');
+                $query->where('eggress_date', null);
             }
         ])->orderBy('created_at', 'desc');
 
