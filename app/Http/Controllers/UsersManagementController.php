@@ -37,54 +37,66 @@ class UsersManagementController extends Controller
             'role' => 'required|string|in:super-admin,nurse-admin,nurse,admin',
             'hospital_id' => 'required_if:role,nurse,nurse-admin|integer|exists:hospitals,id'
         ]);
-
-
+    
         if ($validate->fails()) {
             return response()->json([
                 'message' => 'Validation error',
                 'errors' => $validate->errors()
             ], 400);
         }
+    
         $user = User::find($request->user);
         if (!$user) {
             return response()->json([
                 'message' => 'User not found'
             ], 404);
         }
+    
         if ($user->role == $request->role) {
             return response()->json([
                 'message' => 'User role is already ' . $request->role
             ], 400);
         }
+    
         if ($user->role == 'super-admin' && ($user->email == 'neocare@gmail.com' || $user->name == 'superAdmin')) {
             return response()->json([
                 'message' => 'You cannot remove the last super admin'
             ], 400);
         }
+    
+        $userPerson = UserPerson::where('user_id', $user->id)->first();
+        
+        if (!$userPerson) {
+            return response()->json([
+                'message' => 'User person relationship not found'
+            ], 404);
+        }
+    
         $user->role = $request->role;
         $user->save();
-
-        if ($request->hospital_id) {
-
-            $userPerson = UserPerson::where('user_id', $user->id)->first();
-
-            if (!$userPerson) {
+    
+        if (in_array($request->role, ['nurse', 'nurse-admin'])) {
+            if (!$request->hospital_id) {
                 return response()->json([
-                    'message' => 'User person not found'
-                ], 404);
+                    'message' => 'Hospital ID is required for nurse roles'
+                ], 400);
             }
-
-            $nurse = Nurse::where('user_person_id', $userPerson->id)->first();
-
-            if (!$nurse) {
-                Nurse::create([
-                    'user_person_id' => $userPerson->id,
+    
+            if ($userPerson->nurse) {
+                $userPerson->nurse->update(['hospital_id' => $request->hospital_id]);
+            } else {
+                $userPerson->nurse()->create([
                     'hospital_id' => $request->hospital_id
                 ]);
             }
+        } else {
+            if ($userPerson->nurse) {
+                $userPerson->nurse()->delete();
+            }
         }
+    
         return response()->json([
-            'message' => 'User role updated',
+            'message' => 'User role updated successfully',
             'user' => $user
         ], 200);
     }
