@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\UserPerson;
 use App\Models\Nurse;
 use Illuminate\Support\Facades\Http;
+use App\Models\Hospital;
 
 class IncubatorsController extends Controller
 {
@@ -200,6 +201,22 @@ class IncubatorsController extends Controller
 
         return response()->json([
             'incubators' => $data
+        ], 200);
+    }
+
+    public function indexHospital(Hospital $hospital) {
+        $incubators = Incubator::whereHas('room', function($query) use ($hospital) {
+                $query->where('hospital_id', $hospital->id)
+                      ->where('state', 'available');
+            })
+            ->get(['id']);
+    
+        if ($incubators->isEmpty()) {
+            return response()->json(['message' => 'No Incubators Found'], 404);
+        }
+    
+        return response()->json([
+            'data' => $incubators 
         ], 200);
     }
 
