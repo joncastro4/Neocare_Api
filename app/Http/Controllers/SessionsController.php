@@ -298,7 +298,9 @@ class SessionsController extends Controller
             ], 200);
         }
 
-        $this->sendVerificationEmail($user, $user->name, $user->email);
+        $isApp = $request->input('is_app', false);
+
+        $this->sendVerificationEmail($user, $user->name, $user->email, $isApp);
 
         return response()->json([
             'message' => 'Email sent'
